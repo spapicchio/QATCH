@@ -30,11 +30,13 @@ class AbstractModel(ABC):
                                 for i in range(0, len(queries), max_query_processing_num)]
             # Predict for each slice
             for _slice in questions_slices:
-                model_input = self._process_input(table, queries)
+                model_input = self._process_input(table, _slice)
                 if model_input is None:
-                    result.append([None] * len(queries))
+                    result.append([None] * len(_slice))
                 else:
-                    result.append(self._predict_queries(model_input, table))
+                    predictions = self._predict_queries(model_input, table)
+                    assert(len(predictions) == len(_slice))
+                    result.append(predictions)
             # Flatten result list
             result = list(itertools.chain(*result))
         else:

@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 from transformers import TapexTokenizer, BartForConditionalGeneration
 
-from abstract_model import AbstractModel
+from .abstract_model import AbstractModel
 
 
 class Tapex(AbstractModel):

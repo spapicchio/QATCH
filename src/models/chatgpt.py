@@ -7,7 +7,7 @@ import pandas as pd
 from models.abstract_model import AbstractModel
 
 
-class ConcreteChatGPT(AbstractModel):
+class ChatGPT(AbstractModel):
     def __init__(self, api_key: str, api_org: str, test_type: Literal['QA', 'SP'] = 'QA'):
         self.api_key = api_key
         openai.organization = api_org
@@ -45,7 +45,7 @@ class ConcreteChatGPT(AbstractModel):
             self.messages = None
 
     def _process_input(self, table: pd.DataFrame, queries: list[str] | str) -> Any | None:
-        if table.shape[0] * table.shape[1] > 300:
+        if table.shape[0] * table.shape[1] > 512:
             return None
         linearized_table = self._linearize_table(table)
         if isinstance(queries, str):
