@@ -1,6 +1,7 @@
 # project specific configuration
 .idea
 model_checkpoints
+data
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

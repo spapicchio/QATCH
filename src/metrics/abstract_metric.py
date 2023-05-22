@@ -34,6 +34,14 @@ class AbstractMetric(ABC):
         :param prediction: prediction table to be compared with target table
         :return: the metric result (float or str)
         """
+        # normalize target and prediction
+        target = [
+            [str(cell).replace('\n', '').strip().lower() for cell in row]
+            for row in target]
+
+        prediction = [[str(cell).strip().lower() for cell in row]
+                      for row in prediction]
+
         if len(target) == 0 or len(prediction) == 0:
             return self.evaluate_single_special_case(target, prediction)
         else:

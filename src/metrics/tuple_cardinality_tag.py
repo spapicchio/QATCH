@@ -27,6 +27,8 @@ class TupleCardinalityTag(AbstractMetric):
             * 1 indicates ALL the cardinality values are the same in prediction.
 
         """
+        target = [tuple(t) for t in target]
+        prediction = [tuple(t) for t in prediction]
         count_targ_dict = Counter(target)
         count_pred_dict = Counter(prediction)
         cardinality = [count_pred_dict[key] == count
