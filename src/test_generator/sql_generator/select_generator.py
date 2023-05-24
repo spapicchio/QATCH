@@ -46,7 +46,7 @@ class SelectGenerator(AbstractSqlGenerator):
         """fixed template for SELECT
         :param table_name:
         """
-        return [f'SELECT {self._get_col_comb_str(comb)} FROM {table_name}'
+        return [f'SELECT {self._get_col_comb_str(comb)} FROM "{table_name}"'
                 for comb in combinations]
 
     @staticmethod
