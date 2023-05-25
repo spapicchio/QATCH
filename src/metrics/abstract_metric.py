@@ -34,6 +34,9 @@ class AbstractMetric(ABC):
         :param prediction: prediction table to be compared with target table
         :return: the metric result (float or str)
         """
+        if prediction is None:
+            return None
+
         # normalize target and prediction
         target = [
             [str(cell).replace('\n', '').strip().lower() for cell in row]
