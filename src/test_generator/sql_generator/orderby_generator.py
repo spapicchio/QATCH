@@ -21,12 +21,16 @@ class OrderByGenerator(AbstractSqlGenerator):
             ]
 
             questions += [
-                f'Show all data ordered by {col} in {order.lower()} order ' \
-                f'for the table {table_name}'
+                f'Show all data ordered by {col} in' \
+                f' {"ascending" if order.lower() == "asc" else "descending"} ' \
+                f'order for the table {table_name}'
+
+
+
                 for col in columns
             ]
 
-            # run the query and get the results
-            results = [self.database.run_query(query) for query in queries]
-            sql_tags = ['ORDERBY-SINGLE'] * len(queries)
-            return sql_tags, queries, questions, results
+        # run the query and get the results
+        results = [self.database.run_query(query) for query in queries]
+        sql_tags = ['ORDERBY-SINGLE'] * len(queries)
+        return sql_tags, queries, questions, results

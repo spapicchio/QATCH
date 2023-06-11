@@ -37,7 +37,7 @@ class WhereGenerator(AbstractSqlGenerator):
     def _where_categorical(df: pd.DataFrame, tbl_name: str, cat_cols: list[str]
                            ) -> tuple[list, list, list]:
         if len(cat_cols) == 0:
-            return [], []
+            return [], [], []
         operation2str = {'!=': 'is different from', '=': 'is equal to'}
         min_values = [df[col].min() for col in cat_cols]
         max_values = [df[col].max() for col in cat_cols]
@@ -51,10 +51,11 @@ class WhereGenerator(AbstractSqlGenerator):
                 ]
 
                 questions += [
-                    f'Show the rows of the table {tbl_name} where' \
+                    f'Show the data of the table {tbl_name} where' \
                     f' {col} {operation2str[oper]} {value}'
                     for col, value in zip(cat_cols, values)
                 ]
+
         sql_tags = ['WHERE-CAT-MAX-VALUES'] * len(max_values) * 2
         sql_tags += ['WHERE-CAT-MIN-VALUES'] * len(min_values) * 2
 
@@ -64,7 +65,7 @@ class WhereGenerator(AbstractSqlGenerator):
     def _where_numerical(df: pd.DataFrame, tbl_name: str, num_cols: list[str]
                          ) -> tuple[list, list, list]:
         if len(num_cols) == 0:
-            return [], []
+            return [], [], []
         operation2str = {'>': 'is greater than',
                          '<': 'is less than',
                          '>=': 'is greater than or equal to',
@@ -82,7 +83,7 @@ class WhereGenerator(AbstractSqlGenerator):
                 ]
 
                 questions += [
-                    f'Show the rows of the table {tbl_name} where' \
+                    f'Show the data of the table {tbl_name} where' \
                     f' {col} {operation2str[oper]} {value}'
                     for col, value in zip(num_cols, values)
                 ]
