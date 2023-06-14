@@ -2,11 +2,6 @@
 .idea
 *.txt
 data
-results
-experiments
-experiments_completed
-run_chatgpt_custom_data
-run_chatgpt_spider_SP
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

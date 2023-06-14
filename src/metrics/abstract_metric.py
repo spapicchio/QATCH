@@ -37,14 +37,12 @@ class AbstractMetric(ABC):
         :param prediction: prediction table to be compared with target table
         :return: the metric result (float or str)
         """
-        prediction = self.check_chatgpt_result(prediction)
-
-        if prediction is None:
-            return 0.0
-
         # normalize target and prediction
         target = [[str(cell).replace('\n', '').strip().lower() for cell in row]
                   for row in target]
+        prediction = self.check_chatgpt_result(prediction)
+        if prediction is None:
+            return 0.0
 
         prediction = [[str(cell).strip().lower() for cell in row]
                       for row in prediction]
@@ -98,6 +96,8 @@ class AbstractMetric(ABC):
 
             if prediction.shape == ():
                 return [[prediction.tolist()]]
+            elif len(prediction.shape) == 1:
+                return [[x] for x in prediction]
             else:
                 return prediction.tolist()
 
