@@ -1,4 +1,6 @@
-from metrics.abstract_metric import AbstractMetric
+import numpy as np
+
+from .abstract_metric import AbstractMetric
 
 
 class TupleOrderTag(AbstractMetric):
@@ -36,16 +38,23 @@ class TupleOrderTag(AbstractMetric):
          if tar in prediction and tar not in new_target]
 
         if len(new_target) == 0:
-            return 0.0
+            rho = 0.0
+        else:
+            target_ranks = [i for i in range(len(new_target))]
+            pred_ranks = [new_target.index(row) for row in new_pred]
 
-        target_ranks = [new_target.index(row) for row in new_target]
-        pred_ranks = [new_target.index(row) for row in new_pred]
+            diff_rank_squared = [(tar - pred) ** 2
+                                 for tar, pred in zip(target_ranks, pred_ranks)]
 
-        diff_rank_squared = [(tar - pred) ** 2
-                             for tar, pred in zip(target_ranks, pred_ranks)]
+            sum_diff_rank_squared = sum(diff_rank_squared)
 
-        sum_diff_rank_squared = sum(diff_rank_squared)
+            n = len(new_target) if len(new_target) > 1 else 2
+            rho = 1 - 6 * sum_diff_rank_squared / (n * (n ** 2 - 1))
 
-        n = len(new_target) if len(new_target) > 1 else 2
-        rho = 1 - 6 * sum_diff_rank_squared / (n * (n ** 2 - 1))
-        return round(rho, 3)
+        return self.normalize(round(rho, 3))
+
+    @staticmethod
+    def normalize(data: float):
+        data = [-1, data, 1]
+        data = (data - np.min(data)) / (np.max(data) - np.min(data))
+        return data[1]

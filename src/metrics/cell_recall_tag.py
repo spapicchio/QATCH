@@ -1,5 +1,7 @@
 import itertools
 
+import numpy as np
+
 from .abstract_metric import AbstractMetric
 
 
@@ -19,5 +21,6 @@ class CellRecallTag(AbstractMetric):
         """
         flat_target = list(itertools.chain(*target))
         flat_prediction = list(itertools.chain(*prediction))
-        sum_cell_match = sum([1 for cell in flat_target if cell in flat_prediction])
+
+        sum_cell_match = np.sum(np.isin(flat_target, flat_prediction))
         return round(sum_cell_match / len(flat_target), 3)

@@ -1,5 +1,7 @@
 import itertools
 
+import numpy as np
+
 from .abstract_metric import AbstractMetric
 
 
@@ -20,5 +22,7 @@ class CellPrecisionTag(AbstractMetric):
         """
         flat_target = list(itertools.chain(*target))
         flat_prediction = list(itertools.chain(*prediction))
-        sum_cell_match = sum([1 for cell in flat_prediction if cell in flat_target])
+
+        sum_cell_match = np.sum(np.isin(flat_prediction, flat_target))
+
         return round(sum_cell_match / len(flat_prediction), 3)

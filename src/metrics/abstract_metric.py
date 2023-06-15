@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Any
+
+import numpy as np
 
 
 class AbstractMetric(ABC):
@@ -22,7 +25,7 @@ class AbstractMetric(ABC):
     def evaluate_single_test_metric(self,
                                     target: list[list],
                                     prediction: list[list]
-                                    ) -> float | str:
+                                    ) -> float | str | None:
         """
         Evaluates the metric for a single test.
         The type of prediction and target is given by the linearized table output
@@ -34,13 +37,12 @@ class AbstractMetric(ABC):
         :param prediction: prediction table to be compared with target table
         :return: the metric result (float or str)
         """
-        if prediction is None:
-            return None
-
         # normalize target and prediction
-        target = [
-            [str(cell).replace('\n', '').strip().lower() for cell in row]
-            for row in target]
+        target = [[str(cell).replace('\n', '').strip().lower() for cell in row]
+                  for row in target]
+        prediction = self.check_chatgpt_result(prediction)
+        if prediction is None:
+            return 0.0
 
         prediction = [[str(cell).strip().lower() for cell in row]
                       for row in prediction]
@@ -49,6 +51,62 @@ class AbstractMetric(ABC):
             return self.evaluate_single_special_case(target, prediction)
         else:
             return self.evaluate_single_no_special_case(target, prediction)
+
+    @staticmethod
+    def check_chatgpt_result(prediction) -> list[list[Any]] | None:
+        if prediction is None:
+            return None
+        if prediction == [None]:
+            return None
+
+        if isinstance(prediction, str):
+            try:
+                while len(prediction) > 0 and prediction[0] == '[':
+                    prediction = prediction[1:]
+                while len(prediction) > 0 and prediction[-1] != ']':
+                    prediction = prediction[:-1]
+                while len(prediction) > 0 and prediction[-1] == ']':
+                    prediction = prediction[:-1]
+                if len(prediction) == 0:
+                    return None
+                prediction = f'[[{prediction}]]'
+
+                prediction = eval(prediction)
+                if isinstance(prediction, tuple):
+                    new_pred = []
+                    [new_pred.extend(p) for p in prediction]
+                    prediction = new_pred
+            except NameError:
+                return None
+            except SyntaxError:
+                return None
+            except TypeError:
+                return None
+
+        try:
+            # may fail because len of the inside array are not equal
+            prediction = np.array(prediction)
+        except ValueError:
+            return None
+
+        if len(prediction.shape) > 2:
+            while 1 in prediction.shape:
+                axes = [ax for ax, x in enumerate(prediction.shape) if x == 1]
+                prediction = np.squeeze(prediction, axis=axes[0])
+
+            if prediction.shape == ():
+                return [[prediction.tolist()]]
+            elif len(prediction.shape) == 1:
+                return [[x] for x in prediction]
+            else:
+                return prediction.tolist()
+
+        elif len(prediction.shape) == 1:
+            return [[x] for x in prediction]
+
+        elif len(prediction.shape) == 0:
+            return [[prediction.tolist()]]
+        return prediction.tolist()
 
     @abstractmethod
     def evaluate_single_no_special_case(self,

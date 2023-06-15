@@ -12,7 +12,7 @@ class SingleDatabase:
             os.makedirs(os.path.join(db_path, db_name))
 
         # SPIDER database path
-        db_path = os.path.join(db_path, db_name, f'{db_name}.sqlite')
+        db_path = os.path.join(db_path, f'{db_name}.sqlite')
 
         if not os.path.exists(db_path) and tables is None:
             raise ValueError(f"Database path does not exist and no tables were provided."
@@ -26,11 +26,7 @@ class SingleDatabase:
         if os.path.exists(db_path) and tables is not None:
             self.cursor.execute('SELECT name from sqlite_master where type= "table"')
             existing_tables = [tbl[0] for tbl in self.cursor.fetchall()]
-            if set(existing_tables) != set(tables.keys()) and len(set(existing_tables)) != 0:
-                raise ValueError(f"Database Path already exists."
-                                 f" Cannot overwrite path: {db_path}")
-            else:
-                self.set_tables_in_db(tables)
+            self.set_tables_in_db(tables)
 
         self.db_name = db_name
 

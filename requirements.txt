@@ -2,3 +2,4 @@ pandas~=1.5.3
 transformers~=4.29.2
 torch~=2.0.1
 openai~=0.27.6
+tiktoken~=0.4.0

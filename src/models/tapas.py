@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 from transformers import TapasForQuestionAnswering, TapasTokenizer
 
-from models.abstract_model import AbstractModel
+from .abstract_model import AbstractModel
 
 
 class Tapas(AbstractModel):
@@ -18,7 +18,7 @@ class Tapas(AbstractModel):
         self.model = TapasForQuestionAnswering.from_pretrained(model_name)
         self.model.to(self.device)
 
-    def _process_input(self, table: pd.DataFrame, queries: list[str] | str) -> Any | None:
+    def _process_input(self, table: pd.DataFrame, queries: list[str] | str, *args) -> Any | None:
         """
         Processes the input to the model.
         - TAPAS works with a table containing only string.
@@ -44,14 +44,15 @@ class Tapas(AbstractModel):
             logging.warning(e)
             return None
 
-        if len(model_input.input_ids[0]) > 512:
-            return None
-
         return model_input.to(self.device)
 
     def _predict_queries(self, model_input: Any,
                          table: pd.DataFrame) -> list[list[list[str]]]:
         outputs = self.model(**model_input)
+
+        model_input.to('cpu')
+        outputs = {idx: outputs[idx].cpu().detach() for idx in outputs}
+        [model_input[idx].detach() for idx in model_input]
 
         pred_query_cords, _ = self.tokenizer.convert_logits_to_predictions(
             model_input,
@@ -64,4 +65,6 @@ class Tapas(AbstractModel):
             [query_answer[row].append(table.iat[(row, col)])
              for row, col in tbl_cords]
             answers.append(list(query_answer.values()))
+        del model_input
+        del outputs
         return answers

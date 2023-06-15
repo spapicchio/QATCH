@@ -16,16 +16,19 @@ class TestGeneratorSpider(AbstractTestGenerator):
                                           upper_bound=upper_bound)
 
     def generate(self,
-                 cat_granularity: Literal['LOW', 'MEDIUM', 'HIGH'],
+                 cat_granularity: Literal['LOW', 'MEDIUM', 'HIGH'] | None = None,
                  sql_granularity: Literal['SELECT', 'ORDERBY', 'SIMPLE_AGGR',
-                 'WHERE', 'GROUPBY', 'HAVING']
+                 'WHERE', 'GROUPBY', 'HAVING'] | None = None
                  ) -> tuple[
         dict[tuple[str, str], pd.DataFrame],
         pd.DataFrame
     ]:
-        df = self.spider_reader.get_df_query_db_granularity(
-            sql_granularity=sql_granularity,
-            cat_granularity=cat_granularity)
+        if cat_granularity is None or sql_granularity is None:
+            df = self._generate_mult(cat_granularity, sql_granularity)
+        else:
+            cat_granularity = cat_granularity.upper()
+            sql_granularity = sql_granularity.upper()
+            df = self._generate_single(cat_granularity, sql_granularity)
 
         df['query_result'] = df.apply(
             lambda row: self.spider_reader.get_db_query_results(row.db_id, row.query),
@@ -45,3 +48,32 @@ class TestGeneratorSpider(AbstractTestGenerator):
             if tbl_name is not None
         }
         return tbl_name2table
+
+    def _generate_single(self, cat_granularity, sql_granularity):
+        df = self.spider_reader.get_df_query_db_granularity(
+            sql_granularity=sql_granularity,
+            cat_granularity=cat_granularity)
+        df['sql_tags'] = f'{cat_granularity}-{sql_granularity}'
+        return df
+
+    def _generate_mult(self, cat_granularity, sql_granularity):
+        df = pd.DataFrame()
+        if cat_granularity is None and sql_granularity is None:
+            # concat df for each cat_granularity and sql_granularity
+            for cat_granularity in ['LOW', 'MEDIUM', 'HIGH']:
+                for sql_granularity in ['SELECT', 'ORDERBY', 'SIMPLE_AGGR',
+                                        'WHERE', 'GROUPBY', 'HAVING']:
+                    df = pd.concat([df,
+                                    self._generate_single(cat_granularity, sql_granularity)])
+
+        elif cat_granularity is None and sql_granularity is not None:
+            for cat_granularity in ['LOW', 'MEDIUM', 'HIGH']:
+                df = pd.concat([df,
+                                self._generate_single(cat_granularity, sql_granularity)])
+
+        elif cat_granularity is not None and sql_granularity is None:
+            for sql_granularity in ['SELECT', 'ORDERBY', 'SIMPLE_AGGR',
+                                    'WHERE', 'GROUPBY', 'HAVING']:
+                df = pd.concat([df,
+                                self._generate_single(cat_granularity, sql_granularity)])
+        return df
