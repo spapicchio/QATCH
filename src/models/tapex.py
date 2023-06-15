@@ -1,4 +1,5 @@
 import logging
+import warnings
 from collections import defaultdict, Counter
 from typing import Any
 
@@ -18,9 +19,12 @@ class Tapex(AbstractModel):
         self.model = BartForConditionalGeneration.from_pretrained(model_name)
         self.model.to(self.device)
 
-    def _process_input(self, table: pd.DataFrame, queries: list[str] | str) -> Any | None:
-        if len(table) * len(table.columns) > 1024:
+    def _process_input(self, table: pd.DataFrame,
+                       queries: list[str] | str,
+                       *args) -> Any | None:
+        if table.shape[0] * table.shape[1] > 1024:
             return None
+
         # convert table to string
         table = table.astype(str)
         # process table
@@ -41,6 +45,10 @@ class Tapex(AbstractModel):
             return None
 
         if model_input.input_ids.shape[1] > 1024:
+            warnings.warn(f'After tokenization'
+                          f' the input is longer than 1024 tokens: '
+                          f'{model_input.input_ids.shape[1]}. '
+                          'the input will be skipped')
             return None
 
         return model_input.to(self.device)
@@ -59,6 +67,8 @@ class Tapex(AbstractModel):
         for pred_query in pred_cells_queries:
             query_ans = self._return_cells_aggr_by_row(table, pred_query)
             answers.append(query_ans)
+        del model_input
+        del outputs
         return answers
 
     @staticmethod
