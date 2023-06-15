@@ -7,6 +7,7 @@ This repository is the official implementation of [QATCH: Benchmarking Table Rep
 * ***How does it work?*** Given a pandas dataframe as input, it generates a testing checklist for Question Answering and Semantic Parsing.
 * ***More specifically?*** A query generation algorithm crafts tests by means of the expressive power of SQL.
 * ***Ok cool, that's it?*** To evaluate the model's predictions, we propose 5 new metrics intra and inter tuple.
+* ***Where can I check the results?*** The generated tests along with the predictions and the metric scores can be downloaded [here](https://drive.google.com/uc?export=download&id=1_z8N52QNAHnxpHv54VhbvYu7DbKV6QRv). This is to prevent the costly generation of test results with the openAI API and to build trust in our results.  
  <figure style="text-align:center">
   <img src="https://github.com/spapicchio/repository-images/blob/master/QATCH/fullPipeline.png">
 </figure>
@@ -26,14 +27,10 @@ The SQL declaration expresses the logical complexity of the query and reflects t
 The figure above shows examples of the performance metrics on a toy dataset. 
 <br>
 
-Given the ground truth result (target) with three tuples over two attributes, we report the metric values for five predictions, coming either from a QA or from the execution of a query in SP.
-
+Given the ground truth result (target) with three tuples over two attributes, we report the metric values for five predictions, coming either from a QA or from the execution of a query in SP. More details can be found in the [metrics](src/metrics) folder
 
 ## Project
 
-The project contains two parts: the `src` library and the `generated_examples`. The latter contains the generated tests with the corresponding predictions and scoring metrics. This is to prevent the costly generation of test results with the openAI API.
-
-- `src` overview:
 
 ```shell
 |-- metrics
@@ -67,3 +64,6 @@ The project contains two parts: the `src` library and the `generated_examples`. 
     |-- test_generator.py # generate tests on proprietary tables
     |-- test_generator_spider.py # generate tests on SPIDER tables
 
+# ⚡️ Quickstart
+
+## Prepare Environment
