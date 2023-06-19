@@ -65,7 +65,10 @@ Given the ground truth result (target) with three tuples over two attributes, we
     |-- test_generator_spider.py # generate tests on SPIDER tables
 ```
 # ⚡️ Quickstart
-
+## Google colab
+All the experiments as well as the actual usage of QATCH can be found in the following this Google Colab notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1SNoy3GZGPWltVS5cL068xAG9YoPS_3_l?usp=sharing)
+<br>
+if you do not want to use google colab, continue reading.
 ## Prepare Environment
 First step is to set up a python environment. The current version of the code works with python 3.10.x and we officially support 3.10.11.
 
@@ -79,6 +82,7 @@ pip install -r requirements.txt
 ```
 ## Install and prepare data
 We suggest to create a *data* folder in the project to store all the data but it is not mandatory.
+<br> In case the input data are not in this folder, remember to change in *read_data* the *base_path* argument
 ```bash
 mkdir data/
 ```
@@ -96,8 +100,5 @@ Heart-attack | [link](https://www.kaggle.com/datasets/rashikrahmanpritom/heart-a
 Breast-cancer | [link](https://www.kaggle.com/datasets/utkarshx27/breast-cancer-dataset-used-royston-and-altman) | 686 | 5 | 6 | pgr, rfstime
 Adult-census | [link](https://www.kaggle.com/datasets/uciml/adult-census-income)| 32.6k | 9 | 6 | education, fnlwgt
 Mushrooms | [link](https://www.kaggle.com/datasets/uciml/mushroom-classification)| 8.1k | 23 | 0 | cap-shape, ring-type 
-
-## Usage
-You can check that everything works by following the Google Colab notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]()
 
 
