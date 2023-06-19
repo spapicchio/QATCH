@@ -74,7 +74,7 @@ class AbstractModel(ABC):
             except openai.error.InvalidRequestError as e:
                 logging.error(e)
                 return []
-        return result
+        return result[0]
 
     @abstractmethod
     def _process_input(self, table: pd.DataFrame,

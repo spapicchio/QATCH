@@ -229,7 +229,7 @@ def read_mushroom_dataset(df,
     return df.loc[:, : 'gillcolor']
 
 
-def read_data(name: str, model_name: str):
+def read_data(name: str, model_name: str, base_path='./data'):
     sample_size = {
         ('medicine', 'chatGPT', 'heart-attack'): 30,
         ('medicine', 'tapas', 'heart-attack'): 45,
@@ -270,10 +270,10 @@ def read_data(name: str, model_name: str):
 
     if name == 'medicine':
         df_1 = read_heart_attack_dataset(
-            pd.read_csv('./data/medicine/heart.csv'),
+            pd.read_csv(f'{base_path}/medicine/heart-attack.csv'),
             sample_size=sample_size[(name, model_name, 'heart-attack')])
         df_2 = read_breast_cancer_dataset(
-            pd.read_csv('./data/medicine/breast-cancer.csv'),
+            pd.read_csv(f'{base_path}/medicine/breast-cancer.csv'),
             sample_size=sample_size[(name, model_name, 'breast-cancer')])
         if model_name == 'sp':
             db_tables = {'heartAttack': df_1,
@@ -284,11 +284,11 @@ def read_data(name: str, model_name: str):
 
     elif name == 'ecommerce':
         df_1 = read_sales_transactions_dataset(
-            pd.read_csv('./data/ecommerce/sales_transactions.csv'),
+            pd.read_csv(f'{base_path}/ecommerce/sales-transactions.csv'),
             sample_size=sample_size[(name, model_name, 'sales-transactions')])
 
         df_2 = read_fitness_trackers_dataset(
-            pd.read_csv('./data/ecommerce/Fitness_trackers_updated.csv'),
+            pd.read_csv(f'{base_path}/ecommerce/fitness-trackers.csv'),
             sample_size=sample_size[(name, model_name, 'fitness-trackers')])
         if model_name == 'sp':
             db_tables = {'salesTransactions': df_1,
@@ -299,11 +299,11 @@ def read_data(name: str, model_name: str):
 
     elif name == 'miscellaneous':
         df_1 = read_mushroom_dataset(
-            pd.read_csv('./data/miscellaneous/mushrooms.csv'),
+            pd.read_csv(f'{base_path}/miscellaneous/mushrooms.csv'),
             sample_size=sample_size[(name, model_name, 'mush')])
 
         df_2 = read_adult_dataset(
-            pd.read_csv('./data/miscellaneous/adult.csv'),
+            pd.read_csv(f'{base_path}/miscellaneous/adult-census.csv'),
             sample_size=sample_size[(name, model_name, 'adult')])
         if model_name == 'sp':
             db_tables = {'deadlyMushrooms': df_1,
@@ -314,11 +314,11 @@ def read_data(name: str, model_name: str):
 
     elif name == 'finance':
         df_1 = read_bank_fraud_dataset(
-            pd.read_csv('./data/finance/bank_fraud_dataset_neurips.csv'),
+            pd.read_csv(f'{base_path}/finance/account-fraud.csv'),
             sample_size=sample_size[(name, model_name, 'fraud')])  # Tapex
 
         df_2 = read_finance_factory_ibm(
-            pd.read_csv('./data/finance/finance_factory_ibm.csv'),
+            pd.read_csv(f'{base_path}/finance/late-payment.csv'),
             sample_size=sample_size[(name, model_name, 'ibm')])  # Tapex
         if model_name == 'sp':
             db_tables = {'fraud': df_1,

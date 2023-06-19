@@ -14,7 +14,7 @@ class TestGenerator(AbstractTestGenerator):
                  db_name: str,
                  db_tables: dict[str, pd.DataFrame],
                  seed=2023):
-        self.db_save_path = os.path.join(db_save_path, db_name)
+        self.db_save_path = db_save_path
         if not os.path.exists(self.db_save_path):
             # create directory
             os.makedirs(self.db_save_path)
