@@ -63,7 +63,41 @@ Given the ground truth result (target) with three tuples over two attributes, we
     |-- abstract_test_generator.py # handle common methods for test generator class
     |-- test_generator.py # generate tests on proprietary tables
     |-- test_generator_spider.py # generate tests on SPIDER tables
-
+```
 # ⚡️ Quickstart
 
 ## Prepare Environment
+First step is to set up a python environment. The current version of the code works with python 3.10.x and we officially support 3.10.11.
+
+```bash
+conda create -n your_env_name python=3.10.11
+conda activate your_env_name
+```
+Install other requirements:
+```bash
+pip install -r requirements.txt
+```
+## Install and prepare data
+We suggest to create a *data* folder in the project to store all the data but it is not mandatory.
+```bash
+mkdir data/
+```
+These are the tables we use to generate the results in the main paper. <br>
+Notice that QATCH perfectly works with any table and the following are only a selected sample to higlight results in the paper.
+
+Data | Link | # rows | # categorical cols | # numerical cols | example cols
+--- | --- | --- | --- | --- | ---
+Spider | [link](https://huggingface.co/datasets/spider) | - | - | - | -
+Sales-transactions | [link](https://www.kaggle.com/datasets/gabrielramos87/an-online-shop-business) | 500k | 5 | 3 | ProductNo, Date
+Fitness-trackers | [link](https://www.kaggle.com/datasets/devsubhash/fitness-trackers-products-ecommerce) | 565 | 8 | 3 | Brand Name, Display
+Account-fraud | [link](https://www.kaggle.com/datasets/sgpjesus/bank-account-fraud-dataset-neurips-2022) | 1M | 4 | 26 | DaysSinceRequest, Velocity6h
+Late-payment | [link](https://www.kaggle.com/datasets/hhenry/finance-factoring-ibm-late-payment-histories) | 2466 | 6 | 6 | InvoiceDate, Disputed
+Heart-attack | [link](https://www.kaggle.com/datasets/rashikrahmanpritom/heart-attack-analysis-prediction-dataset) | 303 | 1 | 11 | # trtbps, # oldpeak
+Breast-cancer | [link](https://www.kaggle.com/datasets/utkarshx27/breast-cancer-dataset-used-royston-and-altman) | 686 | 5 | 6 | pgr, rfstime
+Adult-census | [link](https://www.kaggle.com/datasets/uciml/adult-census-income)| 32.6k | 9 | 6 | education, fnlwgt
+Mushrooms | [link](https://www.kaggle.com/datasets/uciml/mushroom-classification)| 8.1k | 23 | 0 | cap-shape, ring-type 
+
+## Usage
+You can check that everything works by following the Google Colab notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]()
+
+
