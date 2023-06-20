@@ -65,8 +65,60 @@ Given the ground truth result (target) with three tuples over two attributes, we
     |-- test_generator_spider.py # generate tests on SPIDER tables
 ```
 # ⚡️ Quickstart
+## How to use QATCH with my data?
+1. Load your input data as pandas df
+```python
+import pandas as pd
+data = {
+    "year": [1896, 1900, 1904, 2004, 2008, 2012],
+    "city": ["athens", "paris", "st. louis", "athens", "beijing", "london"]
+}
+table = pd.DataFrame.from_dict(data)
+db_tables = {'olympic-games': table}
+```
+2. QATCH-Generate: Generates the tests
+```python
+from src import TestGenerator
+# db_tables is a dict where the key is the tbl_name and the value is the pandas dataframe
+test_generator = TestGenerator(db_save_path='/content/games',
+                               db_name='games',
+                               db_tables=db_tables)
+
+tables, tests_df = test_generator.generate()
+```
+3. TRL Model Predictions: if you want to use any version of Tapas/Tapex for QA in Huggingface or chatGPT you can use the already implemented modules but it is NOT mandatory.
+```python
+from tqdm import tqdm
+from src import Tapex
+tapex_model = Tapex(model_name='microsoft/tapex-large-finetuned-wtq')
+tqdm.pandas(desc='predictions')
+tests_df['predictions'] = tests_df.progress_apply(
+    lambda row: tapex_model.predict(
+            table=tables[row.tbl_name],
+            queries=row.question),
+    axis=1
+)
+```
+4. QATCH-Evaluate: Evaluate the results. For SP 
+```python
+from utils import get_predictions_results_from_dbs
+# only for SP ---------
+tests_df = get_predictions_results_from_dbs(base_path_db='<output_db_path>',
+                                            df=tests_df,
+                                            predictions='<prediction_column_name>')
+# ---------------------
+metric_evaluator = MetricEvaluator(
+    metrics=['cell_precision', 'cell_recall', 'tuple_cardinality',
+                         'tuple_constraint', 'tuple_order']
+    )
+tests_df = metric_evaluator.evaluate_with_df(tests_df,
+                                             target='query_result',
+                                             predictions='predictions')
+```
+
+# 🏰 Reproduce Experiments
 ## Google colab
-All the experiments as well as the actual usage of QATCH can be found in the following this Google Colab notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1SNoy3GZGPWltVS5cL068xAG9YoPS_3_l?usp=sharing)
+All the experiments as well as how to use QATCH can be found in the following Google Colab notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1SNoy3GZGPWltVS5cL068xAG9YoPS_3_l?usp=sharing)
 <br>
 if you do not want to use google colab, continue reading.
 ## Prepare Environment
@@ -100,5 +152,24 @@ Heart-attack | [link](https://www.kaggle.com/datasets/rashikrahmanpritom/heart-a
 Breast-cancer | [link](https://www.kaggle.com/datasets/utkarshx27/breast-cancer-dataset-used-royston-and-altman) | 686 | 5 | 6 | pgr, rfstime
 Adult-census | [link](https://www.kaggle.com/datasets/uciml/adult-census-income)| 32.6k | 9 | 6 | education, fnlwgt
 Mushrooms | [link](https://www.kaggle.com/datasets/uciml/mushroom-classification)| 8.1k | 23 | 0 | cap-shape, ring-type 
+# Run Experiments
+The current version of QATCH supports two tasks, Question Answering (QA) and Semantic Parsing (SP). 
+For QA we provide two scripts one for proprietary data and the other for SPIDER. <br> 
+For both scripts, the model name is either the tapas/tapex finetuned version presents on huggingface or chatgpt. For the latter, remember to fill in the credentials.json file to call the API.
+```bash
+python QA_proprietary_data.py --model_name google/tapas-large-finetuned-wtq --db_category ecommerce --verbose
+```
+```bash
+python QA_SPIDER.py --model_name google/tapas-large-finetuned-wtq --spider_base_path data/spider --verbose
+```
+Instead, for SP we are not able to provide an end to end script because we are using an external model not accessible from an API i.e. [RESDSQL](https://github.com/RUCKBReasoning/RESDSQL). <br>
+However, the following scripts contains all the necessary steps to reproduce the results. 
+```bash
+python SP_RESDSQL.py --verbose
+```
+# 📝 License
+The source code of our project is released, for research purposes only, under the following Common
+Law License: [CC BY-NC](LICENSE).
+
 
 
