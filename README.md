@@ -169,7 +169,9 @@ python SP_RESDSQL.py --verbose
 ```
 # 📝 License
 The source code of our project is released, for research purposes only, under the following Common
-Law License: [CC BY-NC](LICENSE).
+Law License: [CC BY-NC](LICENSE). Citing directly the Creative Commons License [website](https://creativecommons.org/about/cclicenses/):<br>
+*"This license allows reusers to distribute, remix, adapt, and build upon the material 
+in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator."*
 
 
 
