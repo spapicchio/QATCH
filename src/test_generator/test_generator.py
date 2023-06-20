@@ -2,6 +2,7 @@ import os.path
 from typing import Literal
 
 import pandas as pd
+from tqdm import tqdm
 
 from .abstract_test_generator import AbstractTestGenerator
 from .database_reader.single_database import SingleDatabase
@@ -36,7 +37,7 @@ class TestGenerator(AbstractTestGenerator):
     ]:
         generators, table_names = self._init_parameters(generators, table_names)
         tests_df = pd.DataFrame()
-        for generator in generators:
+        for generator in tqdm(generators, desc="Generating tests"):
             for table_name in table_names:
                 sql_tags, queries, questions, results = generator.sql_generate(table_name)
                 df = self._build_df(table_name, sql_tags, queries, questions, results)

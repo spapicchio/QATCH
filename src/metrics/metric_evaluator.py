@@ -8,7 +8,10 @@ from .tuple_order_tag import TupleOrderTag
 
 
 class MetricEvaluator:
-    def __init__(self, metrics: list[str] | str):
+    def __init__(self, metrics: list[str] | str | None):
+        if metrics is None:
+            metrics = ['cell_precision', 'cell_recall', 'tuple_cardinality',
+                       'tuple_constraint', 'tuple_order']
         self.metrics = metrics if isinstance(metrics, list) else [metrics]
         self.tags_generator = {
             'cell_precision': CellPrecisionTag,

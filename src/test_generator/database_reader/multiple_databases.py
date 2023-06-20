@@ -31,7 +31,7 @@ class MultipleDatabases:
             if len(self.db_ids2db) >= self._MAX_DB:
                 # FIFO strategy if max reached
                 self.db_ids2db.popitem()
-            path = os.path.join(self.base_path_dbs, 'database', db_id)
+            path = os.path.join(self.base_path_dbs, 'database')
             self.db_ids2db[db_id] = SingleDatabase(path, db_name=db_id)
 
     def get_table(self, key, tbl_name):
