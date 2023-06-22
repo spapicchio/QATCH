@@ -29,15 +29,13 @@ class SelectGenerator(AbstractSqlGenerator):
         sql_tags = ['SELECT-ALL'] + \
                    ['SELECT-ADD-COL'] * len(comb_cols_add) + \
                    ['SELECT-RANDOM-COL'] * len(comb_cols_rand)
-        return sql_tags, queries, questions, results
 
-    @staticmethod
-    def _get_col_comb_str(comb):
-        return ", ".join([f'"{str(c)}"' for c in comb])
+        return {'sql_tags': sql_tags, 'queries': queries,
+                'questions': questions, 'results': results}
 
     def _build_questions(self, combinations: list[list[str]], table_name) -> list[str]:
         """fixed question template for SELECT queries
-        :param table_name:
+        :param table_name
         """
         return [f'Show all {self._get_col_comb_str(comb)} in the table {table_name}'
                 for comb in combinations]
@@ -59,9 +57,3 @@ class SelectGenerator(AbstractSqlGenerator):
     def _comb_add_columns(columns: list[str]) -> list[list[str]]:
         """increasingly add columns to the query"""
         return [columns[:i] for i in range(1, len(columns))]
-
-    @staticmethod
-    def _comb_random(columns: list[str]) -> list[list[str]]:
-        """randomly select columns for each possible combinations between cols"""
-        all_comb_num_cols = [num_cols for num_cols in range(1, len(columns) + 1)]
-        return [random.sample(columns, k) for k in all_comb_num_cols]

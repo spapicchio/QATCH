@@ -31,7 +31,8 @@ class WhereGenerator(AbstractSqlGenerator):
         results = [self.database.run_query(query) for query in queries]
 
         assert (len(sql_tags) == len(queries) == len(questions) == len(results))
-        return sql_tags, queries, questions, results
+        return {'sql_tags': sql_tags, 'queries': queries,
+                'questions': questions, 'results': results}
 
     @staticmethod
     def _where_categorical(df: pd.DataFrame, tbl_name: str, cat_cols: list[str]
@@ -93,10 +94,4 @@ class WhereGenerator(AbstractSqlGenerator):
 
         return sql_tags, queries, questions
 
-    def _get_cat_num_cols(self, table_name: str) -> tuple[list, list]:
-        df = self.database.get_table_from_name(table_name)
-        df = df.infer_objects()
-        cat_cols = df.select_dtypes(include=['object']).columns.tolist()
-        num_cols = df.select_dtypes(include=['float']).columns.tolist()
-        num_cols += df.select_dtypes(include=['int']).columns.tolist()
-        return cat_cols, num_cols
+

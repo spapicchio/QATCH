@@ -231,40 +231,40 @@ def read_mushroom_dataset(df,
 
 def read_data(name: str, model_name: str, base_path='./data'):
     sample_size = {
-        ('medicine', 'chatGPT', 'heart-attack'): 30,
+        ('medicine', 'chatgpt', 'heart-attack'): 30,
         ('medicine', 'tapas', 'heart-attack'): 45,
         ('medicine', 'tapex', 'heart-attack'): 30,
         ('medicine', 'sp', 'heart-attack'): None,
         ('medicine', 'tapas', 'breast-cancer'): 45,
         ('medicine', 'tapex', 'breast-cancer'): 30,
-        ('medicine', 'chatGPT', 'breast-cancer'): 35,
+        ('medicine', 'chatgpt', 'breast-cancer'): 35,
         ('medicine', 'sp', 'breast-cancer'): None,
 
         ('ecommerce', 'tapas', 'sales-transactions'): 60,
         ('ecommerce', 'tapex', 'sales-transactions'): 20,
-        ('ecommerce', 'chatGPT', 'sales-transactions'): 40,
+        ('ecommerce', 'chatgpt', 'sales-transactions'): 40,
         ('ecommerce', 'sp', 'sales-transactions'): 30000,
         ('ecommerce', 'tapas', 'fitness-trackers'): 50,
         ('ecommerce', 'tapex', 'fitness-trackers'): 25,
-        ('ecommerce', 'chatGPT', 'fitness-trackers'): 30,
+        ('ecommerce', 'chatgpt', 'fitness-trackers'): 30,
         ('ecommerce', 'sp', 'fitness-trackers'): None,
 
         ('finance', 'tapas', 'fraud'): 50,
         ('finance', 'tapex', 'fraud'): 25,
-        ('finance', 'chatGPT', 'fraud'): 30,
+        ('finance', 'chatgpt', 'fraud'): 30,
         ('finance', 'sp', 'fraud'): 30000,
         ('finance', 'tapas', 'ibm'): 50,
         ('finance', 'tapex', 'ibm'): 20,
-        ('finance', 'chatGPT', 'ibm'): 25,
+        ('finance', 'chatgpt', 'ibm'): 25,
         ('finance', 'sp', 'ibm'): None,
 
         ('miscellaneous', 'tapas', 'mush'): 50,
         ('miscellaneous', 'tapex', 'mush'): 25,
-        ('miscellaneous', 'chatGPT', 'mush'): 30,
+        ('miscellaneous', 'chatgpt', 'mush'): 30,
         ('miscellaneous', 'sp', 'mush'): None,
         ('miscellaneous', 'tapas', 'adult'): 50,
         ('miscellaneous', 'tapex', 'adult'): 20,
-        ('miscellaneous', 'chatGPT', 'adult'): 30,
+        ('miscellaneous', 'chatgpt', 'adult'): 30,
         ('miscellaneous', 'sp', 'adult'): 30000
     }
 

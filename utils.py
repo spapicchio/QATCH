@@ -17,8 +17,8 @@ def init_model(model_name):
         # open credentials json file
         with open('credentials.json', 'r') as f:
             credentials = json.load(f)
-        model = ChatGPT(api_key=credentials.api_key_chatgpt,
-                        api_org=credentials.api_org_chatgpt)
+        model = ChatGPT(api_key=credentials['api_key_chatgpt'],
+                        api_org=credentials['api_org_chatgpt'])
     return model
 
 

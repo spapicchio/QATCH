@@ -25,12 +25,11 @@ class OrderByGenerator(AbstractSqlGenerator):
                 f' {"ascending" if order.lower() == "asc" else "descending"} ' \
                 f'order for the table {table_name}'
 
-
-
                 for col in columns
             ]
 
         # run the query and get the results
         results = [self.database.run_query(query) for query in queries]
         sql_tags = ['ORDERBY-SINGLE'] * len(queries)
-        return sql_tags, queries, questions, results
+        return {'sql_tags': sql_tags, 'queries': queries,
+                'questions': questions, 'results': results}
