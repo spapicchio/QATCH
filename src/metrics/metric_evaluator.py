@@ -35,7 +35,15 @@ class MetricEvaluator:
         tqdm.pandas(desc='Evaluating metrics')
         for metric in tqdm(self.metrics, desc='Evaluating metrics'):
             generator = self.tags_generator[metric]()
-            df.loc[:, metric] = df.progress_apply(
-                lambda r: generator.evaluate_single_test_metric(r[target], r[predictions]),
-                axis=1)
+
+            if metric == 'tuple_order':
+                df.loc[:, metric] = None
+                mask = df['sql_tags'].str.contains('ORDERBY')
+                df.loc[mask, metric] = df[mask].progress_apply(
+                    lambda r: generator.evaluate_single_test_metric(r[target], r[predictions]),
+                    axis=1)
+            else:
+                df.loc[:, metric] = df.progress_apply(
+                    lambda r: generator.evaluate_single_test_metric(r[target], r[predictions]),
+                    axis=1)
         return df
