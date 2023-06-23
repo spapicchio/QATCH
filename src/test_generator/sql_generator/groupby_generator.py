@@ -20,7 +20,7 @@ class GroupByGenerator(AbstractSqlGenerator):
         random_combinations = self._comb_random(cat_cols)
 
         questions = [f'Show all {self._get_col_comb_str(comb)}' \
-                     f' in the table {table_name} for each {self._get_col_comb_str(comb)}'
+                     f' in the table "{table_name}" for each {self._get_col_comb_str(comb)}'
                      for comb in random_combinations]
 
         queries = [f'SELECT {self._get_col_comb_str(comb)} FROM ' \
@@ -37,7 +37,8 @@ class GroupByGenerator(AbstractSqlGenerator):
     def _build_group_by_with_count(self, table_name):
         """only for Categorcical columns"""
         cat_cols, _ = self._get_cat_num_cols(table_name)
-        questions = [f'For each {col}, count the number of rows' for col in cat_cols]
+        questions = [f'For each "{col}", count the number of rows in table "{table_name}"'
+                     for col in cat_cols]
         queries = [f'SELECT COUNT(*) FROM "{table_name}" GROUP BY "{col}"'
                    for col in cat_cols]
         results = [self.database.run_query(query) for query in queries]
@@ -50,7 +51,7 @@ class GroupByGenerator(AbstractSqlGenerator):
         """only for Numerical columns"""
         cat_cols, num_cols = self._get_cat_num_cols(table_name)
         for agg in ['min', 'max', 'avg', 'sum']:
-            questions = [f'For each {c_col}, find the {agg} of {n_col}'
+            questions = [f'For each "{c_col}", find the {agg} of "{n_col}" in table "{table_name}"'
                          for c_col in cat_cols
                          for n_col in num_cols]
 

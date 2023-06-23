@@ -33,9 +33,9 @@ class HavingGenerator(AbstractSqlGenerator):
             ]
 
             questions = [
-                f'Find all the "{cat_col}" that have at least {mean_count} records',
-                f'Find all the "{cat_col}" that have at most {mean_count} records',
-                f'Find all the "{cat_col}" that have exactly {mean_count} records'
+                f'Find all the "{cat_col}" that have at least {mean_count} records in table "{table_name}"',
+                f'Find all the "{cat_col}" that have at most {mean_count} records in table "{table_name}"',
+                f'Find all the "{cat_col}" that have exactly {mean_count} records in table "{table_name}"'
             ]
 
             sql_tags = ['HAVING-COUNT-GR', 'HAVING-COUNT-LS', 'HAVING-COUNT-EQ']
@@ -63,8 +63,8 @@ class HavingGenerator(AbstractSqlGenerator):
                 ]
 
                 questions = [
-                    f'Find the "{cat_col}" whose min "{num_col}" is at least {mean_mean}',
-                    f'Find the "{cat_col}" whose max "{num_col}" is at most {mean_mean}',
+                    f'Find the "{cat_col}" whose min "{num_col}" is at least {mean_mean} in table "{table_name}"',
+                    f'Find the "{cat_col}" whose max "{num_col}" is at most {mean_mean} in table "{table_name}"',
                 ]
 
                 sql_tags = ['HAVING-AGG-GR', 'HAVING-AGG-LS']
