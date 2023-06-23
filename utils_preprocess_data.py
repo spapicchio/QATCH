@@ -145,8 +145,14 @@ def read_fitness_trackers_dataset(df,
                     }, axis='columns')
     df.columns = df.columns.str.lower()
     if sample_size is None:
-        return df.sample(frac=1, random_state=random_state, ignore_index=True)
-    return df.sample(sample_size, random_state=random_state, ignore_index=True)
+        df = df.sample(frac=1, random_state=random_state, ignore_index=True)
+    else:
+        df = df.sample(sample_size, random_state=random_state, ignore_index=True)
+
+    df['sellingprice'] = df['sellingprice'].map(lambda x: float(x.replace(',', '.')))
+    df['originalprice'] = df['originalprice'].map(lambda x: float(x.replace(',', '.')))
+
+    return df
 
 
 def read_sales_transactions_dataset(df,

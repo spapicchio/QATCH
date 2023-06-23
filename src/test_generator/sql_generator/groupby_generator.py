@@ -1,5 +1,3 @@
-import random
-
 from .abstract_sql_generator import AbstractSqlGenerator
 from ..database_reader import SingleDatabase
 
