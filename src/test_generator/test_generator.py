@@ -30,7 +30,7 @@ class TestGenerator(AbstractTestGenerator):
                            'where': WhereGenerator,
                            'groupby': GroupByGenerator,
                            'having': HavingGenerator,
-                           'simpleAggr': SimpleAggGenerator}
+                           'simpleAgg': SimpleAggGenerator}
 
     def generate(self,
                  generators: Literal['select', 'orderby', 'distinct', 'where'] | list[str] | None = None,

@@ -9,6 +9,7 @@ class GroupByGenerator(AbstractSqlGenerator):
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """the group by is performed only with the categorical columns"""
+        self.sql_generated = {'sql_tags': [], 'queries': [], 'questions': [], 'results': []}
         df = self.database.tables[table_name]
         self._build_group_by_no_agg(table_name)
         self._build_group_by_with_count(table_name)

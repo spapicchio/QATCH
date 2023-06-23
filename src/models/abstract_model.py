@@ -1,6 +1,7 @@
 import itertools
 import logging
 from abc import ABC, abstractmethod
+from time import sleep
 from typing import Any
 
 import openai.error
@@ -11,7 +12,7 @@ from tqdm import tqdm
 class AbstractModel(ABC):
     def predict(self, table: pd.DataFrame,
                 queries: list[str] | str,
-                max_query_processing_num: int = 5,
+                max_query_processing_num: int = 1,
                 tbl_name=None) -> list[Any] | list[None]:
         """
         predict the answer for multiple queries.
@@ -36,45 +37,59 @@ class AbstractModel(ABC):
                                 for i in range(0, len(queries), max_query_processing_num)]
             # Predict for each slice
             for _slice in tqdm(questions_slices, desc='predicting'):
-                model_input = self._process_input(table, _slice, tbl_name)
-                if model_input is None:
-                    result.append([None] * len(_slice))
-                else:
-                    try:
-                        predictions = self._predict_queries(model_input, table)
-                    except openai.error.RateLimitError as e:
-                        logging.error(e)
-                        return list(itertools.chain(*result))
-                    except openai.error.APIError as e:
-                        logging.error(e)
-                        return list(itertools.chain(*result))
-                    except openai.error.InvalidRequestError as e:
-                        logging.error(e)
-                        if len(_slice) == 1:
-                            return [None]
-                        else:
-                            return result.append([None] * len(_slice))
-
-                    assert len(predictions) == len(_slice)
-                    result.append(predictions)
+                predictions = self._handle_prediction_openai_errors(table,
+                                                                    _slice,
+                                                                    tbl_name)
+                result.append(predictions)
             # Flatten result list
             result = list(itertools.chain(*result))
         else:
-            model_input = self._process_input(table, queries, tbl_name)
-            if model_input is None:
-                return [None] * len(queries)
-            try:
-                result = self._predict_queries(model_input, table)
-            except openai.error.RateLimitError as e:
-                logging.error(e)
-                return []
-            except openai.error.APIError as e:
-                logging.error(e)
-                return []
-            except openai.error.InvalidRequestError as e:
-                logging.error(e)
-                return []
+            result = self._handle_prediction_openai_errors(table, queries, tbl_name)
         return result[0]
+
+    def _handle_prediction_openai_errors(self, table: pd.DataFrame,
+                                         queries: list[str],
+                                         tbl_name: str) -> list:
+        """handle openAI API errors to avoid loosing predictions until the error"""
+        pred = ['nan'] * len(queries)
+        start = 0
+        count = 1
+        while 'nan' in pred:
+            new_pred = self.predict_queries(table, queries, tbl_name)
+            if len(new_pred) < len(queries):
+                pred[start:start + len(new_pred)] = new_pred
+                start += len(new_pred)
+                sleep(60)
+                logging.info('sleep for 60')
+                count += 1
+            elif len(new_pred) == len(queries):
+                pred = new_pred
+        return pred
+
+    def predict_queries(self, table: pd.DataFrame,
+                        queries: list[str],
+                        tbl_name: str) -> list:
+        """wrap function to process input and predict queries
+        excepts the openAI errors and return an empty list"""
+        model_input = self._process_input(table, queries, tbl_name)
+        if model_input is None:
+            """Table is too large to be processed"""
+            return [None] * len(queries)
+        try:
+            result = self._predict_queries(model_input, table)
+        except openai.error.RateLimitError as e:
+            """Too many requests to the API"""
+            logging.error(e)
+            return []
+        except openai.error.APIError as e:
+            """Too many requests to the API"""
+            logging.error(e)
+            return []
+        except openai.error.ServiceUnavailableError as e:
+            """Too many requests to the API"""
+            logging.error(e)
+            return []
+        return result
 
     @abstractmethod
     def _process_input(self, table: pd.DataFrame,
@@ -82,7 +97,7 @@ class AbstractModel(ABC):
                        tbl_name: str | None = None) -> Any | None:
         """
         process the input before passing it as input to the model
-        :param table: table to analize to retrieve the answer
+        :param table: table to analyze to retrieve the answer
         :param queries: list or single query to answer
         :return: processed input
         """

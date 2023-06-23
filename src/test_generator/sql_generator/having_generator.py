@@ -13,6 +13,7 @@ class HavingGenerator(AbstractSqlGenerator):
         self.sql_generated = {'sql_tags': [], 'queries': [], 'questions': [], 'results': []}
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
+        self.sql_generated = {'sql_tags': [], 'queries': [], 'questions': [], 'results': []}
         cat_cols, num_cols = self._get_cat_num_cols(table_name)
         df = self.database.get_table_from_name(table_name)
         self._build_having_count(df, table_name, cat_cols)
