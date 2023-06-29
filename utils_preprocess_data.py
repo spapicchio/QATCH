@@ -149,8 +149,8 @@ def read_fitness_trackers_dataset(df,
     else:
         df = df.sample(sample_size, random_state=random_state, ignore_index=True)
 
-    df['sellingprice'] = df['sellingprice'].map(lambda x: float(x.replace(',', '.')))
-    df['originalprice'] = df['originalprice'].map(lambda x: float(x.replace(',', '.')))
+    df['sellingprice'] = df['sellingprice'].map(lambda x: float(x.replace(',', '')))
+    df['originalprice'] = df['originalprice'].map(lambda x: float(x.replace(',', '')))
 
     return df
 

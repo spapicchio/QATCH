@@ -1,3 +1,4 @@
+import re
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -37,20 +38,26 @@ class AbstractMetric(ABC):
         :param prediction: prediction table to be compared with target table
         :return: the metric result (float or str)
         """
-        # normalize target and prediction
-        target = [[str(cell).replace('\n', '').strip().lower() for cell in row]
-                  for row in target]
         prediction = self.check_chatgpt_result(prediction)
         if prediction is None:
             return 0.0
 
-        prediction = [[str(cell).strip().lower() for cell in row]
-                      for row in prediction]
+        # normalize target and prediction
+        target = [list(map(self.normalize_cell, row)) for row in target]
+        prediction = [list(map(self.normalize_cell, row)) for row in prediction]
 
         if len(target) == 0 or len(prediction) == 0:
             return self.evaluate_single_special_case(target, prediction)
         else:
             return self.evaluate_single_no_special_case(target, prediction)
+
+    @staticmethod
+    def normalize_cell(cell):
+        if isinstance(cell, float):
+            cell = round(cell)
+        elif isinstance(cell, str) and re.match(r'^-?\d+(?:\.\d+)?$', cell):
+            cell = round(float(cell), 1)
+        return str(cell).replace('\n', '').strip().lower()
 
     @staticmethod
     def check_chatgpt_result(prediction) -> list[list[Any]] | None:
