@@ -40,7 +40,7 @@ class GroupByGenerator(AbstractSqlGenerator):
         cat_cols, _ = self._get_cat_num_cols(table_name)
         questions = [f'For each "{col}", count the number of rows in table "{table_name}"'
                      for col in cat_cols]
-        queries = [f'SELECT COUNT(*) FROM "{table_name}" GROUP BY "{col}"'
+        queries = [f'SELECT "{col}", COUNT(*) FROM "{table_name}" GROUP BY "{col}"'
                    for col in cat_cols]
         results = [self.database.run_query(query) for query in queries]
         sql_tags = ['GROUPBY-COUNT'] * len(queries)
@@ -56,7 +56,7 @@ class GroupByGenerator(AbstractSqlGenerator):
                          for c_col in cat_cols
                          for n_col in num_cols]
 
-            queries = [f'SELECT {agg.upper()}("{n_col}") FROM "{table_name}" GROUP BY {c_col}'
+            queries = [f'SELECT "{c_col}", {agg.upper()}("{n_col}") FROM "{table_name}" GROUP BY {c_col}'
                        for c_col in cat_cols
                        for n_col in num_cols]
 

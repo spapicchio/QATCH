@@ -52,23 +52,34 @@ class HavingGenerator(AbstractSqlGenerator):
         """
         for cat_col in cat_cols:
             # the mean for each grouped category
-            mean_count = df.groupby(cat_col).mean(numeric_only=True)
+            mean_sum = df.groupby(cat_col).sum(numeric_only=True)
+            mean_mean = df.groupby(cat_col).mean(numeric_only=True)
             for num_col in num_cols:
-                # the mean of means for the grouped category
-                mean_mean = mean_count[num_col].mean()
+                # the mean of sum for the grouped category
+                mean_mean_sum = round(mean_sum[num_col].mean(), 2)
+                mean_mean_mean = round(mean_mean[num_col].mean(), 2)
                 queries = [
                     f'SELECT "{cat_col}" FROM "{table_name}"'
-                    f' GROUP BY "{cat_col}" HAVING MIN("{num_col}") >= {mean_mean}',
+                    f' GROUP BY "{cat_col}" HAVING AVG("{num_col}") >= {mean_mean_mean}',
                     f'SELECT "{cat_col}" FROM "{table_name}"'
-                    f' GROUP BY "{cat_col}" HAVING MAX("{num_col}") <= {mean_mean}',
+                    f' GROUP BY "{cat_col}" HAVING AVG("{num_col}") <= {mean_mean_mean}',
+
+                    f'SELECT "{cat_col}" FROM "{table_name}"'
+                    f' GROUP BY "{cat_col}" HAVING SUM("{num_col}") >= {mean_mean_sum}',
+                    f'SELECT "{cat_col}" FROM "{table_name}"'
+                    f' GROUP BY "{cat_col}" HAVING SUM("{num_col}") <= {mean_mean_sum}',
                 ]
 
                 questions = [
-                    f'Find the "{cat_col}" whose min "{num_col}" is at least {mean_mean} in table "{table_name}"',
-                    f'Find the "{cat_col}" whose max "{num_col}" is at most {mean_mean} in table "{table_name}"',
+                    f'List the "{cat_col}" which average "{num_col}" is at least {mean_mean_mean} in table "{table_name}"',
+                    f'List the "{cat_col}" which average "{num_col}" is at most {mean_mean_mean} in table "{table_name}"',
+
+                    f'List the "{cat_col}" which summation of "{num_col}" is at least {mean_mean_sum} in table "{table_name}"',
+                    f'List the "{cat_col}" which summation of "{num_col}" is at most {mean_mean_sum} in table "{table_name}"',
                 ]
 
-                sql_tags = ['HAVING-AGG-GR', 'HAVING-AGG-LS']
+                sql_tags = ['HAVING-AGG-AVG-GR', 'HAVING-AGG-AVG-LS',
+                            'HAVING-AGG-SUM-GR', 'HAVING-AGG-SUM-LS']
 
                 results = [self.database.run_query(query) for query in queries]
 
