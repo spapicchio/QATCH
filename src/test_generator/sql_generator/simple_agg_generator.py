@@ -9,7 +9,7 @@ class SimpleAggGenerator(AbstractSqlGenerator):
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
         self.sql_generated = {'sql_tags': [], 'queries': [], 'questions': [], 'results': []}
-        cat_cols, num_cols = self._get_cat_num_cols(table_name)
+        _, cat_cols, num_cols = self._get_df_cat_num_cols(table_name)
         self._build_count_cat(table_name, cat_cols)
         self._build_count_agg(table_name, num_cols)
 

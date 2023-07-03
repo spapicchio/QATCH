@@ -10,14 +10,13 @@ class GroupByGenerator(AbstractSqlGenerator):
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """the group by is performed only with the categorical columns"""
         self.sql_generated = {'sql_tags': [], 'queries': [], 'questions': [], 'results': []}
-        df = self.database.tables[table_name]
         self._build_group_by_no_agg(table_name)
         self._build_group_by_with_count(table_name)
         self._build_group_by_with_agg(table_name)
         return self.sql_generated
 
     def _build_group_by_no_agg(self, table_name):
-        cat_cols, _ = self._get_cat_num_cols(table_name)
+        _, cat_cols, _ = self._get_df_cat_num_cols(table_name)
         random_combinations = self._comb_random(cat_cols)
 
         questions = [f'Show all {self._get_col_comb_str(comb)}' \
@@ -37,7 +36,7 @@ class GroupByGenerator(AbstractSqlGenerator):
 
     def _build_group_by_with_count(self, table_name):
         """only for Categorcical columns"""
-        cat_cols, _ = self._get_cat_num_cols(table_name)
+        _, cat_cols, _ = self._get_df_cat_num_cols(table_name)
         questions = [f'For each "{col}", count the number of rows in table "{table_name}"'
                      for col in cat_cols]
         queries = [f'SELECT "{col}", COUNT(*) FROM "{table_name}" GROUP BY "{col}"'
@@ -50,13 +49,15 @@ class GroupByGenerator(AbstractSqlGenerator):
 
     def _build_group_by_with_agg(self, table_name):
         """only for Numerical columns"""
-        cat_cols, num_cols = self._get_cat_num_cols(table_name)
+        # with sample == 2 we get 4 tests for each aggregation -> 4*4 = 16 tests
+        # with sample == 3 we get 9 tests for each aggregation -> 9*4 = 36 tests
+        _, cat_cols, num_cols = self._get_df_cat_num_cols(table_name, sample=2)
         for agg in ['min', 'max', 'avg', 'sum']:
             questions = [f'For each "{c_col}", find the {agg} of "{n_col}" in table "{table_name}"'
                          for c_col in cat_cols
                          for n_col in num_cols]
 
-            queries = [f'SELECT "{c_col}", {agg.upper()}("{n_col}") FROM "{table_name}" GROUP BY {c_col}'
+            queries = [f'SELECT "{c_col}", {agg.upper()}("{n_col}") FROM "{table_name}" GROUP BY "{c_col}"'
                        for c_col in cat_cols
                        for n_col in num_cols]
 

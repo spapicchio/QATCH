@@ -19,8 +19,7 @@ class WhereGenerator(AbstractSqlGenerator):
             * WHERE column_name >= value
             * WHERE column_name <= value
         """
-        cat_cols, num_cols = self._get_cat_num_cols(table_name)
-        df = self.database.get_table_from_name(table_name)
+        df, cat_cols, num_cols = self._get_df_cat_num_cols(table_name)
         output_cat = self._where_categorical(df, table_name, cat_cols)
         output_num = self._where_numerical(df, table_name, num_cols)
 
@@ -40,8 +39,8 @@ class WhereGenerator(AbstractSqlGenerator):
         if len(cat_cols) == 0:
             return [], [], []
         operation2str = {'!=': 'is different from', '=': 'is equal to'}
-        min_values = [df[col].min() for col in cat_cols]
-        max_values = [df[col].max() for col in cat_cols]
+        min_values = [df[col].value_counts().idxmin() for col in cat_cols]
+        max_values = [df[col].value_counts().idxmax() for col in cat_cols]
         queries, questions = [], []
 
         for values in [max_values, min_values]:

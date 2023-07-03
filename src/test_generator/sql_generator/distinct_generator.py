@@ -20,10 +20,11 @@ class DistinctGenerator(AbstractSqlGenerator):
         questions = output_single[2] + output_mul[2]
         results = output_single[3] + output_mul[3]
 
-        return sql_tags, queries, questions, results
+        return {'sql_tags': sql_tags, 'queries': queries,
+                'questions': questions, 'results': results}
 
     def _get_categorical_col(self, table_name: str) -> list[str]:
-        cat_cols, _ = self._get_cat_num_cols(table_name)
+        _, cat_cols, _ = self._get_df_cat_num_cols(table_name)
         return cat_cols
 
     def _generate_distinct_single_col(self, table_name, cat_columns):
@@ -60,5 +61,5 @@ class DistinctGenerator(AbstractSqlGenerator):
         # run the query and get the results
         results = [self.database.run_query(query) for query in queries]
         sql_tags = ['DISTINCT-MULT'] * len(queries)
-        return {'sql_tags': sql_tags, 'queries': queries,
-                'questions': questions, 'results': results}
+        return sql_tags, queries, questions, results
+

@@ -1,6 +1,8 @@
 import random
 from abc import ABC, abstractmethod
 
+import pandas as pd
+
 from ..database_reader import SingleDatabase
 
 
@@ -20,14 +22,22 @@ class AbstractSqlGenerator(ABC):
          """
         raise NotImplementedError
 
-    def _get_cat_num_cols(self, table_name: str) -> tuple[list, list]:
+    def _get_df_cat_num_cols(self, table_name: str, sample=None) -> tuple[pd.DataFrame, list, list]:
         """given the table name, return the categorical and numerical columns"""
         df = self.database.get_table_from_name(table_name)
         df = df.infer_objects()
         cat_cols = df.select_dtypes(include=['object']).columns.tolist()
         num_cols = df.select_dtypes(include=['float']).columns.tolist()
         num_cols += df.select_dtypes(include=['int']).columns.tolist()
-        return cat_cols, num_cols
+        for col in cat_cols:
+            df[col] = df[col].fillna("unknown")
+        for col in num_cols:
+            df[col] = df[col].fillna(0)
+        if sample is not None:
+            # sample the categorical columns
+            cat_cols = random.sample(cat_cols, sample) if len(cat_cols) >= sample else cat_cols
+            num_cols = random.sample(num_cols, sample) if len(num_cols) >= sample else num_cols
+        return df, cat_cols, num_cols
 
     @staticmethod
     def _get_col_comb_str(comb: list):

@@ -14,17 +14,16 @@ class HavingGenerator(AbstractSqlGenerator):
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
         self.sql_generated = {'sql_tags': [], 'queries': [], 'questions': [], 'results': []}
-        cat_cols, num_cols = self._get_cat_num_cols(table_name)
-        df = self.database.get_table_from_name(table_name)
-        self._build_having_count(df, table_name, cat_cols)
-        self._build_having_agg(df, table_name, cat_cols, num_cols)
+        self._build_having_count(table_name)
+        self._build_having_agg(table_name)
         return self.sql_generated
 
-    def _build_having_count(self, df, table_name, cat_cols):
+    def _build_having_count(self, table_name):
         """
         SELECT policy_type_code FROM policies GROUP BY policy_type_code HAVING count(*)>2
         Find all the policy types that have more than 2 records
         """
+        df, cat_cols, _ = self._get_df_cat_num_cols(table_name)
         for cat_col in cat_cols:
             mean_count = int(df.groupby(cat_col).count().mean().values[0])
             queries = [
@@ -45,11 +44,14 @@ class HavingGenerator(AbstractSqlGenerator):
 
             self.extend_values_generated(sql_tags, queries, questions, results)
 
-    def _build_having_agg(self, df, table_name, cat_cols, num_cols):
+    def _build_having_agg(self, table_name):
         """
         SELECT Product_Name FROM PRODUCTS GROUP BY Product_Name HAVING avg(Product_Price) < 1000000
         Find the product names whose average product price is below 1000000.
         """
+        # with sample == 2 we get 4 tests for each aggregation -> 4*4 = 16 tests
+        # with sample == 3 we get 9 tests for each aggregation -> 9*4 = 36 tests
+        df, cat_cols, num_cols = self._get_df_cat_num_cols(table_name, sample=2)
         for cat_col in cat_cols:
             # the mean for each grouped category
             mean_sum = df.groupby(cat_col).sum(numeric_only=True)
