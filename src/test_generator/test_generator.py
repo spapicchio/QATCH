@@ -7,7 +7,7 @@ from tqdm import tqdm
 from .abstract_test_generator import AbstractTestGenerator
 from .database_reader.single_database import SingleDatabase
 from .sql_generator import (SelectGenerator, DistinctGenerator,
-                            OrderByGenerator, WhereGenerator,
+                            OrderByGenerator, WhereGenerator, NullGenerator,
                             GroupByGenerator, HavingGenerator, SimpleAggGenerator)
 
 
@@ -30,7 +30,9 @@ class TestGenerator(AbstractTestGenerator):
                            'where': WhereGenerator,
                            'groupby': GroupByGenerator,
                            'having': HavingGenerator,
-                           'simpleAgg': SimpleAggGenerator}
+                           'simpleAgg': SimpleAggGenerator,
+                           'nullCount': NullGenerator
+                           }
 
     def generate(self,
                  generators: Literal['select', 'orderby', 'distinct', 'where'] | list[str] | None = None,

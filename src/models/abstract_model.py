@@ -55,6 +55,8 @@ class AbstractModel(ABC):
         start = 0
         count = 1
         while 'nan' in pred:
+            if count > 10000:
+                logging.error('Too many errors, aborting.')
             new_pred = self.predict_queries(table, queries, tbl_name)
             if len(new_pred) < len(queries):
                 pred[start:start + len(new_pred)] = new_pred
