@@ -23,8 +23,8 @@ class CellRecallTag(AbstractMetric):
             * 0 indicates no cell in the target is in the prediction
             * 1 indicates all cells in the target are in the prediction
         """
-        flat_target = set(itertools.chain(*target))
-        flat_prediction = set(itertools.chain(*prediction))
+        flat_target = list(itertools.chain(*target))
+        flat_prediction = list(itertools.chain(*prediction))
 
         # sum_cell_match = np.sum(np.isin(flat_target, flat_prediction))
         sum_cell_match = np.sum(list(map(

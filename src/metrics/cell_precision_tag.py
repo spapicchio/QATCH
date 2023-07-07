@@ -24,8 +24,8 @@ class CellPrecisionTag(AbstractMetric):
             * 0 indicates no cell in the prediction is in the target
             * 1 indicates all cells in the prediction are in the target
         """
-        flat_target = set(itertools.chain(*target))
-        flat_prediction = set(itertools.chain(*prediction))
+        flat_target = list(itertools.chain(*target))
+        flat_prediction = list(itertools.chain(*prediction))
 
         sum_cell_match = np.sum(list(map(lambda x: check_isin(x, flat_target), flat_prediction)))
         return round(sum_cell_match / len(flat_prediction), 3)
