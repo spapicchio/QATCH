@@ -251,7 +251,7 @@ def read_data(name: str, model_name: str, base_path='./data'):
         ('ecommerce', 'chatgpt', 'sales-transactions'): 40,
         ('ecommerce', 'sp', 'sales-transactions'): 30000,
         ('ecommerce', 'tapas', 'fitness-trackers'): 50,
-        ('ecommerce', 'tapex', 'fitness-trackers'): 25,
+        ('ecommerce', 'tapex', 'fitness-trackers'): 20,
         ('ecommerce', 'chatgpt', 'fitness-trackers'): 30,
         ('ecommerce', 'sp', 'fitness-trackers'): None,
 

@@ -10,6 +10,19 @@ class AbstractSqlGenerator(ABC):
     def __init__(self, database: SingleDatabase, seed=2023):
         self.database = database
         random.seed(seed)
+        self.sql_generated = {"sql_tags": [], "queries": [],
+                              "questions": [], "results": []}
+
+    def empty_sql_generated(self):
+        self.sql_generated = {"sql_tags": [], "queries": [],
+                              "questions": [], "results": []}
+        return self.sql_generated
+
+    def append_sql_generated(self, sql_tags, queries, questions, results):
+        self.sql_generated['sql_tags'].extend(sql_tags)
+        self.sql_generated['queries'].extend(queries)
+        self.sql_generated['questions'].extend(questions)
+        self.sql_generated['results'].extend(results)
 
     @abstractmethod
     def sql_generate(self, table_name: str) -> dict[str, list]:
@@ -29,10 +42,6 @@ class AbstractSqlGenerator(ABC):
         cat_cols = df.select_dtypes(include=['object']).columns.tolist()
         num_cols = df.select_dtypes(include=['float']).columns.tolist()
         num_cols += df.select_dtypes(include=['int']).columns.tolist()
-        for col in cat_cols:
-            df[col] = df[col].fillna("unknown")
-        for col in num_cols:
-            df[col] = df[col].fillna(0)
         if sample is not None:
             # sample the categorical columns
             cat_cols = random.sample(cat_cols, sample) if len(cat_cols) >= sample else cat_cols
@@ -41,7 +50,7 @@ class AbstractSqlGenerator(ABC):
 
     @staticmethod
     def _get_col_comb_str(comb: list):
-        """given a comibination of columns, return a string with the columns names"""
+        """given a combination of columns, return a string with the columns names"""
         return ", ".join([f'"{str(c)}"' for c in comb])
 
     @staticmethod

@@ -1,8 +1,9 @@
 from unittest.mock import Mock, MagicMock
 
+import numpy as np
 import pytest
 
-from test_generator.sql_generator import OrderByGenerator
+from test_generator.sql_generator import OrderByGenerator, WhereGenerator
 
 
 class TestOrderByGenerator:
@@ -62,3 +63,63 @@ class TestOrderByGenerator:
 
         assert len(generate_dict['queries']) == len(generate_dict['questions']) == \
                len(generate_dict['sql_tags']) == len(generate_dict['results'])
+
+
+class TestWhereGenerator:
+    def test_most_frequent_value(self):
+        # Test case 1: Check for the most frequent value
+        values = np.array(['1', '2', '3', '2', '2', '4', '4'])
+        assert WhereGenerator.get_most_frequent_or_max_value(values) == '2'
+
+        # Test case 1: Check for max value
+        values = np.array([1, 2, 3, 2, 2, 4, 4])
+        assert WhereGenerator.get_most_frequent_or_max_value(values) == 4
+
+        # Test case 1: Check for max value
+        values = np.array([1.0, 2.3, 3.1, 2, 2, 4.4, 4])
+        assert WhereGenerator.get_most_frequent_or_max_value(values) == 4.4
+
+        # Test case 2: Check for empty array
+        values = np.array([])
+        assert WhereGenerator.get_most_frequent_or_max_value(values) is None
+
+        # Test case 3: Check for array with only one value
+        values = np.array([5])
+        assert WhereGenerator.get_most_frequent_or_max_value(values) == 5
+
+        # Test case 5: Presence of None
+        values = np.array([5, None])
+        assert WhereGenerator.get_most_frequent_or_max_value(values) == 5
+
+        # Test case 6: Strings and None
+        values = np.array(['5', None])
+        assert WhereGenerator.get_most_frequent_or_max_value(values) == '5'
+
+    def test_least_frequent_value(self):
+        # Test case 1: Check for the most frequent value
+        values = np.array(['1', '2', '3', '2', '2', '4', '4'])
+        assert WhereGenerator.get_least_frequent_or_min_value(values) == '1'
+
+        # Test case 1: Check for max value
+        values = np.array([1, 2, 3, 2, 2, 4, 4])
+        assert WhereGenerator.get_least_frequent_or_min_value(values) == 1
+
+        # Test case 1: Check for max value
+        values = np.array([1.0, 2.3, 3.1, 2, 2, 4.4, 4])
+        assert WhereGenerator.get_least_frequent_or_min_value(values) == 1.0
+
+        # Test case 2: Check for empty array
+        values = np.array([])
+        assert WhereGenerator.get_least_frequent_or_min_value(values) is None
+
+        # Test case 3: Check for array with only one value
+        values = np.array([5])
+        assert WhereGenerator.get_least_frequent_or_min_value(values) == 5
+
+        # Test case 5: Presence of None
+        values = np.array([5, None])
+        assert WhereGenerator.get_least_frequent_or_min_value(values) == 5
+
+        # Test case 6: Strings and None
+        values = np.array(['5', None])
+        assert WhereGenerator.get_least_frequent_or_min_value(values) == '5'

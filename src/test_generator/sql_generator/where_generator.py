@@ -20,6 +20,7 @@ class WhereGenerator(AbstractSqlGenerator):
             * WHERE column_name >= value
             * WHERE column_name <= value
         """
+        self.empty_sql_generated()
         self.generate_where_categorical(table_name)
         self.generate_where_numerical(table_name)
         return self.sql_generated
