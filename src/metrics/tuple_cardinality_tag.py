@@ -22,7 +22,7 @@ class TupleCardinalityTag(AbstractMetric):
         """
         if len(prediction) >= len(target):
             # in case we have more elements in the prediction than in the target
-            return len(target) / len(prediction)
+            return round(len(target) / len(prediction), 3)
 
         # in case we have more elements in the target than in the prediction
         elif len(prediction) < len(target):

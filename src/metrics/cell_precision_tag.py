@@ -5,6 +5,10 @@ import numpy as np
 from .abstract_metric import AbstractMetric
 
 
+def check_isin(cell, target):
+    return cell in target
+
+
 class CellPrecisionTag(AbstractMetric):
     def evaluate_single_no_special_case(self, target: list[list],
                                         prediction: list[list]) -> float:
@@ -20,9 +24,8 @@ class CellPrecisionTag(AbstractMetric):
             * 0 indicates no cell in the prediction is in the target
             * 1 indicates all cells in the prediction are in the target
         """
-        flat_target = list(itertools.chain(*target))
-        flat_prediction = list(itertools.chain(*prediction))
+        flat_target = set(itertools.chain(*target))
+        flat_prediction = set(itertools.chain(*prediction))
 
-        sum_cell_match = np.sum(np.isin(flat_prediction, flat_target))
-
+        sum_cell_match = np.sum(list(map(lambda x: check_isin(x, flat_target), flat_prediction)))
         return round(sum_cell_match / len(flat_prediction), 3)

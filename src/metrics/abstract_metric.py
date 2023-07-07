@@ -1,3 +1,4 @@
+import math
 import re
 from abc import ABC, abstractmethod
 from typing import Any
@@ -38,11 +39,15 @@ class AbstractMetric(ABC):
         :param prediction: prediction table to be compared with target table
         :return: the metric result (float or str)
         """
+        target = [] if target == '[]' else target
+        prediction = [] if prediction == '[]' else prediction
+
         prediction = self.check_chatgpt_result(prediction)
         if prediction is None:
             return 0.0
 
         # normalize target and prediction
+
         target = [list(map(self.normalize_cell, row)) for row in target]
         prediction = [list(map(self.normalize_cell, row)) for row in prediction]
 
@@ -53,11 +58,15 @@ class AbstractMetric(ABC):
 
     @staticmethod
     def normalize_cell(cell):
-        if isinstance(cell, float):
+        if not isinstance(cell, str) and math.isnan(cell):
+            return cell
+        if isinstance(cell, float) or isinstance(cell, int):
             cell = round(cell)
         elif isinstance(cell, str) and re.match(r'^-?\d+(?:\.\d+)?$', cell):
-            cell = round(float(cell), 1)
-        return str(cell).replace('\n', '').strip().lower()
+            cell = round(float(cell))
+        else:
+            cell = cell.replace('\n', '').strip().lower()
+        return cell
 
     @staticmethod
     def check_chatgpt_result(prediction) -> list[list[Any]] | None:
@@ -65,6 +74,13 @@ class AbstractMetric(ABC):
             return None
         if prediction == [None]:
             return None
+        if prediction == '[]':
+            return []
+
+        # remove the [H] caused by the few-shot learning
+        if isinstance(prediction, str) and '[H]' in prediction:
+            prediction = re.sub(r'\'\[H\](?:\s\w+)?|\',', '', prediction)
+            prediction = re.sub(r'(\d+), \'', r'\1', prediction)
 
         if isinstance(prediction, str):
             try:
