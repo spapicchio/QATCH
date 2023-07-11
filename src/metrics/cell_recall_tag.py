@@ -1,5 +1,3 @@
-import itertools
-
 import numpy as np
 
 from .abstract_metric import AbstractMetric
@@ -23,13 +21,7 @@ class CellRecallTag(AbstractMetric):
             * 0 indicates no cell in the target is in the prediction
             * 1 indicates all cells in the target are in the prediction
         """
-        flat_target = list(itertools.chain(*target))
-        flat_prediction = list(itertools.chain(*prediction))
-
-        # sum_cell_match = np.sum(np.isin(flat_target, flat_prediction))
-        sum_cell_match = np.sum(list(map(
-            lambda x: check_isin(x, flat_prediction),
-            flat_target
-        )))
-
-        return round(sum_cell_match / len(flat_target), 3)
+        target = np.array(target)
+        prediction = np.array(prediction)
+        sum_cell_match = np.sum(np.isin(target, prediction))
+        return round(sum_cell_match / target.size, 3)

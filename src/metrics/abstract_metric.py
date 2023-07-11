@@ -58,12 +58,16 @@ class AbstractMetric(ABC):
 
     @staticmethod
     def normalize_cell(cell):
+        if cell is None:
+            return ""
+        if isinstance(cell, bool):
+            return cell
         if not isinstance(cell, str) and math.isnan(cell):
             return cell
         if isinstance(cell, float) or isinstance(cell, int):
-            cell = round(cell)
+            cell = str(round(cell))
         elif isinstance(cell, str) and re.match(r'^-?\d+(?:\.\d+)?$', cell):
-            cell = round(float(cell))
+            cell = str(round(float(cell)))
         else:
             cell = cell.replace('\n', '').strip().lower()
         return cell

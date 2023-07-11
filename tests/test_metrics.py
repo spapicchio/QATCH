@@ -1,3 +1,6 @@
+import time
+
+import numpy as np
 import pytest
 
 from metrics.cell_precision_tag import CellPrecisionTag
@@ -141,7 +144,7 @@ class TestCellRecallTag:
                   ['True', 'BC', 18, 0.8, 'AB', 'CA', 157, 9.7706304446, 'linux', 'Paid']]
         result = instance.evaluate_single_test_metric(target, prediction)
         # 14 distinct elements in target
-        assert result == round(1 / 14, 3)
+        assert result == round(2 / 20, 3)
 
 
 class TestTupleCardinalityTag:
@@ -194,6 +197,10 @@ class TestTupleConstraintTag:
     def test_no_matching_tuples(self, instance):
         target = [['a', 'b'], ['c', 'd']]
         prediction = [['x', 'y'], ['z', 'w']]
+        result = instance.evaluate_single_test_metric(target, prediction)
+        assert result == 0.0
+        target = [['a', 'b'], ['c', 'd']]
+        prediction = [['a', 'y'], ['c', 'w']]
         result = instance.evaluate_single_test_metric(target, prediction)
         assert result == 0.0
 
@@ -249,14 +256,33 @@ class TestTupleConstraintTag:
         result = instance.evaluate_single_test_metric(target, prediction)
         assert result == 1.0
 
-    def test_normalize(self):
-        target = [['a', 'b'], ['c', 'd'], ['c', 'd']]
-        prediction = [['d', 'c'], ['b', 'a'], ['c', 'd']]
+    def test_special_case(self, instance):
+        target = [[1, 2], ['c', 'd']]
+        prediction = [[1, 2], ['c', 'd']]
+        result = instance.evaluate_single_test_metric(target, prediction)
+        assert result == 1.0
+        target = [[1, 2], ['c', 'd']]
+        prediction = [[1, 2], ['c', 'd'], ['a', 'b']]
+        result = instance.evaluate_single_test_metric(target, prediction)
+        assert result == 1.0
+        target = [[1, 2], ['c', 'd']]
+        prediction = [[1, 2], ['d', 'c'], ['a', 'b']]
+        result = instance.evaluate_single_test_metric(target, prediction)
+        assert result == 1.0
+        target = [[1, 2], [1, 'd']]
+        prediction = [[1, 2], ['d', 1], ['a', 'b']]
+        result = instance.evaluate_single_test_metric(target, prediction)
+        assert result == 1.0
 
-        instance = TupleConstraintTag()
-        normalized_target, normalized_prediction = instance.normalize_target_prediction(target, prediction)
-        assert normalized_target == [['a', 'b'], ['c', 'd'], ['c', 'd']]
-        assert normalized_prediction == [['c', 'd'], ['a', 'b'], ['c', 'd']]
+    def test_evaluate_single_no_special_case_time(self, instance):
+        target = np.empty((60000, 10), dtype=str).tolist()
+        prediction = np.empty((60000, 10), dtype=str).tolist()
+        start = time.time()
+        _ = instance.evaluate_single_no_special_case(target, prediction)
+        end = time.time()
+        time_spent = round((end - start) / 60, 5)
+        print(time_spent)
+        assert time_spent < 0.001
 
 
 class TestTupleOrderTag:

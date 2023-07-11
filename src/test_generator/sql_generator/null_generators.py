@@ -7,11 +7,10 @@ from test_generator.sql_generator.abstract_sql_generator import AbstractSqlGener
 class NullGenerator(AbstractSqlGenerator):
     def __init__(self, database: SingleDatabase, seed=2023):
         super().__init__(database, seed)
-        self.sql_generated = {'sql_tags': [], 'queries': [], 'questions': [], 'results': []}
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """the group by is performed only with the categorical columns"""
-        self.sql_generated = {'sql_tags': [], 'queries': [], 'questions': [], 'results': []}
+        self.empty_sql_generated()
         self._build_null_count(table_name)
         self._build_null_not_count(table_name)
         # self._build_null_with_no_null_col(table_name)
@@ -36,7 +35,7 @@ class NullGenerator(AbstractSqlGenerator):
         queries = [f'SELECT COUNT(*) FROM "{table_name}" WHERE "{col}" IS NOT NULL'
                    for col in null_cols]
 
-        questions = [f'Count the rows where the values of "{col}" are not missings in table "{table_name}"'
+        questions = [f'Count the rows where the values of "{col}" are not missing in table "{table_name}"'
                      for col in null_cols]
 
         results = [self.database.run_query(query) for query in queries]
