@@ -1,4 +1,5 @@
 import math
+
 from metrics.abstract_metric import AbstractMetric
 
 
@@ -6,22 +7,22 @@ class TestNormalizeCell:
     def test_valid_integer(self):
         cell = 10
         result = AbstractMetric.normalize_cell(cell)
-        assert result == 10
+        assert result == '10'
 
     def test_valid_float(self):
         cell = 3.14
         result = AbstractMetric.normalize_cell(cell)
-        assert result == 3
+        assert result == '3'
 
     def test_valid_string_integer(self):
         cell = "42"
         result = AbstractMetric.normalize_cell(cell)
-        assert result == 42
+        assert result == '42'
 
     def test_valid_string_float(self):
         cell = "3.14159"
         result = AbstractMetric.normalize_cell(cell)
-        assert result == 3
+        assert result == '3'
 
     def test_string_with_whitespace_and_newlines(self):
         cell = "   hello\n"
@@ -41,7 +42,7 @@ class TestNormalizeCell:
     def test_non_string_non_nan_value(self):
         cell = True
         result = AbstractMetric.normalize_cell(cell)
-        assert result == True
+        assert result
 
 
 class TestCheckChatGPTResult:
@@ -75,6 +76,9 @@ class TestCheckChatGPTResult:
         result = AbstractMetric.check_chatgpt_result(prediction)
         expected = [[1, 2], [3, 4]]
         assert result == expected
+        prediction = [[[1, 2], [1, 2], [1, 2]], [[1, 2], [1, 2], [1, 2]]]
+        result = AbstractMetric.check_chatgpt_result(prediction)
+        assert result == [[1, 2, 1, 2, 1, 2], [1, 2, 1, 2, 1, 2]]
 
     def test_empty_array_input(self):
         prediction = []
@@ -102,6 +106,9 @@ class TestCheckChatGPTResult:
         result = AbstractMetric.check_chatgpt_result(prediction)
         # the space is normalized later
         assert result == [['poisonous '], ['flat '], ['smooth '], ['white ']]
+        prediction = [['Simone', '[H] Name'], ['Papicchio', '[H] Surname'], ['25', '[H] Age']]
+        result = AbstractMetric.check_chatgpt_result(prediction)
+        assert result == [['Simone'], ['Papicchio'], ['25']]
 
     def test_input_interrupt(self):
         prediction = "[['averagebatterylife', 'devicetype', 'strapmaterial'], " \
