@@ -1,8 +1,10 @@
 import json
+import logging
 from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from src import Tapas, Tapex, ChatGPT, MetricEvaluator
 from utils import get_predictions_results_from_dbs
@@ -73,17 +75,32 @@ class Runner(ABC):
     def generate_tests(self):
         raise NotImplementedError
 
-    @abstractmethod
-    def predict(self,
-                tables: dict[[str, str], pd.DataFrame],
-                tests_df: pd.DataFrame):
-        raise NotImplementedError
+    def predict(self, tables, tests_df):
+        if self.verbose:
+            logging.info('Starting predictions')
+        tqdm.pandas(desc=f'Predictions for {self.name_model}')
+        tests_df[self.prediction_col_name] = tests_df.progress_apply(
+            lambda row: self.model.predict(table=tables[row.tbl_name],
+                                           queries=row.question,
+                                           tbl_name=row.tbl_name),
+            axis=1
+        )
+        return tests_df
 
-    @abstractmethod
-    def evaluate(self, tests_df: pd.DataFrame):
-        raise NotImplementedError
+    def evaluate(self, tests_df):
+        if self.verbose:
+            logging.info('Starting evaluating tests')
 
-    def inject_null_values_in_tables(self, tables: dict[[str, str], pd.DataFrame]):
+        tests_df = self.sp_predictions2query_result(tests_df)
+        tests_df = self.metric_evaluator.evaluate_with_df(tests_df,
+                                                          target=self.query_result_col_name,
+                                                          predictions=self.prediction_col_name,
+                                                          task=self.task)
+        self.change_col_name = False
+
+        return tests_df
+
+    def inject_null_values_in_tables(self, tables: dict[str, pd.DataFrame]):
         """inject null into the tables"""
         np.random.seed(self.seed)
         if self.percentage > 0.0:
@@ -91,13 +108,11 @@ class Runner(ABC):
                       for key, df in tables.items()}
         return tables
 
-    def sp_predictions2query_result(self, tests_df: pd.DataFrame,
-                                    is_spider: bool):
+    def sp_predictions2query_result(self, tests_df: pd.DataFrame):
         if self.task == 'SP':
             tests_df = get_predictions_results_from_dbs(base_path_db=self.save_database_tests,
                                                         df=tests_df,
-                                                        predictions=f'prediction_{self.name_model}',
-                                                        is_spider=is_spider)
+                                                        predictions=self.prediction_col_name)
             self.change_col_name = True
             tests_df.rename(columns={'query_result_predictions': self.prediction_col_name},
                             inplace=True)

@@ -1,14 +1,16 @@
 import argparse
 
-from runners import RunnerProprietary
+from runners import RunnerSpiderTemplate
 
 
 def main(args):
     # initialize the runner
-    runner = RunnerProprietary(**vars(args))
+    runner = RunnerSpiderTemplate(**vars(args))
     # generate tests
     tables, tests_df = runner.generate_tests()
+    print()
     # predict
+    tests_df = tests_df.iloc[:2, :]
     tests_df = runner.predict(tables, tests_df)
     # evaluate the predictions
     tests_df = runner.evaluate(tests_df)
@@ -49,16 +51,22 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--verbose", help="increase output verbosity",
                         action="store_true")
 
-    parser.add_argument("--percentage", type=float, default=0.0,
+    parser.add_argument("--percentage", type=float, default=0.30,
                         help='TODO')  # TODO
 
     parser.add_argument("--seed", type=float, default=2023,
                         help='TODO')  # TODO
 
-    parser.add_argument("-spf", "--save_spider_format", action="store_false",
+    parser.add_argument("-spf", "--save_spider_format", action="store_true",
                         help='TODO')  # TODO
 
     parser.add_argument("--task", type=str, default='SP',
+                        help='TODO')  # TODO
+    parser.add_argument("--pickle_spider_tables", type=str,
+                        default='SPIDER_OUR_TESTS/database/spider_tables.pickle',
+                        help='TODO')  # TODO
+    parser.add_argument("--sample_k_spider_table", type=int,
+                        default=10,
                         help='TODO')  # TODO
 
     main(parser.parse_args())
