@@ -42,6 +42,14 @@ class AbstractSqlGenerator(ABC):
         cat_cols = df.select_dtypes(include=['object']).columns.tolist()
         num_cols = df.select_dtypes(include=['float']).columns.tolist()
         num_cols += df.select_dtypes(include=['int']).columns.tolist()
+
+        # substitute empty value with None
+        df = df.replace(r'', None, regex=True)
+        # avoid columns where all the values are None
+        cat_cols = [col for col in cat_cols if not all(df[col].isna())]
+        num_cols = [col for col in num_cols if not all(df[col].isna())]
+
+
         if sample is not None:
             # sample the categorical columns
             cat_cols = random.sample(cat_cols, sample) if len(cat_cols) >= sample else cat_cols
