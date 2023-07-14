@@ -39,19 +39,25 @@ class WhereGenerator(AbstractSqlGenerator):
                 f'SELECT * FROM "{table_name}" WHERE "{col}" == "{least_freq}"',
                 f'SELECT * FROM "{table_name}" WHERE "{col}" != "{most_freq}"',
                 f'SELECT * FROM "{table_name}" WHERE "{col}" != "{least_freq}"',
+                f'SELECT * FROM "{table_name}" WHERE NOT "{col}" == "{most_freq}"',
+                f'SELECT * FROM "{table_name}" WHERE NOT "{col}" == "{most_freq}"',
+
             ]
 
             questions = [
                 f'Show the data of the table "{table_name}" where "{col}" is equal to {most_freq}',
                 f'Show the data of the table "{table_name}" where "{col}" is equal to {least_freq}',
                 f'Show the data of the table "{table_name}" where "{col}" is different from {most_freq}',
-                f'Show the data of the table "{table_name}" where "{col}" is different from {least_freq}'
+                f'Show the data of the table "{table_name}" where "{col}" is different from {least_freq}',
+                f'Show the data of the table "{table_name}" where "{col}" is not equal to {most_freq}',
+                f'Show the data of the table "{table_name}" where "{col}" is not equal to {least_freq}',
             ]
 
             results = [self.database.run_query(query) for query in queries]
 
             sql_tags = ['WHERE-CAT-MOST-FREQUENT', 'WHERE-CAT-LEAST-FREQUENT',
-                        'WHERE-CAT-MOST-FREQUENT', 'WHERE-CAT-LEAST-FREQUENT']
+                        'WHERE-CAT-MOST-FREQUENT', 'WHERE-CAT-LEAST-FREQUENT',
+                        'WHERE-NOT-MOST-FREQUENT', 'WHERE-NOT-LEAST-FREQUENT']
             self.append_sql_generated(sql_tags, queries, questions, results)
 
         return self.sql_generated
@@ -64,13 +70,15 @@ class WhereGenerator(AbstractSqlGenerator):
         if len(values) == 0:
             return None
         values = values[~pd.isna(values)]
+        # update the dtype after removing the null values
+        values = np.array(values.tolist())
         if np.issubdtype(values.dtype, np.number):
             return np.max(values)
         else:
             unique_values, counts = np.unique(values, return_counts=True)
             index_of_max_count = np.argmax(counts)
             most_frequent_value = unique_values[index_of_max_count]
-            return most_frequent_value
+            return most_frequent_value.replace('"', '').replace("'", '').strip()
 
     @staticmethod
     def get_least_frequent_or_min_value(values):
@@ -80,13 +88,15 @@ class WhereGenerator(AbstractSqlGenerator):
         if len(values) == 0:
             return None
         values = values[~pd.isna(values)]
+        # update the dtype after removing the null values
+        values = np.array(values.tolist())
         if np.issubdtype(values.dtype, np.number):
             return np.min(values)
         else:
             unique_values, counts = np.unique(values, return_counts=True)
             index_of_min_count = np.argmin(counts)
             lest_frequent_value = unique_values[index_of_min_count]
-            return lest_frequent_value
+            return lest_frequent_value.replace('"', '').replace("'", '').strip()
 
     @staticmethod
     def get_mean_value(values):
@@ -126,7 +136,7 @@ class WhereGenerator(AbstractSqlGenerator):
                         for col in num_cols]
         mean_values = [self.get_mean_value(df[col].values) for col in num_cols]
         for col, max_value, min_value, mean_value in zip(num_cols, max_elements,
-                                                          min_elements, mean_values):
+                                                         min_elements, mean_values):
             queries, questions = _generate_given_value(max_value, col)
             sql_tags = ['WHERE-NUM-MAX-VALUES'] * len(queries)
             results = [self.database.run_query(query) for query in queries]
@@ -143,4 +153,3 @@ class WhereGenerator(AbstractSqlGenerator):
             self.append_sql_generated(sql_tags, queries, questions, results)
 
         return self.sql_generated
-
