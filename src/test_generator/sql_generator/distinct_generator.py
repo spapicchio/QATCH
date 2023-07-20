@@ -1,5 +1,3 @@
-import random
-
 from .abstract_sql_generator import AbstractSqlGenerator
 from ..database_reader import SingleDatabase
 
@@ -62,4 +60,3 @@ class DistinctGenerator(AbstractSqlGenerator):
         results = [self.database.run_query(query) for query in queries]
         sql_tags = ['DISTINCT-MULT'] * len(queries)
         return sql_tags, queries, questions, results
-

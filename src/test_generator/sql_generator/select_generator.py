@@ -1,5 +1,3 @@
-import random
-
 import pandas as pd
 
 from .abstract_sql_generator import AbstractSqlGenerator

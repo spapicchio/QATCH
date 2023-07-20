@@ -40,7 +40,7 @@ class WhereGenerator(AbstractSqlGenerator):
                 f'SELECT * FROM "{table_name}" WHERE "{col}" != "{most_freq}"',
                 f'SELECT * FROM "{table_name}" WHERE "{col}" != "{least_freq}"',
                 f'SELECT * FROM "{table_name}" WHERE NOT "{col}" == "{most_freq}"',
-                f'SELECT * FROM "{table_name}" WHERE NOT "{col}" == "{most_freq}"',
+                f'SELECT * FROM "{table_name}" WHERE NOT "{col}" == "{least_freq}"',
 
             ]
 

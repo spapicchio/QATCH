@@ -68,15 +68,19 @@ class MetricEvaluator:
             df[metric] = None
 
             if metric != 'tuple_order':
-                df.loc[mask_equal, metric] = 1
-                if any(~mask_equal & mask_order):
+                if any(mask_equal):
+                    # if at least one is equal, then set 1
+                    df.loc[mask_equal, metric] = 1
+                if any(~mask_equal):
+                    # if at least one is not equal, then run the evaluation
                     df.loc[~mask_equal, metric] = df[~mask_equal].progress_apply(
                         lambda r: generator.evaluate_single_test_metric(r[target], r[predictions]),
                         axis=1)
             else:
                 if any(mask_order):
                     # case where the tuple_order is called but no ORDERBY is present
-                    df.loc[mask_equal & mask_order, metric] = 1
+                    if any(mask_equal & mask_order):
+                        df.loc[mask_equal & mask_order, metric] = 1
                     if any(~mask_equal & mask_order):
                         df.loc[~mask_equal & mask_order, metric] = df[~mask_equal & mask_order].progress_apply(
                             lambda r: generator.evaluate_single_test_metric(r[target], r[predictions]),

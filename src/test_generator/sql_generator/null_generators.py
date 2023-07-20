@@ -1,7 +1,7 @@
 import random
 
-from test_generator.database_reader import SingleDatabase
-from test_generator.sql_generator.abstract_sql_generator import AbstractSqlGenerator
+from .abstract_sql_generator import AbstractSqlGenerator
+from ..database_reader import SingleDatabase
 
 
 class NullGenerator(AbstractSqlGenerator):
@@ -65,5 +65,3 @@ class NullGenerator(AbstractSqlGenerator):
         mask = df.isnull().any()
         cols = list(df.columns[mask])
         return random.sample(cols, sample) if len(cols) >= sample else cols
-
-

@@ -9,7 +9,7 @@ class RunnerSpiderTemplate(Runner):
     @property
     def test_generator(self):
         # 1: get spider tables
-        tables = get_spider_table_paths(self.pickle_spider_tables)
+        tables = get_spider_table_paths(self.pickle_spider_tables, self.input_path_tables)
         # 2 transform tables key
         tables = transform_spider_tables_key(tables)
         # 3. select 10 random db_ids
@@ -44,7 +44,7 @@ class RunnerSpiderTemplate(Runner):
 
     def inject_null_values_in_spider_tables(self, tables: dict[str, dict[str, pd.DataFrame]]):
         new_tables = {}
-        if self.percentage > 0.0:
+        if self.inject_null_percentage > 0.0:
             for key, df_tables in tables.items():
                 db_tables = self.inject_null_values_in_tables(df_tables)
                 new_tables[key] = db_tables

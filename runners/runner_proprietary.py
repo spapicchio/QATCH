@@ -6,6 +6,11 @@ from .utils import read_data
 
 
 class RunnerProprietary(Runner):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.db_id = kwargs['db_id']
+        self.tbl_names = kwargs['tbl_names']
+
     @property
     def test_generator(self):
         # 2. get proprietary tables

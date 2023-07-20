@@ -50,7 +50,7 @@ def run_predictions_check_equal(conn, target, pred):
 
 def get_predictions_results_from_dbs(base_path_db: str, df: pd.DataFrame, predictions: str):
     def get_results_from_db(db_id, targets, queries):
-        path = f'{base_path_db}/{db_id}/{db_id}.sqlite'
+        path = os.path.join(base_path_db, db_id, f'{db_id}.sqlite')
         # sqlite3 connection
         conn = sqlite3.connect(path)
         # get the results
@@ -443,6 +443,14 @@ def transform_spider_tables_key(tables: dict[[str, str], pd.DataFrame]
             continue
         new_tables[db_id][tbl_name] = df
     return new_tables
+
+
+def combine_predictions_txt_with_df(prediction_path, df_path, prediction_col_name):
+    df = pd.read_json(df_path)
+    # read txt file
+    predictions = pd.read_csv(prediction_path, delimiter='\\n', header=None)
+    df[prediction_col_name] = predictions.values
+    return df
 
 
 def convert_to_list(x):

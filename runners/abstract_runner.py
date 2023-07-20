@@ -7,7 +7,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from src import Tapas, Tapex, ChatGPT, MetricEvaluator
-from utils import get_predictions_results_from_dbs
+from .utils import get_predictions_results_from_dbs
 
 
 class Runner(ABC):
@@ -15,24 +15,22 @@ class Runner(ABC):
         self.change_col_name = False
         self.model_name_path = kwargs['model_name_path']
         self.task = kwargs['task']
-        self.db_id = kwargs['db_id']
         self.input_path_tables = kwargs['input_path_tables']
         self.save_database_tests = kwargs['save_database_tests']
         self.verbose = kwargs['verbose']
         self.metrics = kwargs['metrics']
-        self.percentage = kwargs['percentage']
+        self.inject_null_percentage = kwargs['inject_null_percentage']
         self.seed = kwargs['seed']
         self.sql_generators = kwargs['sql_generators']
         self.save_spider_format = kwargs['save_spider_format']
-        self.tbl_names = kwargs['tbl_names']
-        if self.task == 'SP' and self.model_name_path != 'chatgpt':
+        if self.task == 'SP' and self.model_name_path not in ['chatgpt', 'resdsql']:
             raise ValueError('QATCH current version only supports chatgpt for SP task')
 
     @property
     def prediction_col_name(self):
         if self.change_col_name:
             return f'query_result_predictions_{self.name_model}'
-        return f'prediction_{self.name_model}'
+        return f'predictions_{self.name_model}'
 
     @property
     def query_result_col_name(self):
@@ -43,8 +41,10 @@ class Runner(ABC):
         name = None
         name = 'tapas' if 'tapas' in self.model_name_path else name
         name = 'tapex' if 'tapex' in self.model_name_path else name
-        name = 'resdsql' if 'resdsql' in self.model_name_path else name
         name = 'chatgpt' if 'chatgpt' in self.model_name_path else name
+        name = 'resdsql' if 'resdsql' in self.model_name_path else name
+        name = 'sp' if self.task == 'SP' else name
+
         if name is None:
             raise KeyError('Accepted model are tapas, tapex, chatgpt')
         return name
@@ -96,6 +96,13 @@ class Runner(ABC):
                                                           target=self.query_result_col_name,
                                                           predictions=self.prediction_col_name,
                                                           task=self.task)
+        tests_df.rename(columns={
+            'cell_precision': f'cell_precision_{self.name_model}',
+            'cell_recall': f'cell_recall_{self.name_model}',
+            'tuple_cardinality': f'tuple_cardinality_{self.name_model}',
+            'tuple_constraint': f'tuple_constraint_{self.name_model}',
+            'tuple_order': f'tuple_order_{self.name_model}',
+        }, inplace=True)
         self.change_col_name = False
 
         return tests_df
@@ -103,8 +110,8 @@ class Runner(ABC):
     def inject_null_values_in_tables(self, tables: dict[str, pd.DataFrame]):
         """inject null into the tables"""
         np.random.seed(self.seed)
-        if self.percentage > 0.0:
-            tables = {key: df.mask(np.random.random(df.shape) < self.percentage)
+        if self.inject_null_percentage > 0.0:
+            tables = {key: df.mask(np.random.random(df.shape) < self.inject_null_percentage)
                       for key, df in tables.items()}
         return tables
 
