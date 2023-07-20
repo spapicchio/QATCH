@@ -6,7 +6,9 @@ from tqdm import tqdm
 
 from .abstract_test_generator import AbstractTestGenerator
 from .database_reader.single_database import SingleDatabase
-from .sql_generator import SelectGenerator, WhereGenerator, DistinctGenerator, OrderByGenerator
+from .sql_generator import (SelectGenerator, DistinctGenerator,
+                            OrderByGenerator, WhereGenerator, NullGenerator,
+                            GroupByGenerator, HavingGenerator, SimpleAggGenerator)
 
 
 class TestGenerator(AbstractTestGenerator):
@@ -15,7 +17,7 @@ class TestGenerator(AbstractTestGenerator):
                  db_name: str,
                  db_tables: dict[str, pd.DataFrame],
                  seed=2023):
-        self.db_save_path = db_save_path
+        self.db_save_path = db_save_path = os.path.join(db_save_path, db_name)
         if not os.path.exists(self.db_save_path):
             # create directory
             os.makedirs(self.db_save_path)
@@ -25,7 +27,12 @@ class TestGenerator(AbstractTestGenerator):
         self.generators = {'select': SelectGenerator,
                            'orderby': OrderByGenerator,
                            'distinct': DistinctGenerator,
-                           'where': WhereGenerator}
+                           'where': WhereGenerator,
+                           'groupby': GroupByGenerator,
+                           'having': HavingGenerator,
+                           'simpleAgg': SimpleAggGenerator,
+                           'nullCount': NullGenerator
+                           }
 
     def generate(self,
                  generators: Literal['select', 'orderby', 'distinct', 'where'] | list[str] | None = None,
@@ -39,7 +46,11 @@ class TestGenerator(AbstractTestGenerator):
         tests_df = pd.DataFrame()
         for generator in tqdm(generators, desc="Generating tests"):
             for table_name in table_names:
-                sql_tags, queries, questions, results = generator.sql_generate(table_name)
+                sql_generated = generator.sql_generate(table_name)
+                sql_tags = sql_generated['sql_tags']
+                queries = sql_generated['queries']
+                questions = sql_generated['questions']
+                results = sql_generated['results']
                 df = self._build_df(table_name, sql_tags, queries, questions, results)
                 tests_df = pd.concat([tests_df, df])
         if save_spider_format:
@@ -53,8 +64,7 @@ class TestGenerator(AbstractTestGenerator):
             table_names = list(self.database.tables.keys())
 
         if generators is None:
-            generators = ['select', 'orderby', 'distinct', 'where']
-
+            generators = list(self.generators.keys())
         if isinstance(table_names, str):
             table_names = [table_names]
         if isinstance(generators, str):

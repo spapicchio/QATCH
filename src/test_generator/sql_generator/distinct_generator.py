@@ -1,5 +1,3 @@
-import random
-
 from .abstract_sql_generator import AbstractSqlGenerator
 from ..database_reader import SingleDatabase
 
@@ -20,12 +18,12 @@ class DistinctGenerator(AbstractSqlGenerator):
         questions = output_single[2] + output_mul[2]
         results = output_single[3] + output_mul[3]
 
-        return sql_tags, queries, questions, results
+        return {'sql_tags': sql_tags, 'queries': queries,
+                'questions': questions, 'results': results}
 
     def _get_categorical_col(self, table_name: str) -> list[str]:
-        df = self.database.get_table_from_name(table_name)
-        df = df.infer_objects()
-        return df.select_dtypes(include=['object']).columns.tolist()
+        _, cat_cols, _ = self._get_df_cat_num_cols(table_name)
+        return cat_cols
 
     def _generate_distinct_single_col(self, table_name, cat_columns):
         queries = [
@@ -62,9 +60,3 @@ class DistinctGenerator(AbstractSqlGenerator):
         results = [self.database.run_query(query) for query in queries]
         sql_tags = ['DISTINCT-MULT'] * len(queries)
         return sql_tags, queries, questions, results
-
-    @staticmethod
-    def _comb_random(columns: list[str]) -> list[list[str]]:
-        """randomly select columns for each possible combinations between cols"""
-        all_comb_num_cols = [num_cols for num_cols in range(1, len(columns) + 1)]
-        return [random.sample(columns, k) for k in all_comb_num_cols]

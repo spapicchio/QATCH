@@ -1,4 +1,5 @@
 import json
+import logging
 import sqlite3
 
 import pandas as pd
@@ -7,7 +8,7 @@ from src import Tapas, Tapex, ChatGPT, TestGenerator, MetricEvaluator, TestGener
 from utils_preprocess_data import read_data
 
 
-def init_model(model_name):
+def init_model(model_name, test_type_chatgpt='QA'):
     name = _get_name_from_model_path(model_name)
     if name == 'tapas':
         model = Tapas(model_name)
@@ -17,8 +18,9 @@ def init_model(model_name):
         # open credentials json file
         with open('credentials.json', 'r') as f:
             credentials = json.load(f)
-        model = ChatGPT(api_key=credentials.api_key_chatgpt,
-                        api_org=credentials.api_org_chatgpt)
+        model = ChatGPT(api_key=credentials['api_key_chatgpt'],
+                        api_org=credentials['api_org_chatgpt'],
+                        test_type=test_type_chatgpt)
     return model
 
 
@@ -66,18 +68,61 @@ def _get_name_from_model_path(model_name):
 
 
 def get_predictions_results_from_dbs(base_path_db: str, df: pd.DataFrame, predictions: str):
-    def get_results_from_db(db_id, queries):
+    def get_results_from_db(db_id, targets,  queries):
         path = f'{base_path_db}/{db_id}/{db_id}/{db_id}.sqlite'
         # sqlite3 connection
         conn = sqlite3.connect(path)
         # get the results
-        return [conn.execute(query).fetchall() for query in queries]
+        return [run_predictions_check_equal(conn, target, query)
+                for target, query in zip(targets, queries)]
 
     # 1. group the df by db_id
     grouped_df = df.groupby('db_id').agg(list)
     grouped_df['query_result_predictions'] = grouped_df.apply(
-        lambda row: get_results_from_db(row.name, row[predictions]),
+        lambda row: get_results_from_db(
+            db_id=row.name,
+            targets=row['query'],
+            queries=row[predictions]),
         axis=1
     )
-    return grouped_df.explode(['tbl_name', 'sql_tags', 'query', 'question',
-                               'query_result', 'query_result_predictions'])
+    return grouped_df.explode(list(grouped_df.columns)).reset_index()
+
+
+def run_predictions_check_equal(conn, target, pred):
+
+    if pred is None or pred == 'sql placeholder':
+        return None
+
+    new_target = (target.lower()
+                  .replace(" ,", ",")
+                  .replace("  ", " ")
+                  .replace('"', '')
+                  .replace("'", '')
+                  .strip())
+
+    new_pred = (pred.lower()
+                .replace(" ,", ",")
+                .replace("  ", " ")
+                .replace('"', '')
+                .replace("'", '')
+                .replace(' ( ', '(')
+                .replace(' )', ')')
+                .strip())
+
+    if new_pred == new_target:
+        return 'EQUAL'
+
+    elif '-' in pred:
+        pred = pred.split()
+        pred = ['"' + p + '"' if '-' in p else p for p in pred]
+        pred = ' '.join(pred)
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute(pred)
+    except sqlite3.OperationalError as e:
+        logging.error(e)
+        return None
+    return cursor.fetchall()
+
+

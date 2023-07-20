@@ -1,5 +1,88 @@
-import numpy as np
+import logging
+import os
+import pickle
+import random
+import sqlite3
+from collections import defaultdict
+
 import pandas as pd
+
+from src import TestGeneratorSpider
+
+
+def run_predictions_check_equal(conn, target, pred):
+    if pred is None or pred == 'sql placeholder':
+        # TODO  possible to return empty rather tha None?
+        return None
+
+    new_target = (target.lower()
+                  .replace(" ,", ",")
+                  .replace("  ", " ")
+                  .replace('"', '')
+                  .replace("'", '')
+                  .strip())
+
+    new_pred = (pred.lower()
+                .replace(" ,", ",")
+                .replace("  ", " ")
+                .replace('"', '')
+                .replace("'", '')
+                .replace(' ( ', '(')
+                .replace(' )', ')')
+                .strip())
+
+    if new_pred == new_target:
+        return 'EQUAL'
+
+    elif '-' in pred:
+        pred = pred.split()
+        pred = ['"' + p + '"' if '-' in p else p for p in pred]
+        pred = ' '.join(pred)
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute(pred)
+    except sqlite3.OperationalError as e:
+        logging.error(e)
+        return None
+    return cursor.fetchall()
+
+
+def get_predictions_results_from_dbs(base_path_db: str, df: pd.DataFrame, predictions: str):
+    def get_results_from_db(db_id, targets, queries):
+        path = os.path.join(base_path_db, db_id, f'{db_id}.sqlite')
+        # sqlite3 connection
+        conn = sqlite3.connect(path)
+        # get the results
+        return [run_predictions_check_equal(conn, target, query)
+                for target, query in zip(targets, queries)]
+
+    # 1. group the df by db_id
+    grouped_df = df.groupby('db_id').agg(list)
+    grouped_df['query_result_predictions'] = grouped_df.apply(
+        lambda row: get_results_from_db(
+            db_id=row.name,
+            targets=row['query'],
+            queries=row[predictions]),
+        axis=1
+    )
+    return grouped_df.explode(list(grouped_df.columns)).reset_index()
+
+
+def get_spider_table_paths(path_already_exist: str, spider_base_path: str = 'data/spider'):
+    """Get only the spider tables
+     If already exists, load them."""
+    if os.path.exists(path_already_exist):
+        # if path exists, load the pickled tables
+        with open(path_already_exist, 'rb') as handle:
+            tables = pickle.load(handle)
+    else:
+        # else, generate the tables and save them
+        test_generator = TestGeneratorSpider(spider_base_path=spider_base_path)
+        tables, _ = test_generator.generate()
+        with open(path_already_exist, 'wb') as handle:
+            pickle.dump(tables, handle)
+    return tables
 
 
 def read_breast_cancer_dataset(df: pd.DataFrame,
@@ -337,15 +420,37 @@ def read_data(db_id: str, model_name: str, input_base_path_data='./data'
     else:
         raise ValueError('Unknown dataset name')
 
-    return {(db_id, key): df for key, df in db_tables.items()}
+    return db_tables
 
 
-def inject_null_values(df: pd.DataFrame, percentage: float = 0.10, seed=2023):
-    """
-    the percentage of the dataframe is set to null randomly
-    """
-    np.random.seed(seed)
-    return df.mask(np.random.random(df.shape) < percentage)
+def random_db_id_spider_tables(tables: dict[str, dict[str, pd.DataFrame]], seed, k=10
+                               ) -> dict[str, dict[str, pd.DataFrame]]:
+    """ Select k random db_id from the spider tables"""
+    # avoid empty tables and too large tables
+    random.seed(seed)
+    tables_key = random.choices(list(tables.keys()), k=k)
+    return {key: tables[key] for key in tables_key}
+
+
+def transform_spider_tables_key(tables: dict[[str, str], pd.DataFrame]
+                                ) -> dict[str, dict[str, pd.DataFrame]]:
+    """Given the spider tables, create a dictionary where for each db_id (key)
+    there is the respective db_tables (value)"""
+    new_tables = defaultdict(dict)
+    for (db_id, tbl_name), df in tables.items():
+        # avoid empty tables and too large tables
+        if df.size > 512 or len(df) == 0:
+            continue
+        new_tables[db_id][tbl_name] = df
+    return new_tables
+
+
+def combine_predictions_txt_with_df(prediction_path, df_path, prediction_col_name):
+    df = pd.read_json(df_path)
+    # read txt file
+    predictions = pd.read_csv(prediction_path, delimiter='\\n', header=None)
+    df[prediction_col_name] = predictions.values
+    return df
 
 
 def convert_to_list(x):

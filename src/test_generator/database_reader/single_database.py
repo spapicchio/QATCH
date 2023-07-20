@@ -8,13 +8,11 @@ class SingleDatabase:
 
     def __init__(self, db_path: str, db_name: str,
                  tables: dict[str, pd.DataFrame] | None = None):
-        db_path = os.path.join(db_path, db_name)
         if not os.path.exists(db_path):
             os.makedirs(db_path)
 
         # SPIDER database path
         db_path = os.path.join(db_path, f'{db_name}.sqlite')
-
         if not os.path.exists(db_path) and tables is None:
             raise ValueError(f"Database path does not exist and no tables were provided."
                              f" Path {db_path}")

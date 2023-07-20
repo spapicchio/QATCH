@@ -1,8 +1,10 @@
-import itertools
-
 import numpy as np
 
 from .abstract_metric import AbstractMetric
+
+
+def check_isin(cell, target):
+    return cell in target
 
 
 class CellPrecisionTag(AbstractMetric):
@@ -20,9 +22,8 @@ class CellPrecisionTag(AbstractMetric):
             * 0 indicates no cell in the prediction is in the target
             * 1 indicates all cells in the prediction are in the target
         """
-        flat_target = list(itertools.chain(*target))
-        flat_prediction = list(itertools.chain(*prediction))
+        target = np.array(target)
+        prediction = np.array(prediction)
 
-        sum_cell_match = np.sum(np.isin(flat_prediction, flat_target))
-
-        return round(sum_cell_match / len(flat_prediction), 3)
+        sum_cell_match = np.sum(np.isin(prediction, target))
+        return round(sum_cell_match / prediction.size, 3)

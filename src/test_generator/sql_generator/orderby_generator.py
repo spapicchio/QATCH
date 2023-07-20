@@ -9,28 +9,63 @@ class OrderByGenerator(AbstractSqlGenerator):
 
     def sql_generate(self, table_name: str):
         # TODO include order of one column with one select
-        # TODO include order with multiple columns (?)
+        self.empty_sql_generated()
         columns = self.database.get_columns_from_table(table_name)
+        self.generate_order_asc(table_name, columns)
+        self.generate_order_desc(table_name, columns)
+        # TODO check when necessary
+        # self.generate_order_asc_project(table_name, columns)
+        # self.generate_order_desc_project(table_name, columns)
+        return self.sql_generated
 
-        queries, questions, results = [], [], []
-        # create a question, query with all the combinations of columns
-        for order in ['ASC', 'DESC']:
-            queries += [
-                f'SELECT * FROM "{table_name}" ORDER BY "{col}" {order}'
-                for col in columns
-            ]
+    def generate_order_asc(self, table_name: str, columns: list[str]):
+        queries = [f'SELECT * FROM "{table_name}" ORDER BY "{col}" ASC'
+                   for col in columns]
 
-            questions += [
-                f'Show all data ordered by {col} in' \
-                f' {"ascending" if order.lower() == "asc" else "descending"} ' \
-                f'order for the table {table_name}'
-
-
-
-                for col in columns
-            ]
-
-        # run the query and get the results
+        questions = [
+            f'Show all data ordered by "{col}" in ascending order for the table "{table_name}"'
+            for col in columns
+        ]
         results = [self.database.run_query(query) for query in queries]
         sql_tags = ['ORDERBY-SINGLE'] * len(queries)
-        return sql_tags, queries, questions, results
+        self.append_sql_generated(sql_tags, queries, questions, results)
+        return self.sql_generated
+
+    def generate_order_desc(self, table_name, columns: list[str]):
+        queries = [f'SELECT * FROM "{table_name}" ORDER BY "{col}" DESC'
+                   for col in columns]
+
+        questions = [
+            f'Show all data ordered by "{col}" in descending order for the table "{table_name}"'
+            for col in columns
+        ]
+        results = [self.database.run_query(query) for query in queries]
+        sql_tags = ['ORDERBY-SINGLE'] * len(queries)
+        self.append_sql_generated(sql_tags, queries, questions, results)
+        return self.sql_generated
+
+    def generate_order_asc_project(self, table_name: str, columns: list[str]):
+        queries = [f'SELECT "{col}" FROM "{table_name}" ORDER BY "{col}" ASC'
+                   for col in columns]
+
+        questions = [
+            f'Project the "{col}" ordered in ascending order for the table {table_name}'
+            for col in columns
+        ]
+        results = [self.database.run_query(query) for query in queries]
+        sql_tags = ['ORDERBY-PROJECT'] * len(queries)
+        self.append_sql_generated(sql_tags, queries, questions, results)
+        return self.sql_generated
+
+    def generate_order_desc_project(self, table_name, columns: list[str]):
+        queries = [f'SELECT "{col}" FROM "{table_name}" ORDER BY "{col}" DESC'
+                   for col in columns]
+
+        questions = [
+            f'Project the "{col}" ordered in descending order for the table {table_name}'
+            for col in columns
+        ]
+        results = [self.database.run_query(query) for query in queries]
+        sql_tags = ['ORDERBY-PROJECT'] * len(queries)
+        self.append_sql_generated(sql_tags, queries, questions, results)
+        return self.sql_generated

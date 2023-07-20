@@ -27,13 +27,16 @@ class TupleConstraintTag(AbstractMetric):
             * 1 indicates ALL the cardinality values are the same in prediction.
 
         """
-        target = [tuple(t) for t in target]
-        prediction = [tuple(t) for t in prediction]
+
+        target = map(sorted, target)
+        prediction = map(sorted, prediction)
+
+        target = map(tuple, target)
+        prediction = map(tuple, prediction)
 
         count_targ_dict = Counter(target)
         count_pred_dict = Counter(prediction)
 
-        cardinality = [count_pred_dict[key] == count
-                       for key, count in count_targ_dict.items()]
+        cardinality = [count_pred_dict[key] == count for key, count in count_targ_dict.items()]
 
         return round(sum(cardinality) / len(cardinality), 3)
