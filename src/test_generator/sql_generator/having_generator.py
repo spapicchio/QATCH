@@ -27,9 +27,9 @@ class HavingGenerator(AbstractSqlGenerator):
         for cat_col in cat_cols:
             mean_count = int(df.groupby(cat_col).count().mean().values[0])
             queries = [
-                f'SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) >= {mean_count}',
-                f'SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) <= {mean_count}',
-                f'SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) = {mean_count}'
+                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) >= '{mean_count}'""",
+                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) <= '{mean_count}'""",
+                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) = '{mean_count}'"""
             ]
 
             questions = [
@@ -61,15 +61,10 @@ class HavingGenerator(AbstractSqlGenerator):
                 mean_mean_sum = round(mean_sum[num_col].mean(), 2)
                 mean_mean_mean = round(mean_mean[num_col].mean(), 2)
                 queries = [
-                    f'SELECT "{cat_col}" FROM "{table_name}"'
-                    f' GROUP BY "{cat_col}" HAVING AVG("{num_col}") >= {mean_mean_mean}',
-                    f'SELECT "{cat_col}" FROM "{table_name}"'
-                    f' GROUP BY "{cat_col}" HAVING AVG("{num_col}") <= {mean_mean_mean}',
-
-                    f'SELECT "{cat_col}" FROM "{table_name}"'
-                    f' GROUP BY "{cat_col}" HAVING SUM("{num_col}") >= {mean_mean_sum}',
-                    f'SELECT "{cat_col}" FROM "{table_name}"'
-                    f' GROUP BY "{cat_col}" HAVING SUM("{num_col}") <= {mean_mean_sum}',
+                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING AVG("{num_col}") >= '{mean_mean_mean}'""",
+                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING AVG("{num_col}") <= '{mean_mean_mean}'""",
+                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING SUM("{num_col}") >= '{mean_mean_sum}'""",
+                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING SUM("{num_col}") <= '{mean_mean_sum}'""",
                 ]
 
                 questions = [
