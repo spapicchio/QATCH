@@ -17,6 +17,7 @@ class ChatGPT(AbstractModel):
         self.api_key = api_key
         openai.organization = api_org
         openai.api_key = api_key
+        test_type = test_type.upper()
         self.test_type = test_type
         if test_type == 'QA':
             self.messages = [
@@ -51,7 +52,7 @@ class ChatGPT(AbstractModel):
                 {"role": "assistant",
                  "content": "[[26]]"},
             ]
-        else:
+        elif test_type == 'SP':
             self.messages = [
                 {"role": "user", "content":
                     """I want you to act as a text to SQL model for tabular data.
@@ -80,6 +81,8 @@ class ChatGPT(AbstractModel):
                 {"role": "assistant",
                  "content": "SELECT AVG(Grade) FROM student"},
             ]
+        else:
+            raise ValueError('Task not recognized.')
 
     def num_tokens_from_string(self, string: str, encoding_name: str = 'gpt-3.5-turbo') -> int:
         """Returns the number of tokens in a text string."""
