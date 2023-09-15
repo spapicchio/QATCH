@@ -64,6 +64,8 @@ class AbstractMetric(ABC):
             return cell
         elif not isinstance(cell, str) and math.isnan(cell):
             return 'None'
+        elif isinstance(cell, (np.float_, np.int_)):
+            cell = str(round(cell))
         elif isinstance(cell, (float, int)):
             cell = str(round(cell))
         elif isinstance(cell, str) and re.match(r'^-?\d+(?:\.\d+)?$', cell):
@@ -112,13 +114,11 @@ class AbstractMetric(ABC):
                 return None
             except TypeError:
                 return None
-
         try:
             # may fail because len of the inside array are not equal
             prediction = np.array(prediction)
         except ValueError:
             return None
-
         if len(prediction.shape) > 2:
             if 1 not in prediction.shape:
                 rows = prediction.shape[0]
@@ -145,6 +145,10 @@ class AbstractMetric(ABC):
 
         prediction = [[cell for cell in row if '[H]' not in str(cell)] for row in prediction]
         prediction = [row for row in prediction if len(row) > 0]
+        prediction_len = [len(row) for row in prediction]
+        # keep only the row with equal len
+        prediction = [row for row in prediction if len(row) == min(prediction_len)]
+
 
         return prediction
 

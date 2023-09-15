@@ -8,7 +8,7 @@ from .tuple_order_tag import TupleOrderTag
 
 
 class MetricEvaluator:
-    def __init__(self, metrics: list[str] | str | None):
+    def __init__(self, metrics: list[str] | str | None = None):
         if metrics is None:
             metrics = ['cell_precision', 'cell_recall', 'tuple_cardinality',
                        'tuple_constraint', 'tuple_order']
@@ -60,13 +60,13 @@ class MetricEvaluator:
         the difference with QA is that if the target SQL and the Prediction SQL
         are equal, there is no need to run the evaluation over the SQL results.
         """
-        tqdm.pandas(desc='Evaluating metrics')
+        # TODO SQL tags not always present
         mask_order = df.sql_tags.str.contains('ORDERBY')
         mask_equal = df[predictions] == 'EQUAL'
         for metric in self.metrics:
             generator = self.tags_generator[metric]()
             df[metric] = None
-
+            tqdm.pandas(desc=f'Metrics {metric}')
             if metric != 'tuple_order':
                 if any(mask_equal):
                     # if at least one is equal, then set 1

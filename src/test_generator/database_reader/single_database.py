@@ -19,6 +19,7 @@ class SingleDatabase:
 
         # This creates a connection object that represents the database
         self.conn = sqlite3.connect(db_path)
+        self.conn.text_factory = lambda b: b.decode(errors='ignore')
         # A cursor is used to execute SQL commands and retrieve results.
         self.cursor = self.conn.cursor()
 

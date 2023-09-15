@@ -44,7 +44,7 @@ class TestGenerator(AbstractTestGenerator):
     ]:
         generators, table_names = self._init_parameters(generators, table_names)
         tests_df = pd.DataFrame()
-        for generator in tqdm(generators, desc="Generating tests"):
+        for generator in tqdm(generators, desc=f"Generating tests {self.database.db_name}"):
             for table_name in table_names:
                 sql_generated = generator.sql_generate(table_name)
                 sql_tags = sql_generated['sql_tags']
