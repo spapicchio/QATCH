@@ -37,7 +37,7 @@ class TestNormalizeCell:
     def test_nan_value(self):
         cell = math.nan
         result = AbstractMetric.normalize_cell(cell)
-        assert math.isnan(result)
+        assert result == 'None'
 
     def test_non_string_non_nan_value(self):
         cell = True

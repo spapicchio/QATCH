@@ -18,16 +18,9 @@ def substitute_placeholders(query, predictions):
 
 def main(args):
     predictions_col = f'predictions-{args.model_name}'
-    # predictions_col = f'predictions_{args.model_name}'
     # 1. Read tests
     tests_df = pd.read_json(args.tests_path)
     tests_df['query_result'] = tests_df.query_result.map(lambda x: eval(x))
-    # if args.model_name == 'gap':
-    #     # substitute the placeholder 'terminal' in the predictions for WHERE and HAVING SQL categories
-    #     mask = tests_df.predictions_gap.str.contains('terminal')
-    #     tests_df.loc[mask, predictions_col] = tests_df[mask].apply(
-    #         lambda row: substitute_placeholders(row['query'], row[predictions_col]),
-    #         axis=1)
 
     if args.task == 'SP':
         # 2. run the query on the DBs only for SP

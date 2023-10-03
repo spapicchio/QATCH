@@ -39,14 +39,8 @@ def main(args):
     model = init_model(args.model_name, args.model_path, args.credentials_path_chatgpt)
 
     input_df = pd.read_json(args.tests_input_path)
-    tables = pickle.load(open(args.tests_input_tables_path, 'rb'))
-    if isinstance(tables, list):
-        table_dict = {}
-        for table in tables:
-            table_dict.update(table)
-        with open(args.tests_input_tables_path, 'wb') as handle:
-            pickle.dump(table_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        tables = table_dict
+    with open(args.tests_input_tables_path, 'rb') as f:
+        tables = pickle.load(f)
 
     tqdm.pandas(desc=f'Predicting tests for {args.model_name}')
     col_pred = f'prediction_{args.model_name}'
