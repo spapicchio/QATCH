@@ -1,6 +1,6 @@
-# Q<span style="font-size:0.8em;">A</span>TC<span style="font-size:0.8em;">H</span>: Benchmarking Table Representation Learning Models on Your Data
+# Q<span style="font-size:0.8em;">A</span>TC<span style="font-size:0.8em;">H</span>: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data
 
-This repository is the official implementation of [QATCH: Benchmarking Table Representation Learning Models on Your Data](). 
+This repository is the official implementation of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data](). 
 
 # 🏴󠁶󠁵󠁭󠁡󠁰󠁿 Overview
 * ***What is QATCH?*** **Q**uery-**A**ided **T**RL **Ch**ecklist (QATCH) is a toolbox to highlight TRL models’ strengths and weaknesses on prorietary tables.
