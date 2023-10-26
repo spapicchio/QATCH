@@ -1,3 +1,10 @@
+
+<p align="center">
+ <kbd>
+  <img src="https://github.com/spapicchio/repository-images/blob/master/QATCH/Verticale.jpg" alt="QATCH's logo" height="300" style="border-radius:50%">
+ </kbd>
+ </p>
+
 # Q<span style="font-size:0.8em;">A</span>TC<span style="font-size:0.8em;">H</span>: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data
 
 This repository is the official implementation of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data](). 
