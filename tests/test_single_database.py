@@ -11,8 +11,8 @@ from qatch.database_reader import SingleDatabase
 DB_PATH = 'test_db'
 DB_NAME = 'test_database'
 TABLE_NAME = 'test_table'
-TABLE_SCHEMA = {'id': [1, 2, 3], 'name': ['Alice', 'Bob', 'Charlie']}
-TABLE_DATAFRAME = pd.DataFrame(TABLE_SCHEMA)
+TABLE_DICT = {'id': [1, 2, 3], 'name': ['Alice', 'Bob', 'Charlie']}
+TABLE_DATAFRAME = pd.DataFrame(TABLE_DICT)
 
 
 # Fixture to create a temporary SingleDatabase object for testing
