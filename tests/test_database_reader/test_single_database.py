@@ -28,7 +28,7 @@ def single_database():
 
 # Tests for SingleDatabase class methods
 def test_get_table_from_name(single_database):
-    table_data = single_database.get_table_from_name(TABLE_NAME)
+    table_data = single_database.get_table_given(TABLE_NAME)
     assert table_data.equals(TABLE_DATAFRAME)
 
 
@@ -47,7 +47,7 @@ def test_run_query(single_database):
 
 def test_nonexistent_table(single_database):
     with pytest.raises(pd.errors.DatabaseError):
-        single_database.get_table_from_name('nonexistent_table')
+        single_database.get_table_given('nonexistent_table')
 
 
 def test_nonexistent_schema(single_database):

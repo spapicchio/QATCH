@@ -70,7 +70,7 @@ class MultipleDatabases:
         :param str tbl_name: The name of the table to retrieve from the database.
         :return: A Pandas DataFrame representing the specified table from the database.
         """
-        return self[db_id].get_table_from_name(tbl_name)
+        return self[db_id].get_table_given(tbl_name)
 
     def get_schema(self, db_id, tbl_name) -> pd.DataFrame:
         """

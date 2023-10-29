@@ -78,7 +78,7 @@ class SingleDatabase:
                 name = 'my_table'
             table.to_sql(name, conn, if_exists='replace', index=False)
 
-    def get_table_from_name(self, table_name: str) -> pd.DataFrame:
+    def get_table_given(self, table_name: str) -> pd.DataFrame:
         """
         Retrieves a specified table from the database as a Pandas DataFrame.
         :param str table_name: The name of the table to retrieve from the database.
