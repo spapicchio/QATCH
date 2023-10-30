@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from qatch.sql_generator.select_generator import SelectGenerator
+from qatch.sql_generator import SelectGenerator
 
 
 class TestSelectGenerator:
