@@ -13,7 +13,6 @@ class SelectGenerator(AbstractSqlGenerator):
 
     def __int__(self, database: SingleDatabase, *args, **kwargs):
         super().__init__(database, *args, **kwargs)
-        self.empty_sql_generated()
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """
