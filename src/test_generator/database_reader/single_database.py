@@ -13,12 +13,15 @@ class SingleDatabase:
 
         # SPIDER database path
         db_path = os.path.join(db_path, f'{db_name}.sqlite')
+        # TODO understand why this is needed for SPIDER
+        # db_path = os.path.join(db_path, db_name, f'{db_name}.sqlite')
         if not os.path.exists(db_path) and tables is None:
             raise ValueError(f"Database path does not exist and no tables were provided."
                              f" Path {db_path}")
 
         # This creates a connection object that represents the database
         self.conn = sqlite3.connect(db_path)
+        self.conn.text_factory = lambda b: b.decode(errors='ignore')
         # A cursor is used to execute SQL commands and retrieve results.
         self.cursor = self.conn.cursor()
 

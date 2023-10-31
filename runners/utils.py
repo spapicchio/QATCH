@@ -5,12 +5,20 @@ import random
 import sqlite3
 from collections import defaultdict
 
+import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from src import TestGeneratorSpider
 
 
 def run_predictions_check_equal(conn, target, pred):
+    # issue with GAP spider dev table, run too long
+    # if pred == 'SELECT players.first_name, players.country_code FROM players JOIN rankings GROUP BY rankings.player_id ORDER BY Count(*) Desc LIMIT 1':
+    #     return None
+    # if pred == 'SELECT Avg(rankings.ranking), players.first_name FROM rankings JOIN players GROUP BY players.first_name':
+    #     return None
+
     if pred is None or pred == 'sql placeholder':
         # TODO  possible to return empty rather tha None?
         return None
@@ -39,31 +47,54 @@ def run_predictions_check_equal(conn, target, pred):
         pred = ['"' + p + '"' if '-' in p else p for p in pred]
         pred = ' '.join(pred)
 
+    # issue with GAP model, spider dev table, run too long
+    if 'players' in pred.lower() and 'rankings' in pred.lower() and 'join' in pred.lower() and 'group by' in pred.lower():
+        return None
+
     cursor = conn.cursor()
     try:
         cursor.execute(pred)
     except sqlite3.OperationalError as e:
         logging.error(e)
         return None
+    except sqlite3.ProgrammingError as e:
+        logging.error(e)
+        return None
     return cursor.fetchall()
 
 
-def get_predictions_results_from_dbs(base_path_db: str, df: pd.DataFrame, predictions: str):
+def get_predictions_results_from_dbs(base_path_db: str,
+                                     df: pd.DataFrame,
+                                     prediction_col_name: str,
+                                     query_result_col_name: str):
     def get_results_from_db(db_id, targets, queries):
+        #path = os.path.join(base_path_db, db_id, db_id, f'{db_id}.sqlite')
         path = os.path.join(base_path_db, db_id, f'{db_id}.sqlite')
         # sqlite3 connection
+
         conn = sqlite3.connect(path)
+        conn.text_factory = lambda b: b.decode(errors='ignore')
+        # only for spider
+        # conn.text_factory = bytes
         # get the results
         return [run_predictions_check_equal(conn, target, query)
                 for target, query in zip(targets, queries)]
+        # output = []
+        # count = 0
+        # for target, query in zip(targets, queries):
+        #     count += 1
+        #     res = run_predictions_check_equal(conn, target, query)
+        #     output.append(res)
+        # return output
 
     # 1. group the df by db_id
     grouped_df = df.groupby('db_id').agg(list)
-    grouped_df['query_result_predictions'] = grouped_df.apply(
+    tqdm.pandas(desc=f'calculating {query_result_col_name}')
+    grouped_df[query_result_col_name] = grouped_df.progress_apply(
         lambda row: get_results_from_db(
             db_id=row.name,
             targets=row['query'],
-            queries=row[predictions]),
+            queries=row[prediction_col_name]),
         axis=1
     )
     return grouped_df.explode(list(grouped_df.columns)).reset_index()
@@ -319,108 +350,139 @@ def read_mushroom_dataset(df,
     return df.loc[:, : 'gillcolor']
 
 
-def read_data(db_id: str, model_name: str, input_base_path_data='./data'
+def check_model_names(model_name):
+    model_name = model_name.lower()
+    if model_name not in ['tapas', 'tapex', 'omnitab', 'chatgpt-qa',
+                          'resdsql', 'gap', 'skg', 'chatgpt-sp']:
+        raise ValueError(f'Unknown model name {model_name}\n',
+                         'supported QA models = [tapas, tapex, omnitab, chatGPT-QA]\n'
+                         'supported SP models = [resdsql, gap, skg, chatGPT-SP]')
+    # semantic parsing models
+    if model_name in ['resdsql', 'gap', 'skg', 'chatgpt-sp']:
+        model_name = 'sp'
+    return model_name
+
+
+def read_data(db_id: str, model_name: str, input_base_path_data='./data',
+              seed: int = 2023, inject_null_percentage: float = 0.0
               ) -> dict[[str, str], pd.DataFrame]:
+    model_name = check_model_names(model_name)
+
     sample_size = {
-        ('medicine', 'chatgpt', 'heart-attack'): 30,
+        ('medicine', 'chatgpt-qa', 'heart-attack'): 30,
         ('medicine', 'tapas', 'heart-attack'): 45,
         ('medicine', 'tapex', 'heart-attack'): 30,
+        ('medicine', 'omnitab', 'heart-attack'): 20,
         ('medicine', 'sp', 'heart-attack'): None,
         ('medicine', 'tapas', 'breast-cancer'): 45,
         ('medicine', 'tapex', 'breast-cancer'): 30,
-        ('medicine', 'chatgpt', 'breast-cancer'): 35,
+        ('medicine', 'chatgpt-qa', 'breast-cancer'): 35,
+        ('medicine', 'omnitab', 'breast-cancer'): 20,
         ('medicine', 'sp', 'breast-cancer'): None,
 
         ('ecommerce', 'tapas', 'sales-transactions'): 60,
         ('ecommerce', 'tapex', 'sales-transactions'): 20,
-        ('ecommerce', 'chatgpt', 'sales-transactions'): 40,
+        ('ecommerce', 'chatgpt-qa', 'sales-transactions'): 40,
+        ('ecommerce', 'omnitab', 'sales-transactions'): 20,
         ('ecommerce', 'sp', 'sales-transactions'): 30000,
         ('ecommerce', 'tapas', 'fitness-trackers'): 50,
         ('ecommerce', 'tapex', 'fitness-trackers'): 20,
-        ('ecommerce', 'chatgpt', 'fitness-trackers'): 30,
+        ('ecommerce', 'chatgpt-qa', 'fitness-trackers'): 30,
+        ('ecommerce', 'omnitab', 'fitness-trackers'): 20,
         ('ecommerce', 'sp', 'fitness-trackers'): None,
 
         ('finance', 'tapas', 'fraud'): 50,
         ('finance', 'tapex', 'fraud'): 25,
-        ('finance', 'chatgpt', 'fraud'): 30,
+        ('finance', 'chatgpt-qa', 'fraud'): 30,
+        ('finance', 'omnitab', 'fraud'): 20,
         ('finance', 'sp', 'fraud'): 30000,
         ('finance', 'tapas', 'ibm'): 50,
         ('finance', 'tapex', 'ibm'): 20,
-        ('finance', 'chatgpt', 'ibm'): 25,
+        ('finance', 'chatgpt-qa', 'ibm'): 25,
+        ('finance', 'omnitab', 'ibm'): 20,
         ('finance', 'sp', 'ibm'): None,
 
         ('miscellaneous', 'tapas', 'mush'): 50,
         ('miscellaneous', 'tapex', 'mush'): 25,
-        ('miscellaneous', 'chatgpt', 'mush'): 30,
+        ('miscellaneous', 'chatgpt-qa', 'mush'): 30,
+        ('miscellaneous', 'omnitab', 'mush'): 20,
         ('miscellaneous', 'sp', 'mush'): None,
         ('miscellaneous', 'tapas', 'adult'): 50,
         ('miscellaneous', 'tapex', 'adult'): 20,
-        ('miscellaneous', 'chatgpt', 'adult'): 30,
+        ('miscellaneous', 'chatgpt-qa', 'adult'): 30,
+        ('miscellaneous', 'omnitab', 'adult'): 20,
         ('miscellaneous', 'sp', 'adult'): 30000
     }
 
     if db_id == 'medicine':
         df_1 = read_heart_attack_dataset(
             pd.read_csv(f'{input_base_path_data}/medicine/heart-attack.csv'),
-            sample_size=sample_size[(db_id, model_name, 'heart-attack')])
+            sample_size=sample_size[(db_id, model_name, 'heart-attack')],
+            random_state=seed
+        )
         df_2 = read_breast_cancer_dataset(
             pd.read_csv(f'{input_base_path_data}/medicine/breast-cancer.csv'),
-            sample_size=sample_size[(db_id, model_name, 'breast-cancer')])
-        if model_name == 'sp':
-            db_tables = {'heartAttack': df_1,
-                         'breastCancer': df_2}
-        else:
-            db_tables = {'heart-attack': df_1,
-                         'breast-cancer': df_2}
+            sample_size=sample_size[(db_id, model_name, 'breast-cancer')],
+            random_state=seed
+        )
+        db_tables = {'heartAttack': df_1, 'breastCancer': df_2}
 
     elif db_id == 'ecommerce':
         df_1 = read_sales_transactions_dataset(
             pd.read_csv(f'{input_base_path_data}/ecommerce/sales-transactions.csv'),
-            sample_size=sample_size[(db_id, model_name, 'sales-transactions')])
+            sample_size=sample_size[(db_id, model_name, 'sales-transactions')],
+            random_state=seed
+        )
 
         df_2 = read_fitness_trackers_dataset(
             pd.read_csv(f'{input_base_path_data}/ecommerce/fitness-trackers.csv'),
-            sample_size=sample_size[(db_id, model_name, 'fitness-trackers')])
-        if model_name == 'sp':
-            db_tables = {'salesTransactions': df_1,
-                         'fitnessTrackers': df_2}
-        else:
-            db_tables = {'sales-transactions': df_1,
-                         'fitness-trackers': df_2}
+            sample_size=sample_size[(db_id, model_name, 'fitness-trackers')],
+            random_state=seed
+        )
+        db_tables = {'salesTransactions': df_1, 'fitnessTrackers': df_2}
 
     elif db_id == 'miscellaneous':
         df_1 = read_mushroom_dataset(
             pd.read_csv(f'{input_base_path_data}/miscellaneous/mushrooms.csv'),
-            sample_size=sample_size[(db_id, model_name, 'mush')])
+            sample_size=sample_size[(db_id, model_name, 'mush')],
+            random_state=seed
+        )
 
         df_2 = read_adult_dataset(
             pd.read_csv(f'{input_base_path_data}/miscellaneous/adult-census.csv'),
-            sample_size=sample_size[(db_id, model_name, 'adult')])
-        if model_name == 'sp':
-            db_tables = {'deadlyMushrooms': df_1,
-                         'adultCensus': df_2}
-        else:
-            db_tables = {'deadly-mushrooms': df_1,
-                         'adult-census': df_2}
+            sample_size=sample_size[(db_id, model_name, 'adult')],
+            random_state=seed
+        )
+        db_tables = {'mushrooms': df_1, 'adultCensus': df_2}
 
     elif db_id == 'finance':
         df_1 = read_bank_fraud_dataset(
             pd.read_csv(f'{input_base_path_data}/finance/account-fraud.csv'),
-            sample_size=sample_size[(db_id, model_name, 'fraud')])  # Tapex
+            sample_size=sample_size[(db_id, model_name, 'fraud')],
+            random_state=seed
+        )
 
         df_2 = read_finance_factory_ibm(
             pd.read_csv(f'{input_base_path_data}/finance/late-payment.csv'),
-            sample_size=sample_size[(db_id, model_name, 'ibm')])  # Tapex
-        if model_name == 'sp':
-            db_tables = {'fraud': df_1,
-                         'IBMLatePayment': df_2}
-        else:
-            db_tables = {'fraud': df_1,
-                         'IBM-late-payment': df_2}
+            sample_size=sample_size[(db_id, model_name, 'ibm')],
+            random_state=seed
+        )
+        db_tables = {'accountFraud': df_1, 'latePayment': df_2}
+
     else:
         raise ValueError('Unknown dataset name')
-
+    # inject null values
+    db_tables = inject_null_values_in_tables(inject_null_percentage, db_tables, seed)
     return db_tables
+
+
+def inject_null_values_in_tables(inject_null_percentage: float, tables: dict[str, pd.DataFrame], seed: int):
+    """inject null into the tables"""
+    np.random.seed(seed)
+    if inject_null_percentage > 0.0:
+        tables = {key: df.mask(np.random.random(df.shape) < inject_null_percentage)
+                  for key, df in tables.items()}
+    return tables
 
 
 def random_db_id_spider_tables(tables: dict[str, dict[str, pd.DataFrame]], seed, k=10

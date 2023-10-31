@@ -23,7 +23,7 @@ class Runner(ABC):
         self.seed = kwargs['seed']
         self.sql_generators = kwargs['sql_generators']
         self.save_spider_format = kwargs['save_spider_format']
-        if self.task == 'SP' and self.model_name_path not in ['chatgpt', 'resdsql']:
+        if self.task == 'SP' and self.model_name_path not in ['chatgpt', 'resdsql', 'llama2', 'gap', 'skg', 'sp']:
             raise ValueError('QATCH current version only supports chatgpt for SP task')
 
     @property
@@ -43,7 +43,9 @@ class Runner(ABC):
         name = 'tapex' if 'tapex' in self.model_name_path else name
         name = 'chatgpt' if 'chatgpt' in self.model_name_path else name
         name = 'resdsql' if 'resdsql' in self.model_name_path else name
-        name = 'sp' if self.task == 'SP' else name
+        name = 'gap' if 'gap' in self.model_name_path else name
+        name = 'skg' if 'skg' in self.model_name_path else name
+        #name = 'sp' if self.task == 'SP' else name
 
         if name is None:
             raise KeyError('Accepted model are tapas, tapex, chatgpt')
@@ -119,7 +121,7 @@ class Runner(ABC):
         if self.task == 'SP':
             tests_df = get_predictions_results_from_dbs(base_path_db=self.save_database_tests,
                                                         df=tests_df,
-                                                        predictions=self.prediction_col_name)
+                                                        prediction_col_name=self.prediction_col_name)
             self.change_col_name = True
             tests_df.rename(columns={'query_result_predictions': self.prediction_col_name},
                             inplace=True)

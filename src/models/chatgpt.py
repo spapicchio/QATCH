@@ -17,6 +17,7 @@ class ChatGPT(AbstractModel):
         self.api_key = api_key
         openai.organization = api_org
         openai.api_key = api_key
+        test_type = test_type.upper()
         self.test_type = test_type
         if test_type == 'QA':
             self.messages = [
@@ -26,8 +27,8 @@ class ChatGPT(AbstractModel):
                        I want you to only reply with the output of the question executed on the table.
                        I want you to return the answer in format: list of list (row and columns).
                        The answer must be complete of all the data from the table.
-                       If an agregations is present, return only the aggregate values.
-                     r  Do not write explanations. Do not type commands.
+                       If an aggregations is present, return only the aggregate values.
+                       Do not write explanations. Do not type commands.
                        This is an Example:
                        Table:
                         [
@@ -51,7 +52,7 @@ class ChatGPT(AbstractModel):
                 {"role": "assistant",
                  "content": "[[26]]"},
             ]
-        else:
+        elif test_type == 'SP':
             self.messages = [
                 {"role": "user", "content":
                     """I want you to act as a text to SQL model for tabular data.
@@ -80,6 +81,8 @@ class ChatGPT(AbstractModel):
                 {"role": "assistant",
                  "content": "SELECT AVG(Grade) FROM student"},
             ]
+        else:
+            raise ValueError('Task not recognized.')
 
     def num_tokens_from_string(self, string: str, encoding_name: str = 'gpt-3.5-turbo') -> int:
         """Returns the number of tokens in a text string."""
@@ -112,13 +115,16 @@ class ChatGPT(AbstractModel):
         return f"Table: {linearized_table}, Question: '{queries[0]}'"
 
     def _process_input_SP(self, table, queries, tbl_name):
+        if tbl_name is None:
+            raise ValueError('For Semantic Parsing, it is need the table name '
+                             'for the chatgpt input prompt')
         schema = table.columns.tolist()
         return f'Table Name: "{tbl_name}", Schema: {schema}, Question: "{queries[0]}"'
 
     def _predict_queries(self, model_input, table) -> list[Any]:
         try:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-3.5-turbo-0613",
                 messages=self.messages + [model_input],
                 temperature=0.0,  # make it deterministic
                 # max_tokens=4097, # max tokens in the generated output
@@ -152,20 +158,3 @@ class ChatGPT(AbstractModel):
     def _predict_SP(self, response):
         return response.choices[0].message.content
 
-    @staticmethod
-    def _linearize_table(table: pd.DataFrame) -> list[list[list[str]]]:
-        """
-        Linearize a table into a string
-            * create a list for each row
-            * create a list for each cell passing the content of the cell
-              and the header of the cell (with [H])
-        """
-        columns = table.columns.tolist()
-        linearized_table = [
-            [
-                [row[col], f"[H] {col}"]
-                for col in columns
-            ]
-            for _, row in table.iterrows()
-        ]
-        return linearized_table
