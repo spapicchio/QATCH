@@ -39,7 +39,8 @@ def test_get_schema_given(single_database):
 
 
 def test_run_query(single_database):
-    query = f"SELECT * FROM {TABLE_NAME}"
+    # upper to check whether sqlite is case-sensitive or not
+    query = f"SELECT * FROM {TABLE_NAME.upper()}"
     result = single_database.run_query(query)
     expected_result = [(1, 'Alice'), (2, 'Bob'), (3, 'Charlie')]
     assert result == expected_result

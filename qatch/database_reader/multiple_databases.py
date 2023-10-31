@@ -25,7 +25,7 @@ class MultipleDatabases:
         self.db_ids2db: dict[str, SingleDatabase] = dict()
         self._max_db_in_memory = _max_db_in_memory
 
-    def read_database_name(self) -> list[str]:
+    def get_db_names(self) -> list[str]:
         """
         Gets the name of the database file from the path.
         :return: A list of database file names.

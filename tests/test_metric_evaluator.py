@@ -71,8 +71,7 @@ def test_get_query_results_from_db_wrong_query(metric_evaluator):
 
 def test_get_SP_query_results_from_db_equal(metric_evaluator):
     # the predictions are equal to the queries
-    df, pred_col = metric_evaluator._get_SP_query_results_from_db(PREDICTION_DATAFRAME,
-                                                                  'query', 'prediction')
+    df, pred_col = metric_evaluator._get_SP_query_results_from_db(PREDICTION_DATAFRAME, 'prediction')
     assert df[pred_col].tolist() == ['EQUAL'] * len(PREDICTION_DATAFRAME)
 
 
@@ -80,18 +79,16 @@ def test_get_SP_query_results_from_db_different(metric_evaluator):
     """run the prediction query only if they are different to the queries"""
     PREDICTION_DATAFRAME.iloc[-1, -1] = f'SELECT "name" FROM {TABLE_NAME}'
     # the predictions are different to the queries
-    df, pred_col = metric_evaluator._get_SP_query_results_from_db(PREDICTION_DATAFRAME,
-                                                                  'query', 'prediction')
+    df, pred_col = metric_evaluator._get_SP_query_results_from_db(PREDICTION_DATAFRAME, 'prediction')
     target = [[x] for x in TABLE_DATAFRAME['name'].tolist()]
     assert df.iloc[-1, -1] == target
 
 
 def test_get_SP_query_results_from_db_error_query(metric_evaluator):
-    """if the prediction query is wrong, reutrn None"""
+    """if the prediction query is wrong, return None"""
     PREDICTION_DATAFRAME.iloc[-1, -1] = f'SELECT "name" FROM wrong_table_name'
     # the predictions are different to the queries
-    df, pred_col = metric_evaluator._get_SP_query_results_from_db(PREDICTION_DATAFRAME,
-                                                                  'query', 'prediction')
+    df, pred_col = metric_evaluator._get_SP_query_results_from_db(PREDICTION_DATAFRAME, 'prediction')
     target = None
     assert df.iloc[-1, -1] == target
 
