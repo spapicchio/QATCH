@@ -25,14 +25,12 @@ class MultipleDatabases:
         self.db_ids2db: dict[str, SingleDatabase] = dict()
         self._max_db_in_memory = _max_db_in_memory
 
-    @staticmethod
-    def read_database_name(db_path: str) -> list[str]:
+    def read_database_name(self) -> list[str]:
         """
         Gets the name of the database file from the path.
-        :param str db_path: The path of the database file.
         :return: A list of database file names.
         """
-        return [x for x in os.listdir(db_path)]
+        return [x for x in os.listdir(self.db_path)]
 
     def __contains__(self, other: str) -> bool:
         """
@@ -81,7 +79,18 @@ class MultipleDatabases:
         """
         return self[db_id].get_schema_given(tbl_name)
 
-    def run_query(self, db_id: str, query: str) -> list:
+    def run_multiple_queries(self, db_id: str, queries: list) -> list[list]:
+        """Executes multiple queries on the specified database and returns the results.
+        :param str db_id: The name of the database to execute the query on.
+        :param str queries: The list of SQL queries to be executed on the database.
+        :return: A list containing the query results."""
+        # TODO: possible movement in SingleDatabase
+        db = self[db_id]
+        queries_result = map(db.run_query, queries)
+        queries_result = list(map(lambda x: [list(item) for item in x], queries_result))
+        return queries_result
+
+    def run_query(self, db_id: str, query: str) -> list | None:
         """
         Executes an SQL query on the specified database and returns the results.
         :param str db_id: The name of the database to execute the query on.

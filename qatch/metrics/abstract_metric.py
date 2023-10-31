@@ -23,7 +23,7 @@ class AbstractMetric(ABC):
 
     def evaluate_single_test_metric(self,
                                     target: list[list],
-                                    prediction: list[list]
+                                    prediction: list[list] | None
                                     ) -> float:
         """
         Evaluates a single test using the implemented metric.
@@ -33,11 +33,15 @@ class AbstractMetric(ABC):
 
         :return: The evaluation score for the test.
         """
+        if prediction is None:
+            # in case the model was not able to predict anything
+            return 0.0
 
         # TODO: remove this hack
         target = [] if target == '[]' else target
         prediction = [] if prediction == '[]' else prediction
         # TODO: -----------------
+
         # normalize target and prediction
         target = [list(map(self.normalize_cell, row)) for row in target]
         prediction = [list(map(self.normalize_cell, row)) for row in prediction]

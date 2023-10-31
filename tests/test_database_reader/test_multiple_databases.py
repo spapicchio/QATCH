@@ -69,3 +69,11 @@ def test_run_query(multiple_databases):
 
     expected_result = TABLE_DATAFRAME.values.tolist()
     assert result == expected_result
+
+
+def test_run_multiple_queries(multiple_databases):
+    queries = [f"SELECT * FROM {TABLE_NAME}"] * 3
+    db_id = f'{DB_NAME}_1'
+    result = multiple_databases.run_multiple_queries(db_id, queries)
+    expected_result = TABLE_DATAFRAME.values.tolist()
+    assert result == [expected_result] * 3

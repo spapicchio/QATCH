@@ -58,8 +58,8 @@ class AbstractSqlGenerator(ABC):
         """
         schema_df = self.database.get_schema_given(table_name)
         cat_attributes = schema_df.loc[schema_df.type == 'TEXT', 'name'].tolist()
-        num_attributes = schema_df.loc[schema_df.type == 'INTEGER' or
-                                       schema_df.type == 'REAL', 'name'].tolist()
+        num_attributes = schema_df.loc[(schema_df.type == 'INTEGER') |
+                                       (schema_df.type == 'REAL'), 'name'].tolist()
         # TODO: current version store in memory the whole table, it could be a problem for big tables
         df = self.database.get_table_given(table_name)
         # substitute empty value with None
