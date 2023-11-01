@@ -24,7 +24,7 @@ PREDICTION_DATAFRAME = pd.DataFrame(TABLE_DICT_PRED)
 @pytest.fixture
 def multiple_databases():
     os.makedirs(DB_PATH)
-    # create 3 databases with the same table for the MultipleDatabas
+    # create 3 databases with the same table for the MultipleDatabase
     db_1 = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_1', tables={TABLE_NAME: TABLE_DATAFRAME})
     db_2 = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_2', tables={TABLE_NAME: TABLE_DATAFRAME})
     db_3 = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_3', tables={TABLE_NAME: TABLE_DATAFRAME})
@@ -77,20 +77,26 @@ def test_get_SP_query_results_from_db_equal(metric_evaluator):
 
 def test_get_SP_query_results_from_db_different(metric_evaluator):
     """run the prediction query only if they are different to the queries"""
-    PREDICTION_DATAFRAME.iloc[-1, -1] = f'SELECT "name" FROM {TABLE_NAME}'
+    pred_df = pd.DataFrame({'db_id': [f'{DB_NAME}_1'],
+                            'query': [f'SELECT * FROM {TABLE_NAME}'],
+                            'prediction': [f'SELECT "name" FROM {TABLE_NAME}']}
+                           )
     # the predictions are different to the queries
-    df, pred_col = metric_evaluator._get_SP_query_results_from_db(PREDICTION_DATAFRAME, 'prediction')
+    df, pred_col = metric_evaluator._get_SP_query_results_from_db(pred_df, 'prediction')
     target = [[x] for x in TABLE_DATAFRAME['name'].tolist()]
-    assert df.iloc[-1, -1] == target
+    assert df[pred_col][0] == target
 
 
 def test_get_SP_query_results_from_db_error_query(metric_evaluator):
     """if the prediction query is wrong, return None"""
-    PREDICTION_DATAFRAME.iloc[-1, -1] = f'SELECT "name" FROM wrong_table_name'
+    pred_df = pd.DataFrame({'db_id': [f'{DB_NAME}_1'],
+                            'query': [f'SELECT * FROM {TABLE_NAME}'],
+                            'prediction': [f'SELECT "name" FROM error_table_name']}
+                           )
     # the predictions are different to the queries
-    df, pred_col = metric_evaluator._get_SP_query_results_from_db(PREDICTION_DATAFRAME, 'prediction')
+    df, pred_col = metric_evaluator._get_SP_query_results_from_db(pred_df, 'prediction')
     target = None
-    assert df.iloc[-1, -1] == target
+    assert df[pred_col][0] == target
 
 
 @pytest.mark.parametrize("target, prediction, expected_result", [

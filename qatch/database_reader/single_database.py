@@ -61,6 +61,7 @@ class SingleDatabase:
                                 "tables in the database will be used")
         self.db_path = path_sqlite_file
         self.conn = conn
+        self.conn.text_factory = lambda b: b.decode(errors='ignore')
         self.cursor = cursor
         self.table_names = existing_tables
         self.table_schemas = {tbl_name: pd.read_sql_query(f"PRAGMA table_info({tbl_name})", self.conn)
