@@ -54,7 +54,8 @@ class ChatGPT_SP(AbstractChatGPT):
             raise ValueError('For Semantic Parsing, it is need the table name '
                              'for the chatgpt input prompt')
         schema = table.columns.tolist()
-        return f'Table Name: "{tbl_name}",\nSchema: {schema},\nQuestion: "{query}"'
+        prompt = f'Table Name: "{tbl_name}",\nSchema: {schema},\nQuestion: "{query}"'
+        return {"role": "user", "content": prompt}
 
     def _normalize_api_output(self, api_output):
         prediction: str = api_output.choices[0].message.content
