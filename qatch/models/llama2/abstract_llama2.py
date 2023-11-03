@@ -13,7 +13,8 @@ from ..abstract_model import AbstractModel
 
 class AbstractLLama2(AbstractModel, ABC):
     def __init__(self, model_name: str,
-                 hugging_face_token: str | None = None,
+                 hugging_face_token: str | None,
+                 force_cpu=False,
                  *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model_name = model_name
@@ -22,9 +23,9 @@ class AbstractLLama2(AbstractModel, ABC):
         self.pipeline = transformers.pipeline(
             "text-generation",
             model=self.model_name,
-            torch_dtype=torch.float16,
+            torch_dtype=torch.float16 if not force_cpu else torch.float32,
             tokenizer=self.tokenizer,
-            device_map={"": 0},
+            device_map={"": 0} if not force_cpu else 'cpu',
             trust_remote_code=True
         )
 

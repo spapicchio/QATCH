@@ -51,4 +51,4 @@ class LLama2_SP(AbstractLLama2):
         return model_input
 
     def _normalize_output(self, text):
-        return text
+        return text.replace('\n', '').strip()

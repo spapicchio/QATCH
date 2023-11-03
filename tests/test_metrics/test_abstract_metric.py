@@ -46,15 +46,20 @@ class TestNormalizeCell:
         results = abstract_metric_instance.evaluate_tests(targets, predictions)
         assert results == [42.0, 42.0]
 
-    def test_normalize_cell(self, abstract_metric_instance):
-        assert abstract_metric_instance.normalize_cell(42) == '42'
-        assert abstract_metric_instance.normalize_cell('42') == '42.0'
-        assert abstract_metric_instance.normalize_cell(3.14159) == '3.14'
-        assert abstract_metric_instance.normalize_cell('HELLO\n ') == 'hello'
-        assert abstract_metric_instance.normalize_cell(None) == 'None'
-        assert abstract_metric_instance.normalize_cell(math.nan) == 'None'
-        assert abstract_metric_instance.normalize_cell("abc123") == "abc123"
-        assert abstract_metric_instance.normalize_cell(True) is True
+    @pytest.mark.parametrize("value, expected_value", [
+        (42, '42'),
+        ('42', '42'),
+        (3.14159, '3.14'),
+        ('HELLO\n ', 'hello'),
+        (None, 'None'),
+        (math.nan, 'None'),
+        ("abc123", "abc123"),
+        (np.float_(10), '10.0'),
+        (np.int_(10), '10'),
+        (True, True)
+    ])
+    def test_normalize_cell(self, abstract_metric_instance, value, expected_value):
+        assert abstract_metric_instance.normalize_cell(value) == expected_value
 
     def test_normalize_time(self, abstract_metric_instance):
         target = np.random.rand(20, 1000)

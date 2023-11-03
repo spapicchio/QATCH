@@ -12,9 +12,11 @@ class SingleDatabase:
     :ivar sqlite3.Connection conn: A connection object representing the SQLite database.
     :ivar sqlite3.Cursor cursor: A cursor object used to execute SQL commands and retrieve results.
     :ivar str db_name: The name of the database.
-    :ivar dict table_schemas: table name as key, table schema as value
+    :ivar pd.DataFrame table_schemas: table name as key, table schema as value
         table_schema is pd.DataFrame with columns: cid, name, type, notnull, dflt_value, pk
-    :ivar dict table_names: the names of the tables in the database
+    :ivar str table_names: the names of the tables in the database
+    :ivar str db_path: path to the folder which contains the sqlite file
+    :ivar str db_path_sqlite: path to the sqlite file
     """
 
     def __init__(self, db_path: str, db_name: str, tables: dict[str, pd.DataFrame] | None = None):
@@ -54,14 +56,15 @@ class SingleDatabase:
                 existing_tables = list(tables.keys())
                 self._set_tables_in_db(tables, conn)
         else:
-            if tables is None:
+            if tables is not None:
                 # CASE 3: database already exists and tables are provided
                 # log warning tables provided but also database already exists
                 logging.warning("tables provided but also database already exists, "
                                 "tables in the database will be used")
-        self.db_path = path_sqlite_file
+        self.db_path_sqlite = path_sqlite_file
+        self.db_path = db_path
+        self.db_name = db_name
         self.conn = conn
-        self.conn.text_factory = lambda b: b.decode(errors='ignore')
         self.cursor = cursor
         self.table_names = existing_tables
         self.table_schemas = {tbl_name: pd.read_sql_query(f"PRAGMA table_info({tbl_name})", self.conn)

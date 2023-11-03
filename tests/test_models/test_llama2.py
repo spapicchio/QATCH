@@ -16,6 +16,7 @@ class TestLLama2:
         with open('test_models/credentials.json', 'r') as f:
             credentials = json.load(f)
         return LLama2_QA("meta-llama/Llama-2-7b-chat-hf",
+                         force_cpu=True,
                          hugging_face_token=credentials['hugging_face_token'])
 
     @pytest.fixture

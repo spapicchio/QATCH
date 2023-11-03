@@ -7,12 +7,13 @@ import torch
 
 
 class AbstractModel(ABC):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, force_cpu=False, *args, **kwargs):
         # set up logger
         self.logger = logging
         self.device = torch.device("cuda" if torch.cuda.is_available()
-                                             and not kwargs['force_cpu']
+                                             and not force_cpu
                                    else "cpu")
+        self.name = self.__class__.__name__
 
     def predict(self,
                 table: pd.DataFrame,
@@ -23,7 +24,7 @@ class AbstractModel(ABC):
         model_input = self.process_input(table, query, tbl_name)
         if model_input is None:
             """Table is too large to be processed"""
-            result = [None]
+            result = None
         else:
             result = self.predict_input(model_input, table)
         return result

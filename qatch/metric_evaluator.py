@@ -40,7 +40,7 @@ class MetricEvaluator:
         }
         self.databases = databases
 
-    def evaluate_with_df(self, df, prediction_col_name: str, task: str):
+    def evaluate_with_df(self, df, prediction_col_name: str, task: str) -> pd.DataFrame:
         """
         Evaluate the specified metrics using the provided DataFrame containing query results and predictions.
         The df must contain 'query' and 'db_id' columns, and the "prediction_col_name" must be present in the df.
@@ -62,7 +62,7 @@ class MetricEvaluator:
         mask_order = queries.str.contains('order')
 
         # create the mask for the EQUAL case (no need to run the evaluation)
-        mask_equal = df[prediction_col_name] == 'EQUAL' if task == 'SP' else [False] * len(df)
+        mask_equal = df[prediction_col_name] == 'EQUAL'
 
         for metric in self.metrics:
             generator = self.tags_generator[metric]()
@@ -100,8 +100,7 @@ class MetricEvaluator:
         # group-by the df for each db_id present
         grouped_by_db_df = df.groupby('db_id').agg(list)
         # for each db_id get the results of the query from the db
-        tqdm.pandas(desc=f'Getting {query_column} result')
-        grouped_by_db_df[f'{query_column}_result'] = grouped_by_db_df.progress_apply(
+        grouped_by_db_df[f'{query_column}_result'] = grouped_by_db_df.apply(
             lambda row: self.databases.run_multiple_queries(row.name, row[query_column]),
             axis=1
         )

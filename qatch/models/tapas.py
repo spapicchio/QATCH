@@ -62,9 +62,10 @@ class Tapas(AbstractModel):
             query_answer = defaultdict(list)
             [query_answer[row].append(table.iat[(row, col)])
              for row, col in tbl_cords]
-            answers.append(list(query_answer.values()))
+            answers.extend(list(query_answer.values()))
 
         del model_input
         del outputs
         
         return answers
+

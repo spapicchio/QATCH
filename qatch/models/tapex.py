@@ -62,7 +62,7 @@ class Tapex(AbstractModel):
         answers = []
         for pred_query in pred_cells_queries:
             query_ans = self._return_cells_aggr_by_row(table, pred_query)
-            answers.append(query_ans)
+            answers.extend(query_ans)
         del model_input
         del outputs
         return answers

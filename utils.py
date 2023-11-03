@@ -1,119 +1,41 @@
-import logging
 import os
-import pickle
-import random
-import sqlite3
-from collections import defaultdict
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
-from src import TestGeneratorSpider
-
-
-def run_predictions_check_equal(conn, target, pred):
-    # issue with GAP spider dev table, run too long
-    # if pred == 'SELECT players.first_name, players.country_code FROM players JOIN rankings GROUP BY rankings.player_id ORDER BY Count(*) Desc LIMIT 1':
-    #     return None
-    # if pred == 'SELECT Avg(rankings.ranking), players.first_name FROM rankings JOIN players GROUP BY players.first_name':
-    #     return None
-
-    if pred is None or pred == 'sql placeholder':
-        # TODO  possible to return empty rather tha None?
-        return None
-
-    new_target = (target.lower()
-                  .replace(" ,", ",")
-                  .replace("  ", " ")
-                  .replace('"', '')
-                  .replace("'", '')
-                  .strip())
-
-    new_pred = (pred.lower()
-                .replace(" ,", ",")
-                .replace("  ", " ")
-                .replace('"', '')
-                .replace("'", '')
-                .replace(' ( ', '(')
-                .replace(' )', ')')
-                .strip())
-
-    if new_pred == new_target:
-        return 'EQUAL'
-
-    elif '-' in pred:
-        pred = pred.split()
-        pred = ['"' + p + '"' if '-' in p else p for p in pred]
-        pred = ' '.join(pred)
-
-    # issue with GAP model, spider dev table, run too long
-    if 'players' in pred.lower() and 'rankings' in pred.lower() and 'join' in pred.lower() and 'group by' in pred.lower():
-        return None
-
-    cursor = conn.cursor()
-    try:
-        cursor.execute(pred)
-    except sqlite3.OperationalError as e:
-        logging.error(e)
-        return None
-    except sqlite3.ProgrammingError as e:
-        logging.error(e)
-        return None
-    return cursor.fetchall()
+from qatch.database_reader import SingleDatabase
 
 
-def get_predictions_results_from_dbs(base_path_db: str,
-                                     df: pd.DataFrame,
-                                     prediction_col_name: str,
-                                     query_result_col_name: str):
-    def get_results_from_db(db_id, targets, queries):
-        #path = os.path.join(base_path_db, db_id, db_id, f'{db_id}.sqlite')
-        path = os.path.join(base_path_db, db_id, f'{db_id}.sqlite')
-        # sqlite3 connection
+def save_spider_format_for_db_id(df, db: SingleDatabase, model_name: str | None = None):
+    db_save_path = db.db_path
+    test_file_name = f'{model_name}_{db.db_name}_test.json' if model_name is not None else f'{db.db_name}_test.json'
+    tables_file_name = f'{model_name}_{db.db_name}_tables.json' if model_name is not None else f'{db.db_name}_tables.json'
+    path = os.path.join(db_save_path, test_file_name)
+    df.to_json(path, orient='records')
 
-        conn = sqlite3.connect(path)
-        conn.text_factory = lambda b: b.decode(errors='ignore')
-        # only for spider
-        # conn.text_factory = bytes
-        # get the results
-        return [run_predictions_check_equal(conn, target, query)
-                for target, query in zip(targets, queries)]
-        # output = []
-        # count = 0
-        # for target, query in zip(targets, queries):
-        #     count += 1
-        #     res = run_predictions_check_equal(conn, target, query)
-        #     output.append(res)
-        # return output
+    table_names = db.table_names
 
-    # 1. group the df by db_id
-    grouped_df = df.groupby('db_id').agg(list)
-    tqdm.pandas(desc=f'calculating {query_result_col_name}')
-    grouped_df[query_result_col_name] = grouped_df.progress_apply(
-        lambda row: get_results_from_db(
-            db_id=row.name,
-            targets=row['query'],
-            queries=row[prediction_col_name]),
-        axis=1
-    )
-    return grouped_df.explode(list(grouped_df.columns)).reset_index()
+    # for each table
+    for table_id, name in enumerate(table_names):
+        table_schema = db.get_schema_given(table_name=name)
+        column_names = [[id_col, col_name]
+                        for id_col, col_name in enumerate(table_schema.name.tolist())]
+        column_types = table_schema.type.tolist()
 
+        # create SPIDER dataframe for tables.json
+        tables = pd.DataFrame({
+            'column_names': [column_names],
+            'column_names_original': [column_names],
+            'column_types': [column_types],
+            'db_id': db.db_name,
+            'foreign_keys': [[]],
+            'primary_keys': [[]],
+            'table_names': [table_names],
+            'table_names_original': [table_names],
+        })
 
-def get_spider_table_paths(path_already_exist: str, spider_base_path: str = 'data/spider'):
-    """Get only the spider tables
-     If already exists, load them."""
-    if os.path.exists(path_already_exist):
-        # if path exists, load the pickled tables
-        with open(path_already_exist, 'rb') as handle:
-            tables = pickle.load(handle)
-    else:
-        # else, generate the tables and save them
-        test_generator = TestGeneratorSpider(spider_base_path=spider_base_path)
-        tables, _ = test_generator.generate()
-        with open(path_already_exist, 'wb') as handle:
-            pickle.dump(tables, handle)
-    return tables
+        path = os.path.join(db_save_path, tables_file_name)
+        tables.to_json(path, orient='records')
 
 
 def read_breast_cancer_dataset(df: pd.DataFrame,
@@ -363,9 +285,10 @@ def check_model_names(model_name):
     return model_name
 
 
-def read_data(db_id: str, model_name: str, input_base_path_data='./data',
+def read_data(db_id: str, model_name: str,
+              input_base_path_data='./data',
               seed: int = 2023, inject_null_percentage: float = 0.0
-              ) -> dict[[str, str], pd.DataFrame]:
+              ) -> dict[str, pd.DataFrame]:
     model_name = check_model_names(model_name)
 
     sample_size = {
@@ -377,6 +300,7 @@ def read_data(db_id: str, model_name: str, input_base_path_data='./data',
         ('medicine', 'tapas', 'breast-cancer'): 45,
         ('medicine', 'tapex', 'breast-cancer'): 30,
         ('medicine', 'chatgpt-qa', 'breast-cancer'): 35,
+        ('medicine', 'llama-qa', 'breast-cancer'): 35,
         ('medicine', 'omnitab', 'breast-cancer'): 20,
         ('medicine', 'sp', 'breast-cancer'): None,
 
@@ -388,28 +312,33 @@ def read_data(db_id: str, model_name: str, input_base_path_data='./data',
         ('ecommerce', 'tapas', 'fitness-trackers'): 50,
         ('ecommerce', 'tapex', 'fitness-trackers'): 20,
         ('ecommerce', 'chatgpt-qa', 'fitness-trackers'): 30,
+        ('ecommerce', 'llama-qa', 'fitness-trackers'): 30,
         ('ecommerce', 'omnitab', 'fitness-trackers'): 20,
         ('ecommerce', 'sp', 'fitness-trackers'): None,
 
         ('finance', 'tapas', 'fraud'): 50,
         ('finance', 'tapex', 'fraud'): 25,
         ('finance', 'chatgpt-qa', 'fraud'): 30,
+        ('finance', 'llama-qa', 'fraud'): 30,
         ('finance', 'omnitab', 'fraud'): 20,
         ('finance', 'sp', 'fraud'): 30000,
         ('finance', 'tapas', 'ibm'): 50,
         ('finance', 'tapex', 'ibm'): 20,
         ('finance', 'chatgpt-qa', 'ibm'): 25,
+        ('finance', 'llama-qa', 'ibm'): 25,
         ('finance', 'omnitab', 'ibm'): 20,
         ('finance', 'sp', 'ibm'): None,
 
         ('miscellaneous', 'tapas', 'mush'): 50,
         ('miscellaneous', 'tapex', 'mush'): 25,
         ('miscellaneous', 'chatgpt-qa', 'mush'): 30,
+        ('miscellaneous', 'llama-qa', 'mush'): 30,
         ('miscellaneous', 'omnitab', 'mush'): 20,
         ('miscellaneous', 'sp', 'mush'): None,
         ('miscellaneous', 'tapas', 'adult'): 50,
         ('miscellaneous', 'tapex', 'adult'): 20,
         ('miscellaneous', 'chatgpt-qa', 'adult'): 30,
+        ('miscellaneous', 'llama-qa', 'adult'): 30,
         ('miscellaneous', 'omnitab', 'adult'): 20,
         ('miscellaneous', 'sp', 'adult'): 30000
     }
@@ -483,28 +412,6 @@ def inject_null_values_in_tables(inject_null_percentage: float, tables: dict[str
         tables = {key: df.mask(np.random.random(df.shape) < inject_null_percentage)
                   for key, df in tables.items()}
     return tables
-
-
-def random_db_id_spider_tables(tables: dict[str, dict[str, pd.DataFrame]], seed, k=10
-                               ) -> dict[str, dict[str, pd.DataFrame]]:
-    """ Select k random db_id from the spider tables"""
-    # avoid empty tables and too large tables
-    random.seed(seed)
-    tables_key = random.choices(list(tables.keys()), k=k)
-    return {key: tables[key] for key in tables_key}
-
-
-def transform_spider_tables_key(tables: dict[[str, str], pd.DataFrame]
-                                ) -> dict[str, dict[str, pd.DataFrame]]:
-    """Given the spider tables, create a dictionary where for each db_id (key)
-    there is the respective db_tables (value)"""
-    new_tables = defaultdict(dict)
-    for (db_id, tbl_name), df in tables.items():
-        # avoid empty tables and too large tables
-        if df.size > 512 or len(df) == 0:
-            continue
-        new_tables[db_id][tbl_name] = df
-    return new_tables
 
 
 def combine_predictions_txt_with_df(prediction_path, df_path, prediction_col_name):
