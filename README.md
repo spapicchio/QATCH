@@ -1,5 +1,11 @@
 # QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data
 
+<p align="center">
+ <kbd>
+  <img src="docs/img/qatch_logo_verticale.jpg" alt="QATCH's logo" height="300" style="border-radius:50%">
+ </kbd>
+ </p>
+
 This repository is the official implementation of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data]()
 to appear in NeurIPS Dataset and Benchmark track 2023.
 
@@ -53,7 +59,7 @@ a table with three tuples and two attributes.
 
 Given the ground truth result (target) with three tuples over two attributes, we report the metric values for five
 predictions, coming either from a QA or from the execution of a query in SP. More details can be found in
-the [metrics](src/metrics) folder
+the [metrics](qatch/metrics) folder
 
 ## Who should use QATCH?
 
@@ -74,7 +80,10 @@ where QATCH can be used with LLMs:
 - LLM compatibility version: Compare different version of the same LLMs to see the best performing one.
 - Prompt engineering: Analyse the best prompt definition based on the proprietary data.
 
+<p align="center">
 <img src="docs/img/use_case_walter.png" width="70%">
+</p>
+
 Use case example of engineer Walter. 
 With QATCH it is able to create a model ranking on his proprietary data for QA and SP.
 
