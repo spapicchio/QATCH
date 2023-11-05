@@ -54,6 +54,5 @@ nav:
   - Getting Started: getting_started.md
   - "Step 0: Database Reader": database_reader.md
   - "Step 1: SQL Generator": sql_generator.md
-  - "Step 2: Models": models.md
   - "Step 3: Metrics": metrics.md
 

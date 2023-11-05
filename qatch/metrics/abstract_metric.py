@@ -17,9 +17,13 @@ class AbstractMetric(ABC):
                        ) -> list[float]:
         """
         Evaluates multiple tests using the implemented metric.
-        :param list[list[list]] targets: A list of target values for multiple tests.
-        :param list[list[list]] predictions: A list of predicted values for multiple tests.
-        :return: A list of evaluation scores for each test.
+
+        Args:
+            targets (list[list[list]]): A list of target values for multiple tests.
+            predictions (list[list[list]]): A list of predicted values for multiple tests.
+
+        Returns:
+            list[float]: A list of evaluation scores for each test.
         """
         return list(map(self.evaluate_single_test_metric, targets, predictions))
 
@@ -30,10 +34,12 @@ class AbstractMetric(ABC):
         """
         Evaluates a single test using the implemented metric.
 
-        :param list[list] target: The target values for a test.
-        :param list[list] prediction: The predicted values for a test.
+        Args:
+            target (list[list]): The target values for a test.
+            prediction (list[list] | None): The predicted values for a test.
 
-        :return: The evaluation score for the test.
+        Returns:
+            float: The evaluation score for the test.
         """
         if prediction is None:
             # in case the model was not able to predict anything
@@ -56,11 +62,12 @@ class AbstractMetric(ABC):
     def normalize_cell(cell):
         """
         Normalizes a cell value for comparison.
-        All the cell values are transformed in string.
-        The numbers are rounded to 2 decimal places.
 
-        :param cell: The cell value to normalize.
-        :return: The normalized cell value.
+        Args:
+            cell: The cell value to normalize.
+
+        Returns:
+            str: The normalized cell value.
         """
         if cell is None:
             return "None"
@@ -92,9 +99,13 @@ class AbstractMetric(ABC):
         """
         Abstract method to evaluate a single test when there are no special cases.
         This method must be implemented by subclasses.
-        :param list[list] target: The target values for a test.
-        :param list[list] prediction: The predicted values for a test.
-        :return: The evaluation score for the test.
+
+        Args:
+            target (list[list]): The target values for a test.
+            prediction (list[list]): The predicted values for a test.
+
+        Returns:
+            float: The evaluation score for the test.
         """
 
         raise NotImplementedError
@@ -104,11 +115,15 @@ class AbstractMetric(ABC):
                                      prediction: list[list]
                                      ) -> float:
         """
-        Evaluates a single test when the target or the prediction is zero.
-        :param list[list] target: The target values for a test.
-        :param list[list] prediction: The predicted values for a test.
-        :return: The evaluation score for the test.
-        """
+         Evaluates a single test when the target or the prediction is zero.
+
+         Args:
+             target (list[list]): The target values for a test.
+             prediction (list[list]): The predicted values for a test.
+
+         Returns:
+             float: The evaluation score for the test.
+         """
 
         if len(target) == 0 and len(prediction) == 0:
             return 1.0

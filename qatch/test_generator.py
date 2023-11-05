@@ -17,21 +17,27 @@ class TestGenerator:
     The interface to connect the MultipleDatabase with the SQL generators.
     Use this class to generate queries and questions from the databases.
 
-    :ivar MultipleDatabases databases: The MultipleDatabases object representing the database connections.
-    :ivar dict generators: A dictionary mapping generator names to corresponding generator classes.
+    Attributes:
+        databases (MultipleDatabases): The MultipleDatabases object representing the database connections.
     """
 
     def __init__(self, databases: MultipleDatabases):
+        """
+        Initialize the TestGenerator with a MultipleDatabases object.
+
+        Args:
+            databases (MultipleDatabases): Object representing database connections.
+        """
         self.databases = databases
 
-        self.generators = {'select': SelectGenerator,
-                           'orderby': OrderByGenerator,
-                           'distinct': DistinctGenerator,
-                           'where': WhereGenerator,
-                           'groupby': GroupByGenerator,
-                           'having': HavingGenerator,
-                           'simpleAgg': SimpleAggGenerator,
-                           'nullCount': NullGenerator}
+        self._generators = {'select': SelectGenerator,
+                            'orderby': OrderByGenerator,
+                            'distinct': DistinctGenerator,
+                            'where': WhereGenerator,
+                            'groupby': GroupByGenerator,
+                            'having': HavingGenerator,
+                            'simpleAgg': SimpleAggGenerator,
+                            'nullCount': NullGenerator}
 
     def generate(self,
                  generators: list[str] | str | None = None,
@@ -41,12 +47,23 @@ class TestGenerator:
         """
         Generate test queries and questions for specified generators and databases.
 
-        :param generators: Optional. A list of generator names to be used.
-                           Default is to use all available generators.
-        :param db_names: Optional. The name or list of names of databases to generate tests for.
-                         Default is to use all available databases.
-        :param seed: Optional. Seed value for randomization. Default is 2023.
-        :return: A DataFrame containing generated test queries, questions, and related information.
+        Args:
+            generators (list[str] | str | None): Optional. A list of generator names to be used.
+                                                  Default is to use all available generators
+                                                  ['select', 'orderby', 'distinct', 'where', 'groupby',
+                                                   'having', 'simpleAgg', 'nullCount'].
+            db_names (str | list[str] | None): Optional. The name or list of names of databases to generate tests for.
+                                                Default is to use all available databases.
+            seed (int): Optional. Seed value for randomization. Default is 2023.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing generated test queries, questions, and related information.
+
+        Examples:
+            Given a MultipleDatabases object "database", with three databases 'sakila', 'world', and 'employees'
+            >>> generator = TestGenerator(databases)
+            >>> tests_df = generator.generate(generators=['select', 'orderby'], db_names=['sakila', 'world'])
+            generate tests only for select and orderby generators, and only for sakila and world databases
         """
         # TODO possible change of the db_name, add dictionary to specify also the tbl_names
         generators, db_names, = self._init_params(generators, db_names)
@@ -57,7 +74,7 @@ class TestGenerator:
             for generator in generators:
                 # init generator
                 db = self.databases[db_name]
-                generator = self.generators[generator](db, seed)
+                generator = self._generators[generator](db, seed)
                 for tbl in db.table_names:
                     sql_generated = generator.sql_generate(tbl)
                     df = self._build_df(db_name, tbl, sql_generated)
@@ -71,19 +88,22 @@ class TestGenerator:
         """
         Validate and initialize generator names and database names.
 
-        :param generators: The list of generator names or a single generator name.
-        :param db_names: The name or list of names of databases to generate tests for.
-        :return: Validated generator names and database names.
+        Args:
+            generators (list[str] | str | None): The list of generator names or a single generator name.
+            db_names (str | list[str] | None): The name or list of names of databases to generate tests for.
+
+        Returns:
+            tuple[list[str], list[str]]: Validated generator names and database names.
         """
         # generators check
         if generators is None:
-            generators = list(self.generators.keys())
+            generators = list(self._generators.keys())
         else:
             if isinstance(generators, str):
                 generators = [generators]
             for generator in generators:
-                if generator not in self.generators.keys():
-                    raise KeyError(f'Generators must be one of {list(self.generators.keys())}')
+                if generator not in self._generators.keys():
+                    raise KeyError(f'Generators must be one of {list(self._generators.keys())}')
 
         # db_names check
         available_dbs = [x.lower() for x in self.databases.get_db_names()]
@@ -103,11 +123,15 @@ class TestGenerator:
         """
         Build a DataFrame from generated SQL queries, questions, and related information.
 
-        :param db_name: The name of the database.
-        :param tbl_name: The name of the table in the database.
-        :param sql_generated: A dictionary containing generated SQL tags, queries, and questions.
-        :return: A DataFrame containing generated test queries, questions, and related information.
+        Args:
+            db_name (str): The name of the database.
+            tbl_name (str): The name of the table in the database.
+            sql_generated (dict[str, list]): A dictionary containing generated SQL tags, queries, and questions.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing generated test queries, questions, and related information.
         """
+
         sql_tags = sql_generated['sql_tags']
         queries = sql_generated['queries']
         questions = sql_generated['questions']

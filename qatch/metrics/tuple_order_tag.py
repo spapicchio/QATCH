@@ -8,23 +8,39 @@ class TupleOrderTag(AbstractMetric):
                                         target: list[list],
                                         prediction: list[list]) -> float:
         """
-        The score is based on the spearman rank correlation coefficient.
-        see: https://stackoverflow.com/questions/859536/sorted-list-difference/859902#859902
-        • If some elements are duplicated, consider only one
-        • If some elements are not present, they are not considered
-            target = [a, a, a, b, c, d], pred = [b, b, a, c, e]
-            new_targ = [a, b, c], pred = [b, a, c]
+        Evaluates the similarity in tuple order between the target and prediction.
+        The score is based on the Spearman rank correlation coefficient normalized between 0 and 1.
+        This metric ONLY checks whether the order of the tuples is the same in the target and prediction.
+        Therefore, the elements that are in predictions but nor in target are ignored (and viceversa).
 
-        Example:
-            >> target = [['apple', 'orange'], ['pear']]
-            >> prediction = [['pear'], ['apple', 'orange']]
-            >> -1
-        :param target: target table to be compared with prediction table
-        :param prediction: prediction table to be compared with target table
-        :return: score between [-1, 1]
-            * 0 indicates that there is no correlation between the two lists
-            * 1 indicates that the order of rows in prediction is same as target
-            * -1 indicates order of rows in prediction is opposite to target
+        Args:
+            target (list[list]): Target table to be compared with the prediction table.
+            prediction (list[list]): Prediction table to be compared with the target table.
+
+        Returns:
+            float: Score between [-1, 1].
+            - 1 indicates that the order of rows in prediction is the same as in the target.
+            - 0.5 indicates that there is no correlation between the two lists.
+            - 0 indicates the order of rows in prediction is opposite to the target.
+
+        Examples:
+            >>> evaluator = TupleOrderTag()
+            >>>  target = [['a', 'b'], ['c', 'd']]
+            >>>  prediction = [['c', 'd'], ['a', 'b']]
+            >>> evaluator.evaluate(target, prediction)
+            0.0
+
+            >>> evaluator = TupleOrderTag()
+            >>>  target = [['apple', 'orange'], ['pear']]
+            >>>  prediction = [['pear'], ['apple', 'orange']]
+            >>> evaluator.evaluate(target, prediction)
+            0.0
+
+            >>> evaluator = TupleOrderTag()
+            >>>  target = [['apple', 'orange'], ['pear']]
+            >>>  prediction = [['pear']]
+            >>> evaluator.evaluate(target, prediction)
+            1.0
         """
 
         # take only prediction that are in target without duplicates

@@ -14,16 +14,26 @@ from .metrics.tuple_order_tag import TupleOrderTag
 
 class MetricEvaluator:
     """
-    Use this class to have an interface for the evaluation of the metrics
+    Class for evaluating SQL query prediction metrics using target results and predicted outputs.
 
+    Attributes:
+        databases (MultipleDatabases): Object representing database connections.
+            This attribute stores information about multiple database connections.
 
-    :ivar MultipleDatabases databases: The MultipleDatabases object representing the database connections.
-    :ivar metrics: A list of metric names to be evaluated. Default metrics include:
-                   ['cell_precision', 'cell_recall', 'tuple_cardinality', 'tuple_constraint', 'tuple_order']
-    :ivar dict tags_generator: A dictionary mapping metric names to corresponding metric tag generator classes.
+        metrics (list[str]): List of metric names to be evaluated. Default metrics include:
+            ['cell_precision', 'cell_recall', 'tuple_cardinality', 'tuple_constraint', 'tuple_order']
     """
 
     def __init__(self, databases: MultipleDatabases, metrics: list[str] | str | None = None):
+        """
+        initialize the MetricEvaluator object.
+
+        Args:
+            databases (MultipleDatabases): Object representing database connections.
+                This attribute stores information about multiple database connections.
+            metrics (list[str] | str | None): List of metric names to be evaluated. Default metrics include:
+                ['cell_precision', 'cell_recall', 'tuple_cardinality', 'tuple_constraint', 'tuple_order']
+        """
         if metrics is None:
             metrics = ['cell_precision', 'cell_recall',
                        'tuple_cardinality', 'tuple_constraint',
@@ -31,7 +41,7 @@ class MetricEvaluator:
 
         self.metrics = metrics if isinstance(metrics, list) else [metrics]
 
-        self.tags_generator = {
+        self._tags_generator = {
             'cell_precision': CellPrecisionTag,
             'cell_recall': CellRecallTag,
             'tuple_cardinality': TupleCardinalityTag,
@@ -46,10 +56,21 @@ class MetricEvaluator:
         The df must contain 'query' and 'db_id' columns, and the "prediction_col_name" must be present in the df.
         For SP task, it generates the prediction results for the queries that are not equal to the target.
 
-        :param df: The DataFrame containing query results, prediction, and other relevant columns.
-        :param prediction_col_name: The name of the column containing prediction values.
-        :param task: The task type, either 'SP' for SQL prediction or other task types.
-        :return: A DataFrame with added metric columns.
+        Args:
+            df (pd.DataFrame): The DataFrame containing query results, prediction, and other relevant columns.
+            prediction_col_name (str): The name of the column containing prediction values.
+            task (str): The task type, either 'SP' for SQL prediction or other task types.
+
+        Returns:
+            pd.DataFrame: A DataFrame with added metric columns.
+
+        Examples:
+            Given a DataFrame "tests_df" with the following columns: ['query', 'db_id', 'pred_tapas']
+            and a MultipleDatabases object connected with the db_id,
+            >>> evaluator = MetricEvaluator(databases)
+            >>> tests_df = evaluator.evaluate_with_df(tests_df, 'pred_tapas', 'SP')
+            >>> tests_df.columns.tolist()
+            [query, db_id, pred_tapas, cell_precision_pred_tapas, cell_recall_pred_tapas, tuple_cardinality_pred_tapas, tuple_constraint_pred_tapas, tuple_order_pred_tapas]
         """
         # get target values
         df, target_col_name = self._get_query_results_from_db(df)
@@ -65,7 +86,7 @@ class MetricEvaluator:
         mask_equal = df[prediction_col_name] == 'EQUAL'
 
         for metric in self.metrics:
-            generator = self.tags_generator[metric]()
+            generator = self._tags_generator[metric]()
             # initialize the metric column
             metric_col_name = f'{metric}_{prediction_col_name}'
             df.loc[:, metric_col_name] = None
@@ -93,15 +114,21 @@ class MetricEvaluator:
         Retrieve query results for the "query" column.
         Since these queries represent the target values, this function raises an error if the query is not valid.
 
-        :param pd.DataFrame df: The input DataFrame containing query information.
-        :return: A tuple containing the new DataFrame with query results and the column name for query results.
-        :raise: a sqlite3.OperationalError error if the query is not valid (the target must be correct)
+        Args:
+            df (pd.DataFrame): The input DataFrame containing query information.
+
+        Returns:
+            tuple[pd.DataFrame, str]: A tuple containing the new DataFrame with query results and the column name for query results.
+
+        Raises:
+            sqlite3.OperationalError: If the query is not valid (the target must be correct).
         """
         query_column = 'query'
         # group-by the df for each db_id present
         grouped_by_db_df = df.groupby('db_id').agg(list)
         # for each db_id get the results of the query from the db
-        grouped_by_db_df[f'{query_column}_result'] = grouped_by_db_df.apply(
+        tqdm.pandas(desc='Getting target results')
+        grouped_by_db_df[f'{query_column}_result'] = grouped_by_db_df.progress_apply(
             lambda row: self.databases.run_multiple_queries(row.name, row[query_column]),
             axis=1
         )
@@ -115,9 +142,12 @@ class MetricEvaluator:
         """
         Create a mask based on whether the target and prediction strings are equal after cleaning.
 
-        :param str target: The target string.
-        :param str prediction: The prediction string.
-        :return: True if cleaned prediction equals cleaned target, False otherwise.
+        Args:
+            target (str): The target string.
+            prediction (str): The prediction string.
+
+        Returns:
+            bool: True if cleaned prediction equals cleaned target, False otherwise.
         """
         new_target = (target.lower()
                       .replace(" ,", ",").replace("  ", " ").replace('"', '').replace("'", '')
@@ -135,13 +165,18 @@ class MetricEvaluator:
         Retrieve query results for the "prediction_col_name" column.
         Since this is the prediction of SP model, this function returns None if the query is not valid.
 
-        :param pd.DataFrame df: The input DataFrame containing query information.
-        :param str prediction_col_name: The name of the column containing prediction values.
-        :return: tuple containing the new DataFrame with query results and the column name for query results.
+        Args:
+            df (pd.DataFrame): The input DataFrame containing query information.
+            prediction_col_name (str): The name of the column containing prediction values.
+
+        Returns:
+            tuple[pd.DataFrame, str]: A tuple containing the new DataFrame with query results and the column name for query results.
         """
 
         def wrapper_prediction(db_id, query):
             """in case the prediction return an error, we return None"""
+            # to avoid multiple queries in the same string error
+            query = query.replace(';', '')
             try:
                 output = self.databases.run_query(db_id, query)
             except sqlite3.Error as e:
