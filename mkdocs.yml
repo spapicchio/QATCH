@@ -1,0 +1,58 @@
+site_name: "QATCH: Query-Aided TRL Checklist"
+site_description: QATCH is a Python library that generates and evaluates tests for Question Answering and Semantic Parsing tasks for structured data.
+site_author: Simone Papicchio
+repo_url: https://github.com/spapicchio/QATCH
+repo_name: spapicchio/QATCH
+edit_uri: https://github.com/spapicchio/QATCH/tree/develop
+
+theme:
+  name: material
+  logo: assets/qatch_logo.png
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    scheme: slate
+    primary: deep purple
+  features:
+    - search.suggest
+    - search.highlight
+    - search.share
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.top
+
+extra:
+  version: 0.1.0
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/spapicchio/
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/simone-papicchio/
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+  - search
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+nav:
+  - Introduction: index.md
+  - Getting Started: getting_started.md
+  - "Step 0: Database Reader": database_reader.md
+  - "Step 1: SQL Generator": sql_generator.md
+  - "Step 3: Metrics": metrics.md
+
