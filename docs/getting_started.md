@@ -104,7 +104,7 @@ from tqdm import tqdm
 from qatch.models import Tapas
 
 # init the model 
-model = Tapas(model_name=google / tapas - large - finetuned - wtq)
+model = Tapas(model_name="google/tapas-large-finetuned-wtq")
 
 # iterate for each row and run prediction
 tqdm.pandas(desc=f'Predicting for {model.name}')
