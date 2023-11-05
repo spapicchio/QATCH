@@ -38,6 +38,7 @@ class TupleOrderTag(AbstractMetric):
          if tar in prediction and tar not in new_target]
 
         if len(new_target) == 0:
+
             rho = 0.0
         else:
             target_ranks = [i for i in range(len(new_target))]

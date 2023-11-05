@@ -67,19 +67,20 @@ class MetricEvaluator:
         for metric in self.metrics:
             generator = self.tags_generator[metric]()
             # initialize the metric column
-            df.loc[:, metric] = None
+            metric_col_name = f'{metric}_{prediction_col_name}'
+            df.loc[:, metric_col_name] = None
             if metric == 'tuple_order':
                 # when the target and prediction are equal, the metric is 1
                 df.loc[mask_order & mask_equal, metric] = 1
                 mask = mask_order & ~mask_equal
             else:
                 # when the target and prediction are equal, the metric is 1
-                df.loc[mask_equal, metric] = 1
+                df.loc[mask_equal, metric_col_name] = 1
                 mask = ~mask_equal
 
             # evaluate the metric only for the test where the prediction is not equal to the target
-            tqdm.pandas(desc=f'Evaluating {metric}')
-            df.loc[mask, metric] = df[mask].progress_apply(
+            tqdm.pandas(desc=f'Evaluating {metric_col_name}')
+            df.loc[mask, metric_col_name] = df[mask].progress_apply(
                 lambda r: generator.evaluate_single_test_metric(r[target_col_name], r[prediction_col_name]),
                 axis=1)
         # at the end drop the columns that are not needed anymore
@@ -143,7 +144,8 @@ class MetricEvaluator:
             """in case the prediction return an error, we return None"""
             try:
                 output = self.databases.run_query(db_id, query)
-            except sqlite3.OperationalError as e:
+            except sqlite3.Error as e:
+                # catch any possible error of prediction and return None
                 logging.error(e)
                 return None
             else:

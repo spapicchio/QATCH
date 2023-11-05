@@ -36,7 +36,7 @@ class TestWhereGenerator:
         # Test case for generating WHERE queries and questions for categorical columns
         table_name = 'sample_table'
         cat_cols = ['column2']
-        where_generator.generate_where_categorical(table_name, cat_cols, sample_data)
+        where_generator._generate_where_categorical(table_name, cat_cols, sample_data)
 
         # Perform assertions on the generated SQL tags, queries, and questions
         assert where_generator.sql_generated['sql_tags'] == ['WHERE-CAT-MOST-FREQUENT', 'WHERE-CAT-LEAST-FREQUENT',
@@ -49,7 +49,7 @@ class TestWhereGenerator:
         # Test case for generating WHERE queries and questions for numerical columns
         table_name = 'sample_table'
         num_cols = ['column1', 'column3']
-        where_generator.generate_where_numerical(table_name, num_cols, sample_data)
+        where_generator._generate_where_numerical(table_name, num_cols, sample_data)
 
         # generate 6 queries (max, min, mean * 2 [>, <]) for each column,
         # so in this case we expect 12 queries
@@ -67,49 +67,54 @@ class TestWhereGenerator:
     def test_get_most_frequent_or_max_value(self, where_generator):
         # Test case with numerical values
         num_values = np.array([1, 2, 2, 3, 3, 3, 4, 4, 4, 4])
-        result = where_generator.get_most_frequent_or_max_value(num_values)
+        result = where_generator._get_most_frequent_or_max_value(num_values)
         assert result == 4
 
         # Test case with categorical values (most frequent value)
         cat_values = np.array(['A', 'B', 'A', 'C', 'C', 'C', 'D', 'D', 'D', 'D'])
-        result = where_generator.get_most_frequent_or_max_value(cat_values)
+        result = where_generator._get_most_frequent_or_max_value(cat_values)
         assert result == 'D'
 
         # Test case with categorical values and Null (most frequent value
         cat_values = np.array(['A', None, 'A', 'C', None, 'C', 'D', 'D', 'D', 'D'])
-        result = where_generator.get_most_frequent_or_max_value(cat_values)
+        result = where_generator._get_most_frequent_or_max_value(cat_values)
         assert result == 'D'
         # Test case with empty array
         empty_values = np.array([])
-        result = where_generator.get_most_frequent_or_max_value(empty_values)
+        result = where_generator._get_most_frequent_or_max_value(empty_values)
         assert result is None
 
         # Test case with null values
         null_values = np.array([1, 2, None, 3, 3, 3, 4, 4, 4, 4])
-        result = where_generator.get_most_frequent_or_max_value(null_values)
+        result = where_generator._get_most_frequent_or_max_value(null_values)
         assert result == 4
 
     def test_get_least_frequent_or_min_value(self, where_generator):
         # Test case with numerical values
         num_values = np.array([1, 2, 2, 3, 3, 3, 4, 4, 4, 4])
-        result = where_generator.get_least_frequent_or_min_value(num_values)
+        result = where_generator._get_least_frequent_or_min_value(num_values)
         assert result == 1
 
         # Test case with categorical values (most frequent value)
         cat_values = np.array(['A', 'B', 'A', 'C', 'C', 'C', 'D', 'D', 'D', 'D'])
-        result = where_generator.get_least_frequent_or_min_value(cat_values)
+        result = where_generator._get_least_frequent_or_min_value(cat_values)
         assert result == 'B'
 
         # Test case with categorical values and Null (most frequent value
         cat_values = np.array(['A', None, 'A', 'C', None, 'C', 'D', 'D', 'D', 'D'])
-        result = where_generator.get_least_frequent_or_min_value(cat_values)
+        result = where_generator._get_least_frequent_or_min_value(cat_values)
         assert result == 'A'
         # Test case with empty array
         empty_values = np.array([])
-        result = where_generator.get_least_frequent_or_min_value(empty_values)
+        result = where_generator._get_least_frequent_or_min_value(empty_values)
         assert result is None
 
         # Test case with null values
         null_values = np.array([1, 2, None, 3, 3, 3, 4, 4, 4, 4])
-        result = where_generator.get_least_frequent_or_min_value(null_values)
+        result = where_generator._get_least_frequent_or_min_value(null_values)
         assert result == 1
+
+    def test_get_median_value(self, where_generator):
+        num_values = np.array([1, 2, 2, 3, 3, 3, 4, 4, 4, 4])
+        result = where_generator._get_median_value(num_values)
+        assert result == 3
