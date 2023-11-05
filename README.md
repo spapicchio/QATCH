@@ -9,6 +9,10 @@
 This repository is the official implementation of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data]()
 to appear in NeurIPS Dataset and Benchmark track 2023.
 
+# 🔥 Updates
+
+- [**2021-11-05**]: QATCH can now be donwloaded from pip! Do not forget to check the [documentation](https://spapicchio.github.io/QATCH/)! 
+
 # 🏴󠁶󠁵󠁭󠁡󠁰󠁿 Overview
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1SNoy3GZGPWltVS5cL068xAG9YoPS_3_l?usp=sharing)
@@ -23,7 +27,7 @@ to appear in NeurIPS Dataset and Benchmark track 2023.
 * ***Where can I check the results?*** The generated tests along with the predictions and the metric scores can be
   downloaded [here](https://drive.google.com/uc?export=download&id=1_z8N52QNAHnxpHv54VhbvYu7DbKV6QRv). This is to
   prevent the costly generation of test results with the openAI API and to build trust in our results.
-* 
+
 
  <figure style="text-align:center">
   <img src="docs/img/qatch-full-pipeline.png">
