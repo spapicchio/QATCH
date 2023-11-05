@@ -21,19 +21,19 @@ def init_model(model_name, credentials_path=None):
     model_name = model_name.lower()
     name2model = {'tapas': Tapas,
                   'tapex': Tapex,
-                  'chatgpt-qa': ChatGPT_QA,
-                  'chatgpt-sp': ChatGPT_SP,
+                  'chatgpt_qa': ChatGPT_QA,
+                  'chatgpt_sp': ChatGPT_SP,
                   'omnitab': Omnitab,
-                  'llama-qa': LLama2_QA,
-                  'llama-sp': LLama2_SP}
+                  'llama_qa': LLama2_QA,
+                  'llama_sp': LLama2_SP}
 
     name2path = {'tapas': 'google/tapas-large-finetuned-wtq',
-                 'tapex': 'microsoft/tapex-large-finetuned-wikisql',
+                 'tapex': 'microsoft/tapex-large-finetuned-wtq',
                  'omnitab': 'neulab/omnitab-large-finetuned-wtq',
-                 'chatgpt-qa': 'gpt-3.5-turbo-0613',
-                 'chatgpt-sp': 'gpt-3.5-turbo-0613',
-                 'llama-qa': 'meta-llama/Llama-2-7b-chat-hf',
-                 'llama-sp': 'meta-llama/Llama-2-7b-chat-hf'}
+                 'chatgpt_qa': 'gpt-3.5-turbo-0613',
+                 'chatgpt_sp': 'gpt-3.5-turbo-0613',
+                 'llama_qa': 'meta-llama/Llama-2-7b-chat-hf',
+                 'llama_sp': 'meta-llama/Llama-2-7b-chat-hf'}
 
     if 'chatgpt' in model_name:
         if credentials_path is None:
@@ -51,9 +51,9 @@ def init_model(model_name, credentials_path=None):
             credentials = json.load(f)
         model = name2model[model_name]
         model = model(model_name=name2path[model_name],
-                      hugging_face_token=credentials['hugging_face_token'], force_cpu=True)
+                      hugging_face_token=credentials['hugging_face_token'])
     else:
-        model = name2model[model_name](model_name=name2path[model_name], force_cpu=True)
+        model = name2model[model_name](model_name=name2path[model_name])
 
     return model
 
@@ -86,7 +86,6 @@ def step_1_generate_tests(databases, seed):
     test_generator = TestGenerator(databases=databases)
     # generate tests for each database and for each generator
     tests_df = test_generator.generate(generators=None, db_names=None, seed=seed)
-    tests_df = tests_df.sample(10, random_state=seed).reset_index(drop=True)
     return tests_df
 
 
@@ -124,25 +123,41 @@ def reproduce_experiments(args):
         # step 1
         tests_df = step_1_generate_tests(databases=databases, seed=args.seed)
 
+
     # step 2
     tests_df = step_2_run_tests(tests_df=tests_df, databases=databases, model=model)
+    save_df(args=args, tests_df=tests_df, databases=databases)
 
     # step 3
     tests_df = step_3_evaluate_tests(tests_df=tests_df,
                                      databases=databases,
                                      task=args.task,
                                      prediction_col_name=f'predictions_{model.name}')
-    # save
+    save_df(args=args, tests_df=tests_df, databases=databases)
+
+
+def save_df(args, tests_df, databases):
     if args.generate_tests_for == 'spider':
         test_file_name = f'{args.task.upper()}_{args.model_name}_spider_train_test_results.json'
         tests_df.to_json(os.path.join(args.db_save_path, test_file_name),
                          orient='records')
 
     else:
+        test_all_db, tables_all_db = [], []
         for db_id in databases.get_db_names():
-            save_spider_format_for_db_id(df=tests_df[tests_df.db_id == db_id],
-                                         db=databases[db_id],
-                                         model_name=args.model_name)
+            df_db, table_db = save_spider_format_for_db_id(df=tests_df[tests_df.db_id == db_id],
+                                                           db=databases[db_id],
+                                                           model_name=args.model_name)
+            test_all_db.append(df_db)
+            tables_all_db.append(table_db)
+        test_all_db = pd.concat(test_all_db).reset_index(drop=True)
+        tables_all_db = pd.concat(tables_all_db).reset_index(drop=True)
+        test_all_db.to_json(os.path.join(args.db_save_path,
+                                         f'{args.task.upper()}_{args.model_name}_all_dbs_results.json'),
+                            orient='records')
+        tables_all_db.to_json(os.path.join(args.db_save_path,
+                                           f'{args.task.upper()}_{args.model_name}_all_dbs_tables.json'),
+                              orient='records')
 
 
 if __name__ == '__main__':

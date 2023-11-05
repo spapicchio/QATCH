@@ -181,10 +181,27 @@ tests = ["attrs[tests-no-zope]", "zope-interface"]
 tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "pytest-xdist[psutil]"]
 
 [[package]]
+name = "babel"
+version = "2.13.1"
+description = "Internationalization utilities"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "Babel-2.13.1-py3-none-any.whl", hash = "sha256:7077a4984b02b6727ac10f1f7294484f737443d7e2e66c5e4380e41a3ae0b4ed"},
+    {file = "Babel-2.13.1.tar.gz", hash = "sha256:33e0952d7dd6374af8dbf6768cc4ddf3ccfefc244f9986d4074704f2fbd18900"},
+]
+
+[package.dependencies]
+setuptools = {version = "*", markers = "python_version >= \"3.12\""}
+
+[package.extras]
+dev = ["freezegun (>=1.0,<2.0)", "pytest (>=6.0)", "pytest-cov"]
+
+[[package]]
 name = "certifi"
 version = "2023.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
-optional = true
+optional = false
 python-versions = ">=3.6"
 files = [
     {file = "certifi-2023.7.22-py3-none-any.whl", hash = "sha256:92d6037539857d8206b8f6ae472e8b77db8058fec5937a1ef3f54304089edbb9"},
@@ -206,7 +223,7 @@ files = [
 name = "charset-normalizer"
 version = "3.3.2"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
-optional = true
+optional = false
 python-versions = ">=3.7.0"
 files = [
     {file = "charset-normalizer-3.3.2.tar.gz", hash = "sha256:f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"},
@@ -300,6 +317,20 @@ files = [
     {file = "charset_normalizer-3.3.2-cp39-cp39-win_amd64.whl", hash = "sha256:b01b88d45a6fcb69667cd6d2f7a9aeb4bf53760d7fc536bf679ec94fe9f3ff3d"},
     {file = "charset_normalizer-3.3.2-py3-none-any.whl", hash = "sha256:3e4d1f6587322d2788836a99c69062fbb091331ec940e02d12d179c1d53e25fc"},
 ]
+
+[[package]]
+name = "click"
+version = "8.1.7"
+description = "Composable command line interface toolkit"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
+    {file = "click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "cmake"
@@ -477,6 +508,37 @@ ssh = ["paramiko"]
 tqdm = ["tqdm"]
 
 [[package]]
+name = "ghp-import"
+version = "2.1.0"
+description = "Copy your docs directly to the gh-pages branch."
+optional = false
+python-versions = "*"
+files = [
+    {file = "ghp-import-2.1.0.tar.gz", hash = "sha256:9c535c4c61193c2df8871222567d7fd7e5014d835f97dc7b7439069e2413d343"},
+    {file = "ghp_import-2.1.0-py3-none-any.whl", hash = "sha256:8337dd7b50877f163d4c0289bc1f1c7f127550241988d568c1db512c4324a619"},
+]
+
+[package.dependencies]
+python-dateutil = ">=2.8.1"
+
+[package.extras]
+dev = ["flake8", "markdown", "twine", "wheel"]
+
+[[package]]
+name = "griffe"
+version = "0.36.9"
+description = "Signatures for entire Python programs. Extract the structure, the frame, the skeleton of your project, to generate API documentation or find breaking changes in your API."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "griffe-0.36.9-py3-none-any.whl", hash = "sha256:7874febe7cd81e8e47eb7b8130ff9d38c8f3656233c01d2d217d2e898a0925f5"},
+    {file = "griffe-0.36.9.tar.gz", hash = "sha256:b4e510bf0ed1fc91c58453c68018a2247c561adec8f5dadc40275afc01f51eac"},
+]
+
+[package.dependencies]
+colorama = ">=0.4"
+
+[[package]]
 name = "huggingface-hub"
 version = "0.17.3"
 description = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
@@ -513,7 +575,7 @@ typing = ["pydantic (<2.0)", "types-PyYAML", "types-requests", "types-simplejson
 name = "idna"
 version = "3.4"
 description = "Internationalized Domain Names in Applications (IDNA)"
-optional = true
+optional = false
 python-versions = ">=3.5"
 files = [
     {file = "idna-3.4-py3-none-any.whl", hash = "sha256:90b77e79eaa3eba6de819a0c442c0b4ceefc341a7a2ab77d7562bf49f425c5c2"},
@@ -535,7 +597,7 @@ files = [
 name = "jinja2"
 version = "3.1.2"
 description = "A very fast and expressive template engine."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "Jinja2-3.1.2-py3-none-any.whl", hash = "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"},
@@ -559,10 +621,25 @@ files = [
 ]
 
 [[package]]
+name = "markdown"
+version = "3.5.1"
+description = "Python implementation of John Gruber's Markdown."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "Markdown-3.5.1-py3-none-any.whl", hash = "sha256:5874b47d4ee3f0b14d764324d2c94c03ea66bee56f2d929da9f2508d65e722dc"},
+    {file = "Markdown-3.5.1.tar.gz", hash = "sha256:b65d7beb248dc22f2e8a31fb706d93798093c308dc1aba295aedeb9d41a813bd"},
+]
+
+[package.extras]
+docs = ["mdx-gh-links (>=0.2)", "mkdocs (>=1.5)", "mkdocs-gen-files", "mkdocs-literate-nav", "mkdocs-nature (>=0.6)", "mkdocs-section-index", "mkdocstrings[python]"]
+testing = ["coverage", "pyyaml"]
+
+[[package]]
 name = "markupsafe"
 version = "2.1.3"
 description = "Safely add untrusted strings to HTML/XML markup."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "MarkupSafe-2.1.3-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:cd0f502fe016460680cd20aaa5a76d241d6f35a1c3350c474bac1273803893fa"},
@@ -626,6 +703,142 @@ files = [
     {file = "MarkupSafe-2.1.3-cp39-cp39-win_amd64.whl", hash = "sha256:3fd4abcb888d15a94f32b75d8fd18ee162ca0c064f35b11134be77050296d6ba"},
     {file = "MarkupSafe-2.1.3.tar.gz", hash = "sha256:af598ed32d6ae86f1b747b82783958b1a4ab8f617b06fe68795c7f026abbdcad"},
 ]
+
+[[package]]
+name = "mergedeep"
+version = "1.3.4"
+description = "A deep merge function for 🐍."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "mergedeep-1.3.4-py3-none-any.whl", hash = "sha256:70775750742b25c0d8f36c55aed03d24c3384d17c951b3175d898bd778ef0307"},
+    {file = "mergedeep-1.3.4.tar.gz", hash = "sha256:0096d52e9dad9939c3d975a774666af186eda617e6ca84df4c94dec30004f2a8"},
+]
+
+[[package]]
+name = "mkdocs"
+version = "1.5.3"
+description = "Project documentation with Markdown."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "mkdocs-1.5.3-py3-none-any.whl", hash = "sha256:3b3a78e736b31158d64dbb2f8ba29bd46a379d0c6e324c2246c3bc3d2189cfc1"},
+    {file = "mkdocs-1.5.3.tar.gz", hash = "sha256:eb7c99214dcb945313ba30426c2451b735992c73c2e10838f76d09e39ff4d0e2"},
+]
+
+[package.dependencies]
+click = ">=7.0"
+colorama = {version = ">=0.4", markers = "platform_system == \"Windows\""}
+ghp-import = ">=1.0"
+jinja2 = ">=2.11.1"
+markdown = ">=3.2.1"
+markupsafe = ">=2.0.1"
+mergedeep = ">=1.3.4"
+packaging = ">=20.5"
+pathspec = ">=0.11.1"
+platformdirs = ">=2.2.0"
+pyyaml = ">=5.1"
+pyyaml-env-tag = ">=0.1"
+watchdog = ">=2.0"
+
+[package.extras]
+i18n = ["babel (>=2.9.0)"]
+min-versions = ["babel (==2.9.0)", "click (==7.0)", "colorama (==0.4)", "ghp-import (==1.0)", "importlib-metadata (==4.3)", "jinja2 (==2.11.1)", "markdown (==3.2.1)", "markupsafe (==2.0.1)", "mergedeep (==1.3.4)", "packaging (==20.5)", "pathspec (==0.11.1)", "platformdirs (==2.2.0)", "pyyaml (==5.1)", "pyyaml-env-tag (==0.1)", "typing-extensions (==3.10)", "watchdog (==2.0)"]
+
+[[package]]
+name = "mkdocs-autorefs"
+version = "0.5.0"
+description = "Automatically link across pages in MkDocs."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mkdocs_autorefs-0.5.0-py3-none-any.whl", hash = "sha256:7930fcb8ac1249f10e683967aeaddc0af49d90702af111a5e390e8b20b3d97ff"},
+    {file = "mkdocs_autorefs-0.5.0.tar.gz", hash = "sha256:9a5054a94c08d28855cfab967ada10ed5be76e2bfad642302a610b252c3274c0"},
+]
+
+[package.dependencies]
+Markdown = ">=3.3"
+mkdocs = ">=1.1"
+
+[[package]]
+name = "mkdocs-material"
+version = "9.4.7"
+description = "Documentation that simply works"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mkdocs_material-9.4.7-py3-none-any.whl", hash = "sha256:4d698d52bb6a6a3c452ab854481c4cdb68453a0420956a6aee2de55fe15fe610"},
+    {file = "mkdocs_material-9.4.7.tar.gz", hash = "sha256:e704e001c9ef17291e1d3462c202425217601653e18f68f85d28eff4690e662b"},
+]
+
+[package.dependencies]
+babel = ">=2.10,<3.0"
+colorama = ">=0.4,<1.0"
+jinja2 = ">=3.0,<4.0"
+markdown = ">=3.2,<4.0"
+mkdocs = ">=1.5.3,<2.0"
+mkdocs-material-extensions = ">=1.3,<2.0"
+paginate = ">=0.5,<1.0"
+pygments = ">=2.16,<3.0"
+pymdown-extensions = ">=10.2,<11.0"
+regex = ">=2022.4"
+requests = ">=2.26,<3.0"
+
+[package.extras]
+git = ["mkdocs-git-committers-plugin-2 (>=1.1,<2.0)", "mkdocs-git-revision-date-localized-plugin (>=1.2,<2.0)"]
+imaging = ["cairosvg (>=2.6,<3.0)", "pillow (>=9.4,<10.0)"]
+recommended = ["mkdocs-minify-plugin (>=0.7,<1.0)", "mkdocs-redirects (>=1.2,<2.0)", "mkdocs-rss-plugin (>=1.6,<2.0)"]
+
+[[package]]
+name = "mkdocs-material-extensions"
+version = "1.3"
+description = "Extension pack for Python Markdown and MkDocs Material."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mkdocs_material_extensions-1.3-py3-none-any.whl", hash = "sha256:0297cc48ba68a9fdd1ef3780a3b41b534b0d0df1d1181a44676fda5f464eeadc"},
+    {file = "mkdocs_material_extensions-1.3.tar.gz", hash = "sha256:f0446091503acb110a7cab9349cbc90eeac51b58d1caa92a704a81ca1e24ddbd"},
+]
+
+[[package]]
+name = "mkdocstrings"
+version = "0.23.0"
+description = "Automatic documentation from sources, for MkDocs."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mkdocstrings-0.23.0-py3-none-any.whl", hash = "sha256:051fa4014dfcd9ed90254ae91de2dbb4f24e166347dae7be9a997fe16316c65e"},
+    {file = "mkdocstrings-0.23.0.tar.gz", hash = "sha256:d9c6a37ffbe7c14a7a54ef1258c70b8d394e6a33a1c80832bce40b9567138d1c"},
+]
+
+[package.dependencies]
+Jinja2 = ">=2.11.1"
+Markdown = ">=3.3"
+MarkupSafe = ">=1.1"
+mkdocs = ">=1.2"
+mkdocs-autorefs = ">=0.3.1"
+mkdocstrings-python = {version = ">=0.5.2", optional = true, markers = "extra == \"python\""}
+pymdown-extensions = ">=6.3"
+
+[package.extras]
+crystal = ["mkdocstrings-crystal (>=0.3.4)"]
+python = ["mkdocstrings-python (>=0.5.2)"]
+python-legacy = ["mkdocstrings-python-legacy (>=0.2.1)"]
+
+[[package]]
+name = "mkdocstrings-python"
+version = "1.7.3"
+description = "A Python handler for mkdocstrings."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mkdocstrings_python-1.7.3-py3-none-any.whl", hash = "sha256:2439d6ad3e34f0bb4c643b845fb3c06ae9233499a1736f9fa273424b75cc5894"},
+    {file = "mkdocstrings_python-1.7.3.tar.gz", hash = "sha256:c20128fa96c24dbc6437b10dfedaf33b0415d4503e51ce9ce5e84b271278268e"},
+]
+
+[package.dependencies]
+griffe = ">=0.35"
+mkdocstrings = ">=0.20"
 
 [[package]]
 name = "mpmath"
@@ -971,6 +1184,16 @@ files = [
 ]
 
 [[package]]
+name = "paginate"
+version = "0.5.6"
+description = "Divides large result sets into pages for easier browsing"
+optional = false
+python-versions = "*"
+files = [
+    {file = "paginate-0.5.6.tar.gz", hash = "sha256:5e6007b6a9398177a7e1648d04fdd9f8c9766a1a945bceac82f1929e8c78af2d"},
+]
+
+[[package]]
 name = "pandas"
 version = "2.1.0"
 description = "Powerful data structures for data analysis, time series, and statistics"
@@ -1096,6 +1319,32 @@ test = ["hypothesis (>=6.46.1)", "pytest (>=7.3.2)", "pytest-asyncio (>=0.17.0)"
 xml = ["lxml (>=4.8.0)"]
 
 [[package]]
+name = "pathspec"
+version = "0.11.2"
+description = "Utility library for gitignore style pattern matching of file paths."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pathspec-0.11.2-py3-none-any.whl", hash = "sha256:1d6ed233af05e679efb96b1851550ea95bbb64b7c490b0f5aa52996c11e92a20"},
+    {file = "pathspec-0.11.2.tar.gz", hash = "sha256:e0d8d0ac2f12da61956eb2306b69f9469b42f4deb0f3cb6ed47b9cce9996ced3"},
+]
+
+[[package]]
+name = "platformdirs"
+version = "3.11.0"
+description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "platformdirs-3.11.0-py3-none-any.whl", hash = "sha256:e9d171d00af68be50e9202731309c4e658fd8bc76f55c11c7dd760d023bda68e"},
+    {file = "platformdirs-3.11.0.tar.gz", hash = "sha256:cf8ee52a3afdb965072dcc652433e0c7e3e40cf5ea1477cd4b3b1d2eb75495b3"},
+]
+
+[package.extras]
+docs = ["furo (>=2023.7.26)", "proselint (>=0.13)", "sphinx (>=7.1.1)", "sphinx-autodoc-typehints (>=1.24)"]
+test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4)", "pytest-cov (>=4.1)", "pytest-mock (>=3.11.1)"]
+
+[[package]]
 name = "pluggy"
 version = "1.3.0"
 description = "plugin and hook calling mechanisms for python"
@@ -1137,6 +1386,38 @@ files = [
 
 [package.extras]
 test = ["enum34", "ipaddress", "mock", "pywin32", "wmi"]
+
+[[package]]
+name = "pygments"
+version = "2.16.1"
+description = "Pygments is a syntax highlighting package written in Python."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "Pygments-2.16.1-py3-none-any.whl", hash = "sha256:13fc09fa63bc8d8671a6d247e1eb303c4b343eaee81d861f3404db2935653692"},
+    {file = "Pygments-2.16.1.tar.gz", hash = "sha256:1daff0494820c69bc8941e407aa20f577374ee88364ee10a98fdbe0aece96e29"},
+]
+
+[package.extras]
+plugins = ["importlib-metadata"]
+
+[[package]]
+name = "pymdown-extensions"
+version = "10.3.1"
+description = "Extension pack for Python Markdown."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pymdown_extensions-10.3.1-py3-none-any.whl", hash = "sha256:8cba67beb2a1318cdaf742d09dff7c0fc4cafcc290147ade0f8fb7b71522711a"},
+    {file = "pymdown_extensions-10.3.1.tar.gz", hash = "sha256:f6c79941498a458852853872e379e7bab63888361ba20992fc8b4f8a9b61735e"},
+]
+
+[package.dependencies]
+markdown = ">=3.2"
+pyyaml = "*"
+
+[package.extras]
+extra = ["pygments (>=2.12)"]
 
 [[package]]
 name = "pytest"
@@ -1189,7 +1470,7 @@ files = [
 name = "pyyaml"
 version = "6.0.1"
 description = "YAML parser and emitter for Python"
-optional = true
+optional = false
 python-versions = ">=3.6"
 files = [
     {file = "PyYAML-6.0.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:d858aa552c999bc8a8d57426ed01e40bef403cd8ccdd0fc5f6f04a00414cac2a"},
@@ -1245,10 +1526,24 @@ files = [
 ]
 
 [[package]]
+name = "pyyaml-env-tag"
+version = "0.1"
+description = "A custom YAML tag for referencing environment variables in YAML files. "
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "pyyaml_env_tag-0.1-py3-none-any.whl", hash = "sha256:af31106dec8a4d68c60207c1886031cbf839b68aa7abccdb19868200532c2069"},
+    {file = "pyyaml_env_tag-0.1.tar.gz", hash = "sha256:70092675bda14fdec33b31ba77e7543de9ddc88f2e5b99160396572d11525bdb"},
+]
+
+[package.dependencies]
+pyyaml = "*"
+
+[[package]]
 name = "regex"
 version = "2023.10.3"
 description = "Alternative regular expression module, to replace re."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "regex-2023.10.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:4c34d4f73ea738223a094d8e0ffd6d2c1a1b4c175da34d6b0de3d8d69bee6bcc"},
@@ -1345,7 +1640,7 @@ files = [
 name = "requests"
 version = "2.31.0"
 description = "Python HTTP for Humans."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "requests-2.31.0-py3-none-any.whl", hash = "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f"},
@@ -1485,7 +1780,7 @@ torch = ["safetensors[numpy]", "torch (>=1.10)"]
 name = "setuptools"
 version = "68.2.2"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "setuptools-68.2.2-py3-none-any.whl", hash = "sha256:b454a35605876da60632df1a60f736524eb73cc47bbc9f3f1ef1b644de74fd2a"},
@@ -1899,7 +2194,7 @@ files = [
 name = "urllib3"
 version = "2.0.7"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "urllib3-2.0.7-py3-none-any.whl", hash = "sha256:fdb6d215c776278489906c2f8916e6e7d4f5a9b602ccbcfdf7f016fc8da0596e"},
@@ -1911,6 +2206,45 @@ brotli = ["brotli (>=1.0.9)", "brotlicffi (>=0.8.0)"]
 secure = ["certifi", "cryptography (>=1.9)", "idna (>=2.0.0)", "pyopenssl (>=17.1.0)", "urllib3-secure-extra"]
 socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
 zstd = ["zstandard (>=0.18.0)"]
+
+[[package]]
+name = "watchdog"
+version = "3.0.0"
+description = "Filesystem events monitoring"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "watchdog-3.0.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:336adfc6f5cc4e037d52db31194f7581ff744b67382eb6021c868322e32eef41"},
+    {file = "watchdog-3.0.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:a70a8dcde91be523c35b2bf96196edc5730edb347e374c7de7cd20c43ed95397"},
+    {file = "watchdog-3.0.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:adfdeab2da79ea2f76f87eb42a3ab1966a5313e5a69a0213a3cc06ef692b0e96"},
+    {file = "watchdog-3.0.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:2b57a1e730af3156d13b7fdddfc23dea6487fceca29fc75c5a868beed29177ae"},
+    {file = "watchdog-3.0.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:7ade88d0d778b1b222adebcc0927428f883db07017618a5e684fd03b83342bd9"},
+    {file = "watchdog-3.0.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:7e447d172af52ad204d19982739aa2346245cc5ba6f579d16dac4bfec226d2e7"},
+    {file = "watchdog-3.0.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:9fac43a7466eb73e64a9940ac9ed6369baa39b3bf221ae23493a9ec4d0022674"},
+    {file = "watchdog-3.0.0-cp38-cp38-macosx_10_9_universal2.whl", hash = "sha256:8ae9cda41fa114e28faf86cb137d751a17ffd0316d1c34ccf2235e8a84365c7f"},
+    {file = "watchdog-3.0.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:25f70b4aa53bd743729c7475d7ec41093a580528b100e9a8c5b5efe8899592fc"},
+    {file = "watchdog-3.0.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:4f94069eb16657d2c6faada4624c39464f65c05606af50bb7902e036e3219be3"},
+    {file = "watchdog-3.0.0-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:7c5f84b5194c24dd573fa6472685b2a27cc5a17fe5f7b6fd40345378ca6812e3"},
+    {file = "watchdog-3.0.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:3aa7f6a12e831ddfe78cdd4f8996af9cf334fd6346531b16cec61c3b3c0d8da0"},
+    {file = "watchdog-3.0.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:233b5817932685d39a7896b1090353fc8efc1ef99c9c054e46c8002561252fb8"},
+    {file = "watchdog-3.0.0-pp37-pypy37_pp73-macosx_10_9_x86_64.whl", hash = "sha256:13bbbb462ee42ec3c5723e1205be8ced776f05b100e4737518c67c8325cf6100"},
+    {file = "watchdog-3.0.0-pp38-pypy38_pp73-macosx_10_9_x86_64.whl", hash = "sha256:8f3ceecd20d71067c7fd4c9e832d4e22584318983cabc013dbf3f70ea95de346"},
+    {file = "watchdog-3.0.0-pp39-pypy39_pp73-macosx_10_9_x86_64.whl", hash = "sha256:c9d8c8ec7efb887333cf71e328e39cffbf771d8f8f95d308ea4125bf5f90ba64"},
+    {file = "watchdog-3.0.0-py3-none-manylinux2014_aarch64.whl", hash = "sha256:0e06ab8858a76e1219e68c7573dfeba9dd1c0219476c5a44d5333b01d7e1743a"},
+    {file = "watchdog-3.0.0-py3-none-manylinux2014_armv7l.whl", hash = "sha256:d00e6be486affb5781468457b21a6cbe848c33ef43f9ea4a73b4882e5f188a44"},
+    {file = "watchdog-3.0.0-py3-none-manylinux2014_i686.whl", hash = "sha256:c07253088265c363d1ddf4b3cdb808d59a0468ecd017770ed716991620b8f77a"},
+    {file = "watchdog-3.0.0-py3-none-manylinux2014_ppc64.whl", hash = "sha256:5113334cf8cf0ac8cd45e1f8309a603291b614191c9add34d33075727a967709"},
+    {file = "watchdog-3.0.0-py3-none-manylinux2014_ppc64le.whl", hash = "sha256:51f90f73b4697bac9c9a78394c3acbbd331ccd3655c11be1a15ae6fe289a8c83"},
+    {file = "watchdog-3.0.0-py3-none-manylinux2014_s390x.whl", hash = "sha256:ba07e92756c97e3aca0912b5cbc4e5ad802f4557212788e72a72a47ff376950d"},
+    {file = "watchdog-3.0.0-py3-none-manylinux2014_x86_64.whl", hash = "sha256:d429c2430c93b7903914e4db9a966c7f2b068dd2ebdd2fa9b9ce094c7d459f33"},
+    {file = "watchdog-3.0.0-py3-none-win32.whl", hash = "sha256:3ed7c71a9dccfe838c2f0b6314ed0d9b22e77d268c67e015450a29036a81f60f"},
+    {file = "watchdog-3.0.0-py3-none-win_amd64.whl", hash = "sha256:4c9956d27be0bb08fc5f30d9d0179a855436e655f046d288e2bcc11adfae893c"},
+    {file = "watchdog-3.0.0-py3-none-win_ia64.whl", hash = "sha256:5d9f3a10e02d7371cd929b5d8f11e87d4bad890212ed3901f9b4d68767bee759"},
+    {file = "watchdog-3.0.0.tar.gz", hash = "sha256:4d98a320595da7a7c5a18fc48cb633c2e73cda78f93cac2ef42d42bf609a33f9"},
+]
+
+[package.extras]
+watchmedo = ["PyYAML (>=3.10)"]
 
 [[package]]
 name = "wheel"
@@ -2019,4 +2353,4 @@ model = ["accelerate", "openai", "tiktoken", "torch", "transformers"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "252788d1bb8ce8c2341f51b90309e9a9e836a22fa229279cb90ec0b8d8998394"
+content-hash = "6dd28f9c276d5d3abc0556410d67a9f4dd8ae1ca19a72653968cb6b21ff15f87"

@@ -8,21 +8,71 @@ class HavingGenerator(AbstractSqlGenerator):
     """
     A class for generating HAVING SQL queries and corresponding questions based on a database table.
 
-    :ivar SingleDatabase database: The SingleDatabase object representing the database to generate queries from.
-    :ivar dict sql_generated: A dictionary containing generated SQL tags, queries, and questions.
-        Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
+    Attributes:
+        database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
+        sql_generated (dict): A dictionary containing generated SQL tags, queries, and questions.
+            Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
     """
 
     def __init__(self, database: SingleDatabase, seed=2023):
+        """
+        Initializes the HavingGenerator object.
+
+        Args:
+            database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
+            seed (int): The seed value for randomization. Default is 2023.
+        """
         super().__init__(database, seed)
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """
         Generate HAVING SQL queries and corresponding questions for categorical and numerical columns.
 
-        :param str table_name: The name of the table in the database.
-        :return: A dictionary containing generated SQL tags, queries, and questions.
-            Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
+        Args:
+            table_name (str): The name of the table in the database.
+
+        Returns:
+            dict: A dictionary containing generated SQL tags, queries, and questions.
+                Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
+
+        Examples:
+            Given a MultipleDatabases object "database" with a table "table_name" with columns "colors" and "numbers"
+            and (i) the average number of rows for each category in "colors" is 2
+            (ii) the mean of the average numbers for each category is 5
+            (iii) the average sum of numbers for each category is 10:
+            >>> generator = HavingGenerator(database)
+            >>> generator._build_having_count(table_name, ["colors"], df)
+            >>> generator.sql_generated
+            {
+                "sql_tags": ["HAVING-COUNT-GR", "HAVING-COUNT-LS", "HAVING-COUNT-EQ"],
+                "queries": [
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) >= '2'',
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) <= '2'',
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) = '2''
+                ],
+                "questions": [
+                    'Find all the "colors" that have at least 2 records in table "table_name"',
+                    'Find all the "colors" that have at most 2 records in table "table_name"',
+                    'Find all the "colors" that have exactly 2 records in table "table_name"'
+                ]
+            }
+            >>> generator._build_having_agg(table_name, ["colors"], ["numbers"], df)
+            >>> generator.sql_generated
+            {
+                "sql_tags": ["HAVING-AGG-AVG-GR", "HAVING-AGG-AVG-LS", "HAVING-AGG-SUM-GR", "HAVING-AGG-SUM-LS"],
+                "queries": [
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING AVG("numbers") >= '5.0'',
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING AVG("numbers") <= '5.0'',
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING SUM("numbers") >= '10.0'',
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING SUM("numbers") <= '10.0''
+                ],
+                "questions": [
+                    'List the "colors" which average "numbers" is at least 5.0 in table "table_name"',
+                    'List the "colors" which average "numbers" is at most 5.0 in table "table_name"',
+                    'List the "colors" which summation of "numbers" is at least 5.0 in table "table_name"',
+                    'List the "colors" which summation of "numbers" is at most 5.0 in table "table_name"'
+                ]
+            }
         """
         self.empty_sql_generated()
         df, cat_cols, num_cols = self._sample_cat_num_cols(table_name)
@@ -34,11 +84,10 @@ class HavingGenerator(AbstractSqlGenerator):
         """
         Build HAVING SQL queries and questions for categorical columns based on row counts.
 
-        > SELECT policy_type_code FROM policies GROUP BY policy_type_code HAVING count(*)>2
-        > Find all the policy types that have more than 2 records
-
-        :param str table_name: The name of the table in the database.
-        :param list cat_cols: List of categorical columns.
+        Args:
+            table_name (str): The name of the table in the database.
+            cat_cols (list): List of categorical columns.
+            df (pd.DataFrame): The DataFrame containing the data.
         """
 
         for cat_col in cat_cols:
@@ -65,13 +114,11 @@ class HavingGenerator(AbstractSqlGenerator):
         """
         Build HAVING SQL queries and questions for numerical columns based on aggregations.
 
-        > SELECT Product_Name FROM PRODUCTS GROUP BY Product_Name HAVING avg(Product_Price) < 1000000
-        > Find the product names whose average product price is below 1000000.
-
-        :param str table_name: The name of the table in the database.
-        :param list cat_cols: List of categorical columns.
-        :param list num_cols: List of numerical columns.
-        :param pd.DataFrame df: The DataFrame containing the data.
+        Args:
+            table_name (str): The name of the table in the database.
+            cat_cols (list): List of categorical columns.
+            num_cols (list): List of numerical columns.
+            df (pd.DataFrame): The DataFrame containing the data.
         """
         # with sample == 2 we get 4 tests for each aggregation -> 4*4 = 16 tests
         # with sample == 3 we get 9 tests for each aggregation -> 9*4 = 36 tests
@@ -105,6 +152,16 @@ class HavingGenerator(AbstractSqlGenerator):
                 self.append_sql_generated(sql_tags, queries, questions)
 
     def _get_average_of_count_cat_col(self, table_name, cat_col):
+        """
+        Helper method to calculate the average count of rows for each category in a categorical column.
+
+        Args:
+            table_name (str): The name of the table in the database.
+            cat_col (str): The name of the categorical column.
+
+        Returns:
+            int: The average count of rows for each category.
+        """
         # TODO: pandas performs faster when number of tuples is 5e4 or more
         # SQL query to get the average count for each category
         inner_query = f'SELECT COUNT(*) AS row_count FROM "{table_name}" GROUP BY "{cat_col}"'
@@ -113,6 +170,17 @@ class HavingGenerator(AbstractSqlGenerator):
         return int(average)
 
     def _get_average_of_sum_avg_cat_col(self, table_name, cat_col, num_col):
+        """
+        Helper method to calculate the average sum and average of a numerical column for each category in a categorical column.
+
+        Args:
+            table_name (str): The name of the table in the database.
+            cat_col (str): The name of the categorical column.
+            num_col (str): The name of the numerical column.
+
+        Returns:
+            tuple: A tuple containing the average sum and average of the numerical column for each category.
+        """
         # TODO: pandas performs faster when number of tuples is 5e4 or more
         # SQL queries to get the average sum and average of numerical column for each category
         inner_query_sum = f'SELECT SUM("{num_col}") AS sum_col FROM "{table_name}" GROUP BY "{cat_col}"'

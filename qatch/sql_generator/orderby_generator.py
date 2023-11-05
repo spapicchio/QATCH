@@ -6,37 +6,106 @@ class OrderByGenerator(AbstractSqlGenerator):
     """
     A class for generating ORDER BY SQL queries and corresponding questions based on a database table.
 
-    :ivar SingleDatabase database: The SingleDatabase object representing the database to generate queries from.
-    :ivar dict sql_generated: A dictionary containing generated SQL tags, queries, and questions.
-        Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
+    Attributes:
+        database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
+        sql_generated (dict): A dictionary containing generated SQL tags, queries, and questions.
+            Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
     """
 
     def __int__(self, database: SingleDatabase, *args, **kwargs):
-        super().__init__(database, *args, **kwargs)
-        self.empty_sql_generated()
-
-    def sql_generate(self, table_name: str):
         """
-        Abstract method to generate SQL tags, queries, and questions based on the specified table.
-        :param str table_name: The name of the table in the database.
-        :return: A dictionary containing generated SQL tags, queries, and questions.
-            Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
+        Initializes the OrderByGenerator object.
+
+        Args:
+            database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
+        super().__init__(database, *args, **kwargs)
+
+    def sql_generate(self, table_name: str) -> dict[str, list]:
+        """
+        Generate ORDER BY queries and corresponding questions based on the specified table.
+
+        Args:
+            table_name (str): The name of the table in the database.
+
+        Returns:
+            dict: A dictionary containing generated SQL tags, queries, and questions.
+                Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
+
+        Examples:
+            Given a MultipleDatabases object "database" with a table "table_name" with columns "colors" and "numbers"
+            >>> generator = OrderByGenerator(database)
+            >>> generator._generate_order_asc("table_name", ["colors", "numbers"])
+            >>> generator.sql_generated
+            {
+                "sql_tags": ["ORDERBY-SINGLE", "ORDERBY-SINGLE"],
+                "queries": [
+                    'SELECT * FROM "table_name" ORDER BY "colors" ASC',
+                    'SELECT * FROM "table_name" ORDER BY "numbers" ASC'
+                ],
+                "questions": [
+                    'Show all data ordered by "colors" in ascending order for the table "table_name"',
+                    'Show all data ordered by "numbers" in ascending order for the table "table_name"'
+                ]
+            }
+            >>> generator._generate_order_desc("table_name", ["colors", "numbers"])
+            >>> generator.sql_generated
+            {
+                "sql_tags": ["ORDERBY-SINGLE", "ORDERBY-SINGLE"],
+                "queries": [
+                    'SELECT * FROM "table_name" ORDER BY "colors" DESC',
+                    'SELECT * FROM "table_name" ORDER BY "numbers" DESC'
+                ],
+                "questions": [
+                    'Show all data ordered by "colors" in descending order for the table "table_name"',
+                    'Show all data ordered by "numbers" in descending order for the table "table_name"'
+                ]
+            }
+            >>> generator._generate_order_asc_project("table_name", ["colors", "numbers"])
+            >>> generator.sql_generated
+            {
+                "sql_tags": ["ORDERBY-PROJECT", "ORDERBY-PROJECT"],
+                "queries": [
+                    'SELECT "colors" FROM "table_name" ORDER BY "colors" ASC',
+                    'SELECT "numbers" FROM "table_name" ORDER BY "numbers" ASC'
+                ],
+                "questions": [
+                    'Project the "colors" ordered in ascending order for the table "table_name"',
+                    'Project the "numbers" ordered in ascending order for the table "table_name"'
+                ]
+            }
+            >>> generator._generate_order_desc_project("table_name", ["colors", "numbers"])
+            >>> generator.sql_generated
+            {
+                "sql_tags": ["ORDERBY-PROJECT", "ORDERBY-PROJECT"],
+                "queries": [
+                    'SELECT "colors" FROM "table_name" ORDER BY "colors" DESC',
+                    'SELECT "numbers" FROM "table_name" ORDER BY "numbers" DESC'
+                ],
+                "questions": [
+                    'Project the "colors" ordered in descending order for the table "table_name"',
+                    'Project the "numbers" ordered in descending order for the table "table_name"'
+                ]
+            }
         """
         self.empty_sql_generated()
         columns = self.database.get_schema_given(table_name).name.tolist()
-        self.generate_order_asc(table_name, columns)
-        self.generate_order_desc(table_name, columns)
-        # TODO check when necessary
-        # self.generate_order_asc_project(table_name, columns)
-        # self.generate_order_desc_project(table_name, columns)
+        self._generate_order_asc(table_name, columns)
+        self._generate_order_desc(table_name, columns)
+
+        self._generate_order_asc_project(table_name, columns)
+        self._generate_order_desc_project(table_name, columns)
         return self.sql_generated
 
-    def generate_order_asc(self, table_name: str, columns: list[str]):
+    def _generate_order_asc(self, table_name: str, columns: list[str]):
         """
         Generates SQL queries and questions for ordering data in ascending order for each column.
 
-        :param str table_name: The name of the table in the database.
-        :param list[str] columns: List of column names.
+        Args:
+            table_name (str): The name of the table in the database.
+            columns (list): List of column names.
         """
         queries = [f'SELECT * FROM "{table_name}" ORDER BY "{col}" ASC'
                    for col in columns]
@@ -48,12 +117,13 @@ class OrderByGenerator(AbstractSqlGenerator):
         sql_tags = ['ORDERBY-SINGLE'] * len(queries)
         self.append_sql_generated(sql_tags, queries, questions)
 
-    def generate_order_desc(self, table_name, columns: list[str]):
+    def _generate_order_desc(self, table_name: str, columns: list[str]):
         """
         Generates SQL queries and questions for ordering data in descending order for each column.
 
-        :param str table_name: The name of the table in the database.
-        :param list[str] columns: List of column names.
+        Args:
+            table_name (str): The name of the table in the database.
+            columns (list): List of column names.
         """
         queries = [f'SELECT * FROM "{table_name}" ORDER BY "{col}" DESC'
                    for col in columns]
@@ -65,12 +135,13 @@ class OrderByGenerator(AbstractSqlGenerator):
         sql_tags = ['ORDERBY-SINGLE'] * len(queries)
         self.append_sql_generated(sql_tags, queries, questions)
 
-    def generate_order_asc_project(self, table_name: str, columns: list[str]):
+    def _generate_order_asc_project(self, table_name: str, columns: list[str]):
         """
         Generates SQL queries and questions for projecting a single column and ordering it in ascending order.
 
-        :param str table_name: The name of the table in the database.
-        :param list[str] columns: List of column names.
+        Args:
+            table_name (str): The name of the table in the database.
+            columns (list): List of column names.
         """
         queries = [f'SELECT "{col}" FROM "{table_name}" ORDER BY "{col}" ASC'
                    for col in columns]
@@ -82,12 +153,13 @@ class OrderByGenerator(AbstractSqlGenerator):
         sql_tags = ['ORDERBY-PROJECT'] * len(queries)
         self.append_sql_generated(sql_tags, queries, questions)
 
-    def generate_order_desc_project(self, table_name, columns: list[str]):
+    def _generate_order_desc_project(self, table_name: str, columns: list[str]):
         """
         Generates SQL queries and questions for projecting a single column and ordering it in descending order.
 
-        :param str table_name: The name of the table in the database.
-        :param list[str] columns: List of column names.
+        Args:
+            table_name (str): The name of the table in the database.
+            columns (list): List of column names.
         """
         queries = [f'SELECT "{col}" FROM "{table_name}" ORDER BY "{col}" DESC'
                    for col in columns]

@@ -115,7 +115,7 @@ def test_create_mask_target_equal_prediction(metric_evaluator, target, predictio
 
 @pytest.mark.parametrize("predictions, expected_result", [
     ([f'SELECT * FROM {TABLE_NAME}'] * 3, []),
-    ([f'SELECT "name" FROM {TABLE_NAME}'] * 3, ['cell_recall', 'tuple_constraint'])
+    ([f'SELECT "name" FROM {TABLE_NAME}'] * 3, ['cell_recall_prediction_result', 'tuple_constraint_prediction_result'])
 ])
 def test_evaluate_with_df_no_order(metric_evaluator, predictions, expected_result):
     """expected result contains the metrics that are not 1.0 with the specified predictions"""
@@ -124,7 +124,8 @@ def test_evaluate_with_df_no_order(metric_evaluator, predictions, expected_resul
     df = metric_evaluator.evaluate_with_df(PREDICTION_DATAFRAME, 'prediction', task='SP')
     metrics = metric_evaluator.metrics
     for metric in metrics:
-        if metric == 'tuple_order':
+        metric = f'{metric}_prediction_result'
+        if metric == 'tuple_order_prediction_result':
             # always NONE in this case because no order
             assert df[metric].tolist() == [None] * len(PREDICTION_DATAFRAME)
             continue
@@ -143,12 +144,13 @@ def test_evaluate_with_df_no_order(metric_evaluator, predictions, expected_resul
     (
             [f'SELECT * FROM {TABLE_NAME} ORDER BY "name" DESC'] * 3,
             [f'SELECT * FROM {TABLE_NAME} ORDER BY "name" ASC'] * 3,  # predictions all different
-            ['tuple_order']),
+            ['tuple_order_prediction_result']),
     (
             [f'SELECT * FROM {TABLE_NAME} ORDER BY "name" DESC'] * 3,
             [f'SELECT * FROM {TABLE_NAME} ORDER BY ASC'] * 3,  # wrong prediction
             # all the metrics are 0 because the prediction is None
-            ['cell_precision', 'cell_recall', 'tuple_cardinality', 'tuple_constraint', 'tuple_order']
+            ['cell_precision_prediction_result', 'cell_recall_prediction_result',
+             'tuple_cardinality_prediction_result', 'tuple_constraint_prediction_result', 'tuple_order_prediction_result']
     )
 ])
 def test_evaluate_with_df_with_order(metric_evaluator, query, predictions, expected_result):
@@ -160,6 +162,7 @@ def test_evaluate_with_df_with_order(metric_evaluator, query, predictions, expec
     df = metric_evaluator.evaluate_with_df(PREDICTION_DATAFRAME, 'prediction', task='SP')
     metrics = metric_evaluator.metrics
     for metric in metrics:
+        metric = f'{metric}_prediction_result'
         if metric not in expected_result:
             assert df[metric].tolist() == [1.0] * len(PREDICTION_DATAFRAME)
         else:

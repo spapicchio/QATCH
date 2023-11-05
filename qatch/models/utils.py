@@ -49,11 +49,12 @@ def _normalize_output_for_QA(prediction: str) -> list[list[Any]] | None:
         return None
     except TypeError:
         return None
-    prediction = check_prediction_list_dim(prediction)
+    prediction = check_prediction_list_dim(prediction, check_llm=True)
     return prediction
 
 
-def check_prediction_list_dim(prediction: list):
+def check_prediction_list_dim(prediction: list, check_llm: bool = False
+                              ) -> list[list[Any]] | None:
     try:
         # may fail because len of the inside array are not equal
         prediction = np.array(prediction)
@@ -78,10 +79,10 @@ def check_prediction_list_dim(prediction: list):
         prediction = [[prediction.tolist()]]
     else:
         prediction = prediction.tolist()
-
-    prediction = [[cell for cell in row if '[H]' not in str(cell)] for row in prediction]
-    prediction = [row for row in prediction if len(row) > 0]
-    prediction_len = [len(row) for row in prediction]
-    # keep only the row with equal len after removing ['H']
-    prediction = [row for row in prediction if len(row) == min(prediction_len)]
+    if check_llm:
+        prediction = [[cell for cell in row if '[H]' not in str(cell)] for row in prediction]
+        prediction = [row for row in prediction if len(row) > 0]
+        prediction_len = [len(row) for row in prediction]
+        # keep only the row with equal len after removing ['H']
+        prediction = [row for row in prediction if len(row) == min(prediction_len)]
     return prediction

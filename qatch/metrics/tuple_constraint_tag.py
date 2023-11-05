@@ -9,25 +9,37 @@ class TupleConstraintTag(AbstractMetric):
                                         prediction: list[list]
                                         ) -> float:
         """
-        check the ratio between the cardinality of the target tuples and the prediction.
-        return a score between 0 and 1.
-        Example:
-            >> target = [['a', 'b'], ['c', 'd']]
-            >> prediction = [['a', 'b'], ['c', 'd']]
-            >> 1.0
+        Evaluates the ratio between the cardinality of the target tuples and the prediction.
+        Returns a score between 0 and 1. It is 1 if the schema, the cardinality and the cell values are equal.
 
-            >> target = [['a', 'b'], ['c', 'd']]
-            >> prediction = [['a', 'b'], ['a', 'b'], ['c', 'd']]
-            >> 0.5
+        Args:
+            target (list[list]): Target table to be compared with the prediction table.
+            prediction (list[list]): Prediction table to be compared with the target table.
 
-        :param target: target table to be compared with prediction table
-        :param prediction: prediction table to be compared with target table
-        :return: score between [0, 1]
-            * 0 indicates NONE of the cardinality values are the same in prediction.
-            * 1 indicates ALL the cardinality values are the same in prediction.
+        Returns:
+            float: Score between [0, 1].
+                - 0 indicates NONE of the schema/cardinality/cell_values  are the same in prediction.
+                - 1 indicates the schema, the cardinality and the cell values of the prediction tuples are equal to the target ones.
 
+        Examples:
+            >>> evaluator = TupleConstraintTag()
+            >>> target = [['a', 'b'], ['c', 'd']]
+            >>> prediction = [['a', 'b'], ['c', 'd']]
+            >>> evaluator.evaluate_single_no_special_case(target, prediction)
+            1.0
+
+            >>> evaluator = TupleConstraintTag()
+            >>> target = [['a', 'b'], ['c', 'd']]
+            >>> prediction = [['a', 'b'], ['a', 'b'], ['c', 'd']]
+            >>> evaluator.evaluate_single_no_special_case(target, prediction)
+            0.5  # only ['c', 'd'] is the same in both tables
+
+            >>> evaluator = TupleConstraintTag()
+            >>> target = [['a', 'b'], ['c', 'd']]
+            >>> prediction = [['a', 'b'], ['a', 'b'], ['c', 'd'], ['c', 'd']]
+            >>> evaluator.evaluate_single_no_special_case(target, prediction)
+            0.0
         """
-
         target = map(sorted, target)
         prediction = map(sorted, prediction)
 

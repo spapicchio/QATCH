@@ -42,7 +42,7 @@ class AbstractLLama2(AbstractModel, ABC):
             top_k=10,
             num_return_sequences=1,
             eos_token_id=self.tokenizer.eos_token_id,
-            max_new_tokens=2048,  # TODO insert 4096
+            max_new_tokens=512,
             temperature=0.01,
         )
         text = sequences[0]['generated_text']

@@ -5,6 +5,8 @@ from typing import Any
 import pandas as pd
 import torch
 
+from .utils import check_prediction_list_dim
+
 
 class AbstractModel(ABC):
     def __init__(self, force_cpu=False, *args, **kwargs):
@@ -27,6 +29,9 @@ class AbstractModel(ABC):
             result = None
         else:
             result = self.predict_input(model_input, table)
+            if 'SP' not in self.name:
+                # only for QA models
+                result = check_prediction_list_dim(result, check_llm=False)
         return result
 
     @abstractmethod

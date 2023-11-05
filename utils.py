@@ -36,6 +36,7 @@ def save_spider_format_for_db_id(df, db: SingleDatabase, model_name: str | None 
 
         path = os.path.join(db_save_path, tables_file_name)
         tables.to_json(path, orient='records')
+        return df, tables
 
 
 def read_breast_cancer_dataset(df: pd.DataFrame,
@@ -274,13 +275,8 @@ def read_mushroom_dataset(df,
 
 def check_model_names(model_name):
     model_name = model_name.lower()
-    if model_name not in ['tapas', 'tapex', 'omnitab', 'chatgpt-qa',
-                          'resdsql', 'gap', 'skg', 'chatgpt-sp']:
-        raise ValueError(f'Unknown model name {model_name}\n',
-                         'supported QA models = [tapas, tapex, omnitab, chatGPT-QA]\n'
-                         'supported SP models = [resdsql, gap, skg, chatGPT-SP]')
     # semantic parsing models
-    if model_name in ['resdsql', 'gap', 'skg', 'chatgpt-sp']:
+    if model_name in ['resdsql', 'gap', 'skg', 'chatgpt_sp', 'llama_sp']:
         model_name = 'sp'
     return model_name
 
@@ -292,53 +288,55 @@ def read_data(db_id: str, model_name: str,
     model_name = check_model_names(model_name)
 
     sample_size = {
-        ('medicine', 'chatgpt-qa', 'heart-attack'): 30,
+        ('medicine', 'chatgpt_qa', 'heart-attack'): 30,
+        ('medicine', 'llama_qa', 'heart-attack'): 20,
         ('medicine', 'tapas', 'heart-attack'): 45,
         ('medicine', 'tapex', 'heart-attack'): 30,
         ('medicine', 'omnitab', 'heart-attack'): 20,
         ('medicine', 'sp', 'heart-attack'): None,
         ('medicine', 'tapas', 'breast-cancer'): 45,
         ('medicine', 'tapex', 'breast-cancer'): 30,
-        ('medicine', 'chatgpt-qa', 'breast-cancer'): 35,
-        ('medicine', 'llama-qa', 'breast-cancer'): 35,
+        ('medicine', 'chatgpt_qa', 'breast-cancer'): 35,
+        ('medicine', 'llama_qa', 'breast-cancer'): 25,
         ('medicine', 'omnitab', 'breast-cancer'): 20,
         ('medicine', 'sp', 'breast-cancer'): None,
 
         ('ecommerce', 'tapas', 'sales-transactions'): 60,
         ('ecommerce', 'tapex', 'sales-transactions'): 20,
-        ('ecommerce', 'chatgpt-qa', 'sales-transactions'): 40,
+        ('ecommerce', 'chatgpt_qa', 'sales-transactions'): 40,
+        ('ecommerce', 'llama_qa', 'sales-transactions'): 30,
         ('ecommerce', 'omnitab', 'sales-transactions'): 20,
         ('ecommerce', 'sp', 'sales-transactions'): 30000,
         ('ecommerce', 'tapas', 'fitness-trackers'): 50,
         ('ecommerce', 'tapex', 'fitness-trackers'): 20,
-        ('ecommerce', 'chatgpt-qa', 'fitness-trackers'): 30,
-        ('ecommerce', 'llama-qa', 'fitness-trackers'): 30,
+        ('ecommerce', 'chatgpt_qa', 'fitness-trackers'): 30,
+        ('ecommerce', 'llama_qa', 'fitness-trackers'): 20,
         ('ecommerce', 'omnitab', 'fitness-trackers'): 20,
         ('ecommerce', 'sp', 'fitness-trackers'): None,
 
         ('finance', 'tapas', 'fraud'): 50,
         ('finance', 'tapex', 'fraud'): 25,
-        ('finance', 'chatgpt-qa', 'fraud'): 30,
-        ('finance', 'llama-qa', 'fraud'): 30,
+        ('finance', 'chatgpt_qa', 'fraud'): 30,
+        ('finance', 'llama_qa', 'fraud'): 20,
         ('finance', 'omnitab', 'fraud'): 20,
         ('finance', 'sp', 'fraud'): 30000,
         ('finance', 'tapas', 'ibm'): 50,
         ('finance', 'tapex', 'ibm'): 20,
-        ('finance', 'chatgpt-qa', 'ibm'): 25,
-        ('finance', 'llama-qa', 'ibm'): 25,
+        ('finance', 'chatgpt_qa', 'ibm'): 25,
+        ('finance', 'llama_qa', 'ibm'): 20,
         ('finance', 'omnitab', 'ibm'): 20,
         ('finance', 'sp', 'ibm'): None,
 
         ('miscellaneous', 'tapas', 'mush'): 50,
         ('miscellaneous', 'tapex', 'mush'): 25,
-        ('miscellaneous', 'chatgpt-qa', 'mush'): 30,
-        ('miscellaneous', 'llama-qa', 'mush'): 30,
+        ('miscellaneous', 'chatgpt_qa', 'mush'): 30,
+        ('miscellaneous', 'llama_qa', 'mush'): 20,
         ('miscellaneous', 'omnitab', 'mush'): 20,
         ('miscellaneous', 'sp', 'mush'): None,
         ('miscellaneous', 'tapas', 'adult'): 50,
         ('miscellaneous', 'tapex', 'adult'): 20,
-        ('miscellaneous', 'chatgpt-qa', 'adult'): 30,
-        ('miscellaneous', 'llama-qa', 'adult'): 30,
+        ('miscellaneous', 'chatgpt_qa', 'adult'): 30,
+        ('miscellaneous', 'llama_qa', 'adult'): 20,
         ('miscellaneous', 'omnitab', 'adult'): 20,
         ('miscellaneous', 'sp', 'adult'): 30000
     }
