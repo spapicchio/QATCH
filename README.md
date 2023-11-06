@@ -294,21 +294,6 @@ python main_reproducibility.py -gtf spider --task QA --model_name Tapas -dsp tes
 Instead, for the not supported models (because an API does not exist),
 the only difference is that the prediction phase has to be done by the user.
 
-# 💬 Citation
-
-If our work is useful for you, please consider citing our paper:
-
-```bibtex
-@inproceedings{
-papicchio2023qatch,
-title={{QATCH}: Benchmarking {SQL}-centric tasks with Table Representation Learning Models on Your Data},
-author={Simone Papicchio and Paolo Papotti and Luca Cagliero},
-booktitle={Thirty-seventh Conference on Neural Information Processing Systems Datasets and Benchmarks Track},
-year={2023},
-url={https://openreview.net/forum?id=XOpaPrb0U5}
-}
-```
-
 # 📝 License
 
 The source code of our project is released, for research purposes only, under the following Common
