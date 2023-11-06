@@ -6,11 +6,11 @@
  </kbd>
  </p>
 
-This repository is the official implementation of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data]()
+This repository is the official implementation of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data](https://openreview.net/forum?id=XOpaPrb0U5)
 to appear in NeurIPS Dataset and Benchmark track 2023.
 
 # 🔥 Updates
-
+- [**2021-11-06**]: Camera ready version is now available! [check it out](https://openreview.net/forum?id=XOpaPrb0U5)! 
 - [**2021-11-05**]: QATCH can now be donwloaded from pip! Do not forget to check the [documentation](https://spapicchio.github.io/QATCH/)! 
 
 # 🏴󠁶󠁵󠁭󠁡󠁰󠁿 Overview
@@ -293,6 +293,21 @@ python main_reproducibility.py -gtf spider --task QA --model_name Tapas -dsp tes
 ```
 Instead, for the not supported models (because an API does not exist),
 the only difference is that the prediction phase has to be done by the user.
+
+# 💬 Citation
+
+If our work is useful for you, please consider citing our paper:
+
+```bibtex
+@inproceedings{
+papicchio2023qatch,
+title={{QATCH}: Benchmarking {SQL}-centric tasks with Table Representation Learning Models on Your Data},
+author={Simone Papicchio and Paolo Papotti and Luca Cagliero},
+booktitle={Thirty-seventh Conference on Neural Information Processing Systems Datasets and Benchmarks Track},
+year={2023},
+url={https://openreview.net/forum?id=XOpaPrb0U5}
+}
+```
 
 # 📝 License
 
