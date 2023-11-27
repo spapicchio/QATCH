@@ -24,7 +24,7 @@ class AbstractSqlGenerator(ABC):
             database (SingleDatabase): The SingleDatabase object representing the database to generate SQL from.
             seed (int): The seed value for randomization. Default is 2023.
         """
-        random.seed(seed)
+        self.seed = seed
         self.database = database
         self.sql_generated = {"sql_tags": [], "queries": [], "questions": []}
 
@@ -85,7 +85,9 @@ class AbstractSqlGenerator(ABC):
 
         if sample is not None:
             # sample the categorical columns
+            random.seed(self.seed)
             cat_cols = random.sample(cat_cols, sample) if len(cat_cols) >= sample else cat_cols
+            random.seed(self.seed)
             num_cols = random.sample(num_cols, sample) if len(num_cols) >= sample else num_cols
         return df, cat_cols, num_cols
 
@@ -101,8 +103,11 @@ class AbstractSqlGenerator(ABC):
         """
         return ", ".join([f'"{str(c)}"' for c in comb])
 
-    @staticmethod
-    def _comb_random(columns: list[str]) -> list[list[str]]:
+    def _comb_random(self, columns: list[str]) -> list[list[str]]:
+        def _get_sample(_columns, k):
+            random.seed(self.seed)
+            return random.sample(_columns, k)
+
         """Randomly select columns for each possible combinations between columns.
 
         Args:
@@ -112,4 +117,4 @@ class AbstractSqlGenerator(ABC):
             list[list[str]]: List of randomly selected column combinations.
         """
         all_comb_num_cols = [num_cols for num_cols in range(1, len(columns) + 1)]
-        return [random.sample(columns, k) for k in all_comb_num_cols]
+        return [_get_sample(columns, k) for k in all_comb_num_cols]

@@ -1,5 +1,4 @@
 import shutil
-import time
 from unittest.mock import patch
 
 import numpy as np
@@ -54,16 +53,17 @@ def having_generator(single_database) -> HavingGenerator:
 
 def test_get_average_of_count_cat_col(having_generator):
     cat_col = 'col2'
-    start_time = time.time()
     target = int(TABLE_DATAFRAME.groupby(cat_col).count().mean().values[0])
-    pd_time = time.time() - start_time
-    start_time = time.time()
     avg_cat_col = having_generator._get_average_of_count_cat_col(TABLE_NAME, cat_col)
-    qatch_time = time.time() - start_time
-    print()
-    print(f'Qatch time: {qatch_time}')
-    print(f'Pandas time: {pd_time}')
+    assert target == avg_cat_col
 
+def test_get_average_of_sum_avg_cat_col(having_generator):
+    cat_col = 'col2'
+    num_col = 'col3'
+    target_sum = round(TABLE_DATAFRAME.groupby(cat_col).agg({num_col: sum}).mean().values[0], 2)
+    target_avg = round(TABLE_DATAFRAME.groupby(cat_col).agg({num_col: 'mean'}).mean().values[0], 2)
+    avg_cat_col = having_generator._get_average_of_sum_avg_cat_col(TABLE_NAME, cat_col, num_col)
+    assert (target_sum, target_avg) == avg_cat_col
 
 def test_having_generator(having_generator):
     # numerical and categorical attributes present

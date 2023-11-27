@@ -106,13 +106,12 @@ class TestGenerator:
                     raise KeyError(f'Generators must be one of {list(self._generators.keys())}')
 
         # db_names check
-        available_dbs = [x.lower() for x in self.databases.get_db_names()]
+        available_dbs = self.databases.get_db_names()
         if db_names is None:
             db_names = available_dbs
         else:
             if isinstance(db_names, str):
                 db_names = [db_names]
-            db_names = [x.lower() for x in db_names]
             for db_name in db_names:
                 if db_name not in available_dbs:
                     raise KeyError(f'Database name "{db_name}" must be one of {available_dbs}')

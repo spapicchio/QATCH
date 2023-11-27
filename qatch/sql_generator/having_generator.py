@@ -46,9 +46,9 @@ class HavingGenerator(AbstractSqlGenerator):
             {
                 "sql_tags": ["HAVING-COUNT-GR", "HAVING-COUNT-LS", "HAVING-COUNT-EQ"],
                 "queries": [
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) >= '2'',
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) <= '2'',
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) = '2''
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) >= 2',
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) <= 2',
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) = 2'
                 ],
                 "questions": [
                     'Find all the "colors" that have at least 2 records in table "table_name"',
@@ -61,10 +61,10 @@ class HavingGenerator(AbstractSqlGenerator):
             {
                 "sql_tags": ["HAVING-AGG-AVG-GR", "HAVING-AGG-AVG-LS", "HAVING-AGG-SUM-GR", "HAVING-AGG-SUM-LS"],
                 "queries": [
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING AVG("numbers") >= '5.0'',
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING AVG("numbers") <= '5.0'',
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING SUM("numbers") >= '10.0'',
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING SUM("numbers") <= '10.0''
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING AVG("numbers") >= 5.0',
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING AVG("numbers") <= 5.0',
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING SUM("numbers") >= 10.0',
+                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING SUM("numbers") <= 10.0'
                 ],
                 "questions": [
                     'List the "colors" which average "numbers" is at least 5.0 in table "table_name"',
@@ -95,9 +95,9 @@ class HavingGenerator(AbstractSqlGenerator):
             mean_count = self._get_average_of_count_cat_col(table_name, cat_col)
             # int(df.groupby(cat_col).count().mean().values[0])
             queries = [
-                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) >= '{mean_count}'""",
-                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) <= '{mean_count}'""",
-                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) = '{mean_count}'"""
+                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) >= {mean_count}""",
+                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) <= {mean_count}""",
+                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) = {mean_count}"""
             ]
 
             questions = [
@@ -132,10 +132,10 @@ class HavingGenerator(AbstractSqlGenerator):
                 # mean_mean_mean = round(mean_mean[num_col].mean(), 2)
                 mean_mean_sum, mean_mean_mean = self._get_average_of_sum_avg_cat_col(table_name, cat_col, num_col)
                 queries = [
-                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING AVG("{num_col}") >= '{mean_mean_mean}'""",
-                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING AVG("{num_col}") <= '{mean_mean_mean}'""",
-                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING SUM("{num_col}") >= '{mean_mean_sum}'""",
-                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING SUM("{num_col}") <= '{mean_mean_sum}'""",
+                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING AVG("{num_col}") >= {mean_mean_mean}""",
+                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING AVG("{num_col}") <= {mean_mean_mean}""",
+                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING SUM("{num_col}") >= {mean_mean_sum}""",
+                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING SUM("{num_col}") <= {mean_mean_sum}""",
                 ]
 
                 questions = [

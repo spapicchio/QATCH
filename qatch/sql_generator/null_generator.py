@@ -95,6 +95,10 @@ class NullGenerator(AbstractSqlGenerator):
         self.append_sql_generated(sql_tags, queries, questions)
 
     def _get_null_cols(self, table_name: str, sample=2):
+        def _get_sample(_columns, k):
+            random.seed(self.seed)
+            return random.sample(_columns, k)
+
         """
         Randomly select columns with NULL values from the given table for generating queries.
 
@@ -108,4 +112,4 @@ class NullGenerator(AbstractSqlGenerator):
         df, _, _ = self._sample_cat_num_cols(table_name)
         mask = df.isnull().any()
         cols = list(df.columns[mask])
-        return random.sample(cols, sample) if len(cols) >= sample else cols
+        return _get_sample(cols, sample) if len(cols) >= sample else cols

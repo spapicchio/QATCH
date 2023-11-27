@@ -6,7 +6,7 @@ from typing import Any
 import numpy as np
 
 
-def _normalize_output_for_QA(prediction: str) -> list[list[Any]] | None:
+def _normalize_output_for_QA(prediction: str) -> list[list[Any]] | None | str:
     try:
         prediction = ast.literal_eval(prediction)
     except ValueError as e:
@@ -27,6 +27,7 @@ def _normalize_output_for_QA(prediction: str) -> list[list[Any]] | None:
         prediction = re.sub(r'\'\[H\](?:\s\w+)?|\',', '', prediction)
         prediction = re.sub(r'(\d+), \'', r'\1', prediction)
         prediction = re.sub(r'(nan), \'', r'\1', prediction)
+    old_prediction = prediction
     try:
         while len(prediction) > 0 and prediction[0] == '[':
             prediction = prediction[1:]
@@ -44,11 +45,11 @@ def _normalize_output_for_QA(prediction: str) -> list[list[Any]] | None:
             [new_pred.extend(p) for p in prediction]
             prediction = new_pred
     except NameError:
-        return None
+        return old_prediction
     except SyntaxError:
-        return None
+        return old_prediction
     except TypeError:
-        return None
+        return old_prediction
     prediction = check_prediction_list_dim(prediction, check_llm=True)
     return prediction
 

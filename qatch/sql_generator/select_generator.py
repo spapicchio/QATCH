@@ -12,16 +12,15 @@ class SelectGenerator(AbstractSqlGenerator):
             Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
     """
 
-    def __int__(self, database: SingleDatabase, *args, **kwargs):
+    def __int__(self, database: SingleDatabase, seed=2023):
         """
         Initializes the SelectGenerator object.
 
         Args:
             database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
+            seed (int): The seed value for randomization. Default is 2023.
         """
-        super().__init__(database, *args, **kwargs)
+        super().__init__(database, seed)
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """
