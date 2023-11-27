@@ -21,7 +21,7 @@ class GroupByGenerator(AbstractSqlGenerator):
             database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
             seed (int): The seed to use for the random number generator.
         """
-        super().__init__(database, seed=2023)
+        super().__init__(database, seed)
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """

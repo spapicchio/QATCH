@@ -12,16 +12,15 @@ class OrderByGenerator(AbstractSqlGenerator):
             Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
     """
 
-    def __int__(self, database: SingleDatabase, *args, **kwargs):
+    def __int__(self, database: SingleDatabase, seed=2023):
         """
         Initializes the OrderByGenerator object.
 
         Args:
             database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
+            seed (int): The seed value for randomization. Default is 2023.
         """
-        super().__init__(database, *args, **kwargs)
+        super().__init__(database, seed)
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """
@@ -91,11 +90,15 @@ class OrderByGenerator(AbstractSqlGenerator):
             }
         """
         self.empty_sql_generated()
-        columns = self.database.get_schema_given(table_name).name.tolist()
+        # to avoid too many ORDERBY sql queries, sample only 2 Cate and 2 numerical columns
+        _, cat_cols, num_cols = self._sample_cat_num_cols(table_name, sample=2)
+        columns = cat_cols + num_cols
         self._generate_order_asc(table_name, columns)
         self._generate_order_desc(table_name, columns)
 
         self._generate_order_asc_project(table_name, columns)
+
+
         self._generate_order_desc_project(table_name, columns)
         return self.sql_generated
 
@@ -129,7 +132,7 @@ class OrderByGenerator(AbstractSqlGenerator):
                    for col in columns]
 
         questions = [
-            f'Show all data ordered by "{col}" in descending order for the table "{table_name}"'
+            f'Show all data ordered by {col} in descending order for the table {table_name}'
             for col in columns
         ]
         sql_tags = ['ORDERBY-SINGLE'] * len(queries)

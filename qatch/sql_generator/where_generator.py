@@ -69,12 +69,12 @@ class WhereGenerator(AbstractSqlGenerator):
                 "sql_tags": ['WHERE-NUM-MAX-VALUES-EMPTY', 'WHERE-NUM-MAX-VALUES',
                             'WHERE-NUM-MIN-VALUES', 'WHERE-NUM-MIN-VALUES-EMPTY',
                             'WHERE-NUM-MEAN-VALUES', 'WHERE-NUM-MEAN-VALUES'],
-                "queries": ['SELECT * FROM "table_name" WHERE "numbers" > "5"',
-                            'SELECT * FROM "table_name" WHERE "numbers" < "5"',
-                            'SELECT * FROM "table_name" WHERE "numbers" > "1"',
-                            'SELECT * FROM "table_name" WHERE "numbers" < "1"',
-                            'SELECT * FROM "table_name" WHERE "numbers" > "3.0"'
-                            'SELECT * FROM "table_name" WHERE "numbers" < "3.0"'],
+                "queries": ['SELECT * FROM "table_name" WHERE "numbers" > 5',
+                            'SELECT * FROM "table_name" WHERE "numbers" < 5',
+                            'SELECT * FROM "table_name" WHERE "numbers" > 1',
+                            'SELECT * FROM "table_name" WHERE "numbers" < 1',
+                            'SELECT * FROM "table_name" WHERE "numbers" > 3.0'
+                            'SELECT * FROM "table_name" WHERE "numbers" < 3.0'],
                 "question": ['Show the data of the table "table_name" where "numbers" is greater than 5',
                             'Show the data of the table "table_name" where "numbers" is less than 5',
                             'Show the data of the table "table_name" where "numbers" is greater than 1',
@@ -106,12 +106,12 @@ class WhereGenerator(AbstractSqlGenerator):
         least_frequent_elements = [self._get_least_frequent_or_min_value(df[col].values) for col in cat_cols]
         for col, most_freq, least_freq in zip(cat_cols, most_frequent_elements, least_frequent_elements):
             queries = [
-                f"""SELECT * FROM "{table_name}" WHERE "{col}" == '{most_freq}'""",
-                f"""SELECT * FROM "{table_name}" WHERE "{col}" == '{least_freq}'""",
-                f"""SELECT * FROM "{table_name}" WHERE "{col}" != '{most_freq}'""",
-                f"""SELECT * FROM "{table_name}" WHERE "{col}" != '{least_freq}'""",
-                f"""SELECT * FROM "{table_name}" WHERE NOT "{col}" == '{most_freq}'""",
-                f"""SELECT * FROM "{table_name}" WHERE NOT "{col}" == '{least_freq}'""",
+                f"""SELECT * FROM "{table_name}" WHERE "{col}" == "{most_freq}" """,
+                f"""SELECT * FROM "{table_name}" WHERE "{col}" == "{least_freq}" """,
+                f"""SELECT * FROM "{table_name}" WHERE "{col}" != "{most_freq}" """,
+                f"""SELECT * FROM "{table_name}" WHERE "{col}" != "{least_freq}" """,
+                f"""SELECT * FROM "{table_name}" WHERE NOT "{col}" == "{most_freq}" """,
+                f"""SELECT * FROM "{table_name}" WHERE NOT "{col}" == "{least_freq}" """,
             ]
 
             questions = [
@@ -141,8 +141,8 @@ class WhereGenerator(AbstractSqlGenerator):
 
         def _generate_given_value(number, n_col):
             queries_n = [
-                f'SELECT * FROM "{table_name}" WHERE "{n_col}" > "{number}"',
-                f'SELECT * FROM "{table_name}" WHERE "{n_col}" < "{number}"',
+                f'SELECT * FROM "{table_name}" WHERE "{n_col}" > {number}',
+                f'SELECT * FROM "{table_name}" WHERE "{n_col}" < {number}',
             ]
             questions_n = [
                 f'Show the data of the table "{table_name}" where "{n_col}" is greater than {number}',
