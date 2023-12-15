@@ -294,13 +294,5 @@ python main_reproducibility.py -gtf spider --task QA --model_name Tapas -dsp tes
 Instead, for the not supported models (because an API does not exist),
 the only difference is that the prediction phase has to be done by the user.
 
-# 📝 License
-
-The source code of our project is released, for research purposes only, under the following Common
-Law License: [CC BY-NC](LICENSE). Citing directly the Creative Commons
-License [website](https://creativecommons.org/about/cclicenses/):<br>
-*"This license allows reusers to distribute, remix, adapt, and build upon the material
-in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator."*
-
 
 
