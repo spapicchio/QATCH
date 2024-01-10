@@ -50,7 +50,8 @@ class MetricEvaluator:
         }
         self.databases = databases
 
-    def evaluate_with_df(self, df, prediction_col_name: str, task: str) -> pd.DataFrame:
+    def evaluate_with_df(self, df, prediction_col_name: str, task: str, keep_target: bool = False
+                         ) -> pd.DataFrame:
         """
         Evaluate the specified metrics using the provided DataFrame containing query results and predictions.
         The df must contain 'query' and 'db_id' columns, and the "prediction_col_name" must be present in the df.
@@ -60,6 +61,7 @@ class MetricEvaluator:
             df (pd.DataFrame): The DataFrame containing query results, prediction, and other relevant columns.
             prediction_col_name (str): The name of the column containing prediction values.
             task (str): The task type, either 'SP' for SQL prediction or other task types.
+            keep_target (bool): Whether to keep the target column in the output DataFrame. Default is False.
 
         Returns:
             pd.DataFrame: A DataFrame with added metric columns.
@@ -92,7 +94,7 @@ class MetricEvaluator:
             df.loc[:, metric_col_name] = None
             if metric == 'tuple_order':
                 # when the target and prediction are equal, the metric is 1
-                df.loc[mask_order & mask_equal, metric] = 1
+                df.loc[mask_order & mask_equal, metric_col_name] = 1
                 mask = mask_order & ~mask_equal
             else:
                 # when the target and prediction are equal, the metric is 1
@@ -105,8 +107,9 @@ class MetricEvaluator:
                 lambda r: generator.evaluate_single_test_metric(r[target_col_name], r[prediction_col_name]),
                 axis=1)
         # at the end drop the columns that are not needed anymore
-        df = df.drop(columns=[target_col_name, prediction_col_name]) if task == 'SP' \
-            else df.drop(columns=[target_col_name])
+        if not keep_target:
+            df = df.drop(columns=[target_col_name, prediction_col_name]) if task == 'SP' \
+                else df.drop(columns=[target_col_name])
         return df
 
     def _get_query_results_from_db(self, df) -> tuple[pd.DataFrame, str]:

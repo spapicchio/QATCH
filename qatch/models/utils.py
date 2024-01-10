@@ -15,9 +15,11 @@ def _normalize_output_for_QA(prediction: str) -> list[list[Any]] | None | str:
     except SyntaxError as e:
         logging.error(e)
     else:
-        prediction = check_prediction_list_dim(prediction)
+        # enter only if there is no exception
+        prediction = check_prediction_list_dim(prediction, check_llm=True)
         return prediction
 
+    # if there is an exception, go in this part of code
     if prediction is None or prediction == [None]:
         return None
 

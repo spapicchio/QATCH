@@ -31,7 +31,8 @@ class MultipleDatabases:
         Returns:
             list[str]: A list of database file names.
         """
-        return [x for x in os.listdir(self.db_path)]
+        # return x only if it is a directory
+        return [x for x in os.listdir(self.db_path) if os.path.isdir(os.path.join(self.db_path, x))]
 
     def __contains__(self, other: str) -> bool:
         """Checks if a database with the given name exists in the managed databases.
