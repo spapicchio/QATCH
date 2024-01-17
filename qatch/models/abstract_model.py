@@ -44,20 +44,3 @@ class AbstractModel(ABC):
     def predict_input(self, model_input, table) -> list[Any]:
         raise NotImplementedError
 
-    @staticmethod
-    def linearize_table(table: pd.DataFrame) -> list[list[list[str]]]:
-        """
-        Linearize a table into a string
-            * create a list for each row
-            * create a list for each cell passing the content of the cell
-              and the header of the cell (with [H])
-        """
-        columns = table.columns.tolist()
-        linearized_table = [
-            [
-                [row[col], f"[H] {col}"]
-                for col in columns
-            ]
-            for _, row in table.iterrows()
-        ]
-        return linearized_table

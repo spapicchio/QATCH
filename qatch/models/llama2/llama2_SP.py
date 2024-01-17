@@ -7,6 +7,10 @@ from .abstract_llama2 import AbstractLLama2
 
 class LLama2_SP(AbstractLLama2):
     @property
+    def name(self):
+        return 'LLama2_SP'
+
+    @property
     def prompt(self):
         return \
             """[INST] I want you to act as a text to SQL model for tabular data.
@@ -39,12 +43,15 @@ class LLama2_SP(AbstractLLama2):
             SELECT AVG("Grade") FROM "student"
             """
 
-    def process_input(self, table: pd.DataFrame,
-                      query: list[str] | str,
-                      tbl_name: str) -> Any | None:
+    def process_input(self,
+                      table: pd.DataFrame | None,
+                      db_table_schema: dict | None,
+                      query: str,
+                      query_tbl_name: str | list[str]) -> Any | None:
+
         schema = table.columns.tolist()
         model_input = f"""
-        [INST] Table name: "{tbl_name}"
+        [INST] Table name: "{query_tbl_name}"
         Schema: "{schema}"
         Question: "{query}"
         [/INST] """

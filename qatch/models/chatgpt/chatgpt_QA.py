@@ -4,7 +4,7 @@ import pandas as pd
 import tiktoken
 
 from .abstract_chatgpt import AbstractChatGPT
-from ..utils import _normalize_output_for_QA
+from ..utils import _normalize_output_for_QA, linearize_table
 
 
 class ChatGPT_QA(AbstractChatGPT):
@@ -52,11 +52,14 @@ class ChatGPT_QA(AbstractChatGPT):
              "content": "[[26]]"}
         ]
 
-    def process_input(self, table: pd.DataFrame,
+    def process_input(self,
+                      table: pd.DataFrame | None,
+                      db_table_schema: list | list[list] | None,
                       query: str,
-                      tbl_name: str,
-                      ) -> Any | None:
-        linearized_table = self.linearize_table(table)
+                      query_tbl_name: str | list[str]) -> Any | None:
+        if not table:
+            raise ValueError('To use ChatGPT for QA, you need to pass the pandas table')
+        linearized_table = linearize_table(table)
         prompt = f"Table: {linearized_table},\nQuestion: '{query}'"
         num_tokens = self._num_tokens_from_string(prompt)
         if num_tokens > 4098:
@@ -74,5 +77,3 @@ class ChatGPT_QA(AbstractChatGPT):
         prediction: str = api_output.choices[0].message.content
         prediction: list = _normalize_output_for_QA(prediction)
         return prediction
-
-

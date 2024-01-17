@@ -4,6 +4,7 @@ import re
 from typing import Any
 
 import numpy as np
+import pandas as pd
 
 
 def _normalize_output_for_QA(prediction: str) -> list[list[Any]] | None | str:
@@ -89,3 +90,21 @@ def check_prediction_list_dim(prediction: list, check_llm: bool = False
         # keep only the row with equal len after removing ['H']
         prediction = [row for row in prediction if len(row) == min(prediction_len)]
     return prediction
+
+
+def linearize_table(table: pd.DataFrame) -> list[list[list[str]]]:
+    """
+    Linearize a table into a string
+        * create a list for each row
+        * create a list for each cell passing the content of the cell
+          and the header of the cell (with [H])
+    """
+    columns = table.columns.tolist()
+    linearized_table = [
+        [
+            [row[col], f"[H] {col}"]
+            for col in columns
+        ]
+        for _, row in table.iterrows()
+    ]
+    return linearized_table

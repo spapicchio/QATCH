@@ -3,7 +3,7 @@ from typing import Any
 import pandas as pd
 
 from .abstract_llama2 import AbstractLLama2
-from ..utils import _normalize_output_for_QA
+from ..utils import _normalize_output_for_QA, linearize_table
 
 
 class LLama2_QA(AbstractLLama2):
@@ -12,13 +12,16 @@ class LLama2_QA(AbstractLLama2):
         return """\
         [INST] I want you to act as a question answering model for tabular data.
         I will pass you a table with one question. 
-        I want you to only reply with the output of the question executed on the table.
+        I want you to return the elements in the table that answer the question.
         I want you to return the answer in format: list of list (row and columns).
         The answer must be complete of all the data from the table.
         If an aggregations is present, return only the aggregate values.
-        Do not write explanations. Do not type commands. 
+        The answer must be generated only from the table provided.
+        The answer must have the same format of the Table passed as input.
+        The answer must be a list of tuples. Then for each tuple, a list of elements. For each element a list of cell values and the header. 
+        Do not use different formats in the answer. 
+        Do not repeat the instruction in the answer.
         [/INST]
-        ok pass me the input
         [INST] Table Name: "Body_Builders"
         Table: "[[['Simone', '[H] Name'], ['Papicchio', '[H] Surname']], [['Marco', '[H] Name'], ['Clemente', '[H] Surname']]]"
         Question: "Show all information about each body builder"
@@ -37,12 +40,16 @@ class LLama2_QA(AbstractLLama2):
         [[26]]
         """
 
-    def process_input(self, table: pd.DataFrame,
-                      query: list[str] | str,
-                      tbl_name: str) -> Any | None:
-        linearized_table = self.linearize_table(table)
+    def process_input(self,
+                      table: pd.DataFrame | None,
+                      db_table_schema: dict | None,
+                      query: str,
+                      query_tbl_name: str | list[str]) -> Any | None:
+        if table.size > 512:
+            return None
+        linearized_table = linearize_table(table)
         model_input = \
-            f"""[INST] Table Name: "{tbl_name}"
+            f"""[INST] Table Name: "{query_tbl_name}"
             Table: "{linearized_table}"
             Question: "{query}"
             [/INST]"""

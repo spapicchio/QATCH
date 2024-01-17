@@ -46,15 +46,17 @@ class ChatGPT_SP(AbstractChatGPT):
              "content": "SELECT AVG(Grade) FROM student"},
         ]
 
-    def process_input(self, table: pd.DataFrame,
+    def process_input(self,
+                      table: pd.DataFrame | None,
+                      db_table_schema: list | list[list] | None,
                       query: str,
-                      tbl_name: str,
-                      ) -> Any | None:
-        if tbl_name is None:
+                      query_tbl_name: str | list[str]) -> Any | None:
+        if not query_tbl_name:
             raise ValueError('For Semantic Parsing, it is need the table name '
                              'for the chatgpt input prompt')
+
         schema = table.columns.tolist()
-        prompt = f'Table Name: "{tbl_name}",\nSchema: {schema},\nQuestion: "{query}"'
+        prompt = f'Table Name: "{query_tbl_name}",\nSchema: {schema},\nQuestion: "{query}"'
         return {"role": "user", "content": prompt}
 
     def _normalize_api_output(self, api_output):

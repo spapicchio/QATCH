@@ -1,17 +1,18 @@
 from abc import abstractmethod, ABC
 from typing import Any
 
+import pandas as pd
 import torch
 import transformers
 from huggingface_hub import login
 from transformers import AutoTokenizer
 
-from ..abstract_model import AbstractModel
+from ..utils import check_prediction_list_dim
 
 
 # pip install torch==2.0.1+cu118 -f https://download.pytorch.org/whl/torch_stable.html
 
-class AbstractLLama2(AbstractModel, ABC):
+class AbstractLLama2(ABC):
     def __init__(self, model_name: str,
                  hugging_face_token: str | None,
                  force_cpu=False,
@@ -34,16 +35,37 @@ class AbstractLLama2(AbstractModel, ABC):
     def prompt(self):
         raise NotImplementedError
 
-    def predict_input(self, model_input, table) -> list[Any]:
+    @property
+    @abstractmethod
+    def name(self):
+        raise NotImplementedError
+
+    def predict(self,
+                table: pd.DataFrame | None,
+                query: str,
+                tbl_name: str | list[str],
+                db_table_schema: dict | None = None) -> list[Any] | list[None]:
+        """"""
+        model_input = self.process_input(table, db_table_schema, query, tbl_name)
+        if model_input is None:
+            """Table is too large to be processed"""
+            result = None
+        else:
+            result = self.predict_input(model_input)
+            if 'SP' not in self.name:
+                # only for QA models
+                result = check_prediction_list_dim(result, check_llm=False)
+        return result
+
+    def predict_input(self, model_input) -> list[Any]:
         final_prompt = self.prompt + model_input
         sequences = self.pipeline(
             final_prompt,
-            do_sample=True,
-            top_k=10,
+            do_sample=False,
             num_return_sequences=1,
             eos_token_id=self.tokenizer.eos_token_id,
-            max_new_tokens=512,
-            temperature=0.01,
+            max_new_tokens=2048,
+            batch_size=1
         )
         text = sequences[0]['generated_text']
         text = text.replace(final_prompt, '').strip()
@@ -51,4 +73,12 @@ class AbstractLLama2(AbstractModel, ABC):
 
     @abstractmethod
     def _normalize_output(self, text):
+        raise NotImplementedError
+
+    @abstractmethod
+    def process_input(self,
+                      table: pd.DataFrame | None,
+                      db_table_schema: dict | None,
+                      query: str,
+                      query_tbl_name: str | list[str]) -> Any | None:
         raise NotImplementedError
