@@ -1,4 +1,5 @@
 import os
+import sqlite3
 
 import numpy as np
 import pandas as pd
@@ -426,3 +427,87 @@ def convert_to_list(x):
     if x == '':
         return None
     return eval(x)
+
+
+def convert_fk_index(data):
+    fk_holder = []
+    for fk in data["foreign_keys"]:
+        tn, col, ref_tn, ref_col = fk[0][0], fk[0][1], fk[1][0], fk[1][1]
+        ref_cid, cid = None, None
+        tid = data['table_names_original'].index(tn)
+        ref_tid = data['table_names_original'].index(ref_tn)
+
+        for i, (tab_id, col_org) in enumerate(data['column_names_original']):
+            if tab_id == ref_tid and ref_col == col_org:
+                ref_cid = i
+            elif tid == tab_id and col == col_org:
+                cid = i
+        if ref_cid and cid:
+            fk_holder.append([cid, ref_cid])
+    return fk_holder
+
+
+def dump_db_json_schema(db, f, database2primary_keys: dict[str, dict]):
+    '''read table and column info'''
+
+    key2tbl_name = {key: tbl_name for tbl_name, key in database2primary_keys[f].items()}
+
+    conn = sqlite3.connect(db)
+    conn.execute('pragma foreign_keys=ON')
+    cursor = conn.execute("SELECT name FROM sqlite_master WHERE type='table';")
+
+    data = {'db_id': f,
+            'table_names_original': [],
+            'table_names': [],
+            'column_names_original': [(-1, '*')],
+            'column_names': [(-1, '*')],
+            'column_types': ['text'],
+            'primary_keys': [],
+            'foreign_keys': []}
+
+    fk_holder = []
+    for i, item in enumerate(cursor.fetchall()):
+        table_name = item[0]
+        data['table_names_original'].append(table_name)
+        data['table_names'].append(table_name.lower().replace("_", ' '))
+        # CREATE TABLE Test (first INTEGER, second INTEGER, FOREIGN KEY (first) REFERENCES A(a), FOREIGN KEY (second) REFERENCES B(x));
+        # sqlite> PRAGMA foreign_key_list(Test);
+        # id         seq         table 2      from 3       to  4       on_update   on_delete   match
+        # ----------  ----------  ----------  ----------  ----------  ----------  ----------  ----------
+        # 0           0           B           second      x           NO ACTION   CASCADE     NONE
+        # 1           0           A           first       a           NO ACTION   CASCADE     NONE
+        # fks = conn.execute("PRAGMA foreign_key_list('{}') ".format(table_name)).fetchall()
+        # print("db:{} table:{} fks:{}".format(f,table_name,fks))
+        # fk[3] -> name of the foreign key in the table
+        # fk[2] -> name of the table that contains the primary key
+        # fk[4] -> name of the foreign key
+        # fk_holder.extend([ [(table_name, fk[3]), (fk[2], fk[4])] for fk in fks])
+        cur = conn.execute("PRAGMA table_info('{}') ".format(table_name))
+        for j, col in enumerate(cur.fetchall()):
+            column = col[1]
+            if column in key2tbl_name:
+                if key2tbl_name[column] != table_name:
+                    fk_holder.append([(table_name, column), (key2tbl_name[column], column)])
+                else:
+                    data['primary_keys'].append(len(data['column_names']))
+
+            data['column_names_original'].append((i, col[1]))
+            data['column_names'].append((i, col[1].lower().replace("_", " ")))
+            # varchar, '' -> text, int, numeric -> integer,
+            col_type = col[2].lower()
+            if 'char' in col_type or col_type == '' or 'text' in col_type or 'var' in col_type:
+                data['column_types'].append('text')
+            elif 'int' in col_type or 'numeric' in col_type or 'decimal' in col_type or 'number' in col_type \
+                    or 'id' in col_type or 'real' in col_type or 'double' in col_type or 'float' in col_type:
+                data['column_types'].append('number')
+            elif 'date' in col_type or 'time' in col_type or 'year' in col_type:
+                data['column_types'].append('time')
+            elif 'boolean' in col_type:
+                data['column_types'].append('boolean')
+            else:
+                data['column_types'].append('others')
+
+    data["foreign_keys"] = fk_holder
+    data['foreign_keys'] = convert_fk_index(data)
+
+    return data

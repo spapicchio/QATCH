@@ -94,6 +94,18 @@ class MultipleDatabases:
         """
         return self[db_id].get_schema_given(tbl_name)
 
+    def get_all_table_schema_given(self, db_id: str) -> dict[str, pd.DataFrame]:
+        """Retrieves all the table schema from the database.
+
+        Args:
+            db_id (str): The name of the database.
+
+        Returns:
+            pd.DataFrame: A Pandas DataFrame representing the schema of the specified table.
+        """
+
+        return self[db_id].table_schemas
+
     def run_multiple_queries(self, db_id: str, queries: list) -> list[list]:
         """Executes multiple queries on the specified database and returns the results.
 

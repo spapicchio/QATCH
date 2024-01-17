@@ -125,8 +125,18 @@ class SingleDatabase:
         Returns:
             list[list]: A list of lists representing the result of the SQL query.
         """
-        self.cursor.execute(query)
-        return self.cursor.fetchall()
+        try:
+            self.cursor.execute(query)
+            output = self.cursor.fetchall()
+            if not output:
+                logging.warning(f'No query result for this query: {query}')
+            return output
+        except sqlite3.OperationalError as e:
+            logging.error(f"Error while executing query: {query}")
+            logging.error(e)
+            raise
+        # self.cursor.execute(query)
+        # return self.cursor.fetchall()
 
     def close_connection(self):
         """Closes the connection to the database."""

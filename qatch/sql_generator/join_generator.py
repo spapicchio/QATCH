@@ -32,8 +32,9 @@ class JoinGenerator(AbstractSqlGenerator):
                 # create the join query
                 queries.append(f'SELECT T1.{t1_cat_cols[0]}, T2."{t2_cat_cols[0]}" '
                                f'FROM "{table_name}" AS T1 JOIN {t2} AS T2 ON T1.{col}=T2.{col}')
-                questions.append(f'List all the "{t1_cat_cols[0]}" and "{t2_cat_cols[0]}" from the table "{table_name}" and the table "{t2}" '
-                                 f'where {col} is the same')
+                questions.append(
+                    f'List all the "{t1_cat_cols[0]}" and "{t2_cat_cols[0]}" from the table "{table_name}" and the table "{t2}" '
+                    f'where {col} is the same')
                 sql_tags.append('JOIN-PROJECT-CAT')
         self.append_sql_generated(sql_tags, queries, questions)
 
