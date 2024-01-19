@@ -18,6 +18,10 @@ class ChatGPT_QA(AbstractChatGPT):
         self.encoding = tiktoken.encoding_for_model(model_name)
 
     @property
+    def name(self):
+        return "ChatGPT_QA"
+
+    @property
     def prompt(self):
         return [
             {"role": "user", "content":
@@ -57,7 +61,7 @@ class ChatGPT_QA(AbstractChatGPT):
                       db_table_schema: list | list[list] | None,
                       query: str,
                       query_tbl_name: str | list[str]) -> Any | None:
-        if not table:
+        if table is None:
             raise ValueError('To use ChatGPT for QA, you need to pass the pandas table')
         linearized_table = linearize_table(table)
         prompt = f"Table: {linearized_table},\nQuestion: '{query}'"

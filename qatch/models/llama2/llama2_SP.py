@@ -8,7 +8,7 @@ from .abstract_llama2 import AbstractLLama2
 class LLama2_SP(AbstractLLama2):
     @property
     def name(self):
-        return 'LLama2_SP'
+        return 'LLama2_SP_code'
 
     @property
     def prompt(self):

@@ -8,6 +8,10 @@ from ..utils import _normalize_output_for_QA, linearize_table
 
 class LLama2_QA(AbstractLLama2):
     @property
+    def name(self):
+        return 'LLama2_QA_code'
+
+    @property
     def prompt(self):
         return """\
         [INST] I want you to act as a question answering model for tabular data.

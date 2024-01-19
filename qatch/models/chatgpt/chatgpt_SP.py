@@ -15,6 +15,10 @@ class ChatGPT_SP(AbstractChatGPT):
                          *args, **kwargs)
 
     @property
+    def name(self):
+        return 'ChatGPT_SP'
+
+    @property
     def prompt(self):
         return [
             {"role": "user", "content":

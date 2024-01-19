@@ -19,7 +19,8 @@ class SingleDatabase:
         db_path_sqlite (str): Path to the SQLite file.
     """
 
-    def __init__(self, db_path: str, db_name: str, tables: dict[str, pd.DataFrame] | None = None):
+    def __init__(self, db_path: str, db_name: str, tables: dict[str, pd.DataFrame] | None = None,
+                 table2primary_key: dict[str, str] | None = None):
         """
         Initializes a new SingleDatabase object.
 
@@ -29,6 +30,7 @@ class SingleDatabase:
             tables (Optional[Dict[str, pd.DataFrame]]): A dictionary containing table names as keys and corresponding
                 Pandas DataFrames as values. If provided, these tables will be created in the database upon
                 initialization. Default is None.
+            table2primary_key: TODO
 
         Raises:
             ValueError: If the specified `db_path` does not exist and no tables are provided.
@@ -60,13 +62,14 @@ class SingleDatabase:
                 # CASE 2: tables provided and database does not exist
                 logging.info(f"provided tables are stored in {path_sqlite_file}")
                 existing_tables = list(tables.keys())
-                self._set_tables_in_db(tables, conn)
+                self._set_tables_in_db(tables, conn, table2primary_key)
         else:
             if tables is not None:
                 # CASE 3: database already exists and tables are provided
                 # log warning tables provided but also database already exists
                 logging.warning("tables provided but also database already exists, "
                                 "tables in the database will be used")
+        self.table2primary_key = table2primary_key
         self.db_path_sqlite = path_sqlite_file
         self.db_path = db_path
         self.db_name = db_name
@@ -77,7 +80,9 @@ class SingleDatabase:
                               for tbl_name in self.table_names}
 
     @staticmethod
-    def _set_tables_in_db(tables: dict[str, pd.DataFrame] | None, conn: sqlite3.Connection):
+    def _set_tables_in_db(tables: dict[str, pd.DataFrame] | None,
+                          conn: sqlite3.Connection,
+                          table2primary_key: dict[str, str] | None):
         """
         Sets the tables in the database based on the provided dictionary.
 
@@ -86,10 +91,61 @@ class SingleDatabase:
                 Pandas DataFrames as values.
             conn (sqlite3.Connection): A connection object representing the SQLite database.
         """
+        primary_key2table = {v: k for k, v in table2primary_key.items()} if table2primary_key else None
         for name, table in tables.items():
             if name == 'table':
                 name = 'my_table'
-            table.to_sql(name, conn, if_exists='replace', index=False)
+            if not table2primary_key:
+                table.to_sql(name, conn, if_exists='replace', index=False)
+            else:
+                create_table_string = SingleDatabase._create_table_in_db(name, table, primary_key2table)
+                conn.cursor().execute(create_table_string)
+                table.to_sql(name, conn, if_exists='append', index=False)
+
+    @staticmethod
+    def _create_table_in_db(name, table, primary_key2table):
+        """
+        CREATE TABLE `match` (
+        "Round" real,
+        "Location" text,
+        "Country" text,
+        "Date" text,
+        "Fastest_Qualifying" text,
+        "Winning_Pilot" text,
+        "Winning_Aircraft" text,
+        PRIMARY KEY ("Round"),
+        FOREIGN KEY (`Winning_Aircraft`) REFERENCES `aircraft`(`Aircraft_ID`),
+        FOREIGN KEY (`Winning_Pilot`) REFERENCES `pilot`(`Pilot_Id`)
+        );
+        """
+        def convert_pandas_dtype_to_sqlite_type(type_):
+            if 'int' in type_:
+                return 'INTEGER'
+            if 'float' in type_:
+                return 'REAL'
+            if 'object' in type_ or 'date' in type_:
+                return 'TEXT'
+
+        column2type = {k: convert_pandas_dtype_to_sqlite_type(str(table.dtypes[k]))
+                       for k in table.dtypes.index}
+        create_table = [f'CREATE TABLE `{name}`(']
+        # add simple col
+        # "Round" real,
+        [create_table.append(f'"{col}" {column2type[col]},') for col in table.columns]
+        # Add primary key and foreign key
+        for col in table.columns:
+            if col in primary_key2table:
+                if name == primary_key2table[col]:
+                    # PRIMARY KEY ("Round"),
+                    create_table.append(f'PRIMARY KEY ("{col}"),')
+                else:
+                    # FOREIGN KEY (`Winning_Aircraft`) REFERENCES `aircraft`(`Aircraft_ID`),
+                    create_table.append(f'FOREIGN KEY (`{col}`) REFERENCES `{primary_key2table[col]}`(`{col}`),')
+        # remove last comma
+        create_table[-1] = create_table[-1][:-1]
+        # add closing statement
+        create_table.append(');')
+        return " ".join(create_table)
 
     def get_table_given(self, table_name: str) -> pd.DataFrame:
         """

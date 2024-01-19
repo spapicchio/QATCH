@@ -277,7 +277,7 @@ def read_mushroom_dataset(df,
 def check_model_names(model_name):
     model_name = model_name.lower()
     # semantic parsing models
-    if model_name in ['resdsql', 'gap', 'skg', 'chatgpt_sp', 'llama_sp']:
+    if model_name in ['resdsql', 'gap', 'skg'] or 'sp' in model_name:
         model_name = 'sp'
     return model_name
 
@@ -447,10 +447,8 @@ def convert_fk_index(data):
     return fk_holder
 
 
-def dump_db_json_schema(db, f, database2primary_keys: dict[str, dict]):
+def dump_db_json_schema_spider(db, f):
     '''read table and column info'''
-
-    key2tbl_name = {key: tbl_name for tbl_name, key in database2primary_keys[f].items()}
 
     conn = sqlite3.connect(db)
     conn.execute('pragma foreign_keys=ON')
@@ -470,27 +468,10 @@ def dump_db_json_schema(db, f, database2primary_keys: dict[str, dict]):
         table_name = item[0]
         data['table_names_original'].append(table_name)
         data['table_names'].append(table_name.lower().replace("_", ' '))
-        # CREATE TABLE Test (first INTEGER, second INTEGER, FOREIGN KEY (first) REFERENCES A(a), FOREIGN KEY (second) REFERENCES B(x));
-        # sqlite> PRAGMA foreign_key_list(Test);
-        # id         seq         table 2      from 3       to  4       on_update   on_delete   match
-        # ----------  ----------  ----------  ----------  ----------  ----------  ----------  ----------
-        # 0           0           B           second      x           NO ACTION   CASCADE     NONE
-        # 1           0           A           first       a           NO ACTION   CASCADE     NONE
-        # fks = conn.execute("PRAGMA foreign_key_list('{}') ".format(table_name)).fetchall()
-        # print("db:{} table:{} fks:{}".format(f,table_name,fks))
-        # fk[3] -> name of the foreign key in the table
-        # fk[2] -> name of the table that contains the primary key
-        # fk[4] -> name of the foreign key
-        # fk_holder.extend([ [(table_name, fk[3]), (fk[2], fk[4])] for fk in fks])
+        fks = conn.execute("PRAGMA foreign_key_list('{}') ".format(table_name)).fetchall()
+        fk_holder.extend([[(table_name, fk[3]), (fk[2], fk[4])] for fk in fks])
         cur = conn.execute("PRAGMA table_info('{}') ".format(table_name))
         for j, col in enumerate(cur.fetchall()):
-            column = col[1]
-            if column in key2tbl_name:
-                if key2tbl_name[column] != table_name:
-                    fk_holder.append([(table_name, column), (key2tbl_name[column], column)])
-                else:
-                    data['primary_keys'].append(len(data['column_names']))
-
             data['column_names_original'].append((i, col[1]))
             data['column_names'].append((i, col[1].lower().replace("_", " ")))
             # varchar, '' -> text, int, numeric -> integer,
@@ -507,7 +488,24 @@ def dump_db_json_schema(db, f, database2primary_keys: dict[str, dict]):
             else:
                 data['column_types'].append('others')
 
+            if col[5] == 1:
+                data['primary_keys'].append(len(data['column_names']) - 1)
+
     data["foreign_keys"] = fk_holder
     data['foreign_keys'] = convert_fk_index(data)
 
     return data
+
+
+def create_json_tables_file(db_path):
+    db_files_sqlite = [(df + '.sqlite', df) for df in os.listdir(db_path) if
+                       os.path.exists(os.path.join(db_path, df, df + '.sqlite'))]
+
+    tables = []
+    for f, df in db_files_sqlite:
+        db = os.path.join(db_path, df, f)
+        table = dump_db_json_schema_spider(db, df)
+        table['column_names'] = table['column_names_original']
+        table['table_names'] = table['table_names_original']
+        tables.append(table)
+    return tables

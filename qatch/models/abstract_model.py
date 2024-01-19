@@ -20,7 +20,8 @@ class AbstractModel(ABC):
     def predict(self,
                 table: pd.DataFrame,
                 query: str,
-                tbl_name: str) -> list[Any] | list[None]:
+                tbl_name: str,
+                *args, **kwargs) -> list[Any] | list[None]:
         """
         """
         model_input = self.process_input(table, query, tbl_name)
