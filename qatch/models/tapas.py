@@ -67,25 +67,59 @@ class Tapas(AbstractModel):
         return model_input.to(self.device)
 
     def predict_input(self, model_input, table) -> list[Any]:
-        outputs = self.model(**model_input)
+        """
+        Method to make a prediction using the provided model input and tabulated data.
 
+        The model generates a collection of outputs from which prediction coordinates are derived.
+        These coordinates are used to retrieve data from the provided table which is subsequently compiled into the answer set.
+
+        After usage, memory heavy variables are carefully disposed to ensure efficient memory usage.
+
+        Args:
+            model_input (Any): The processed model input.
+            table (pd.DataFrame): Data table to use for generating predictions.
+
+        Returns:
+            list[Any]: List containing the processed query answers derived from the model's predictions.
+
+        Note:
+            This method should not be called independently. It is initiated within the
+            pipeline of the `predict` method of the implementing classes.
+
+        Example:
+            >>> query = "what are the phone numbers?"
+            >>> tbl_name = "table"
+            >>> model_input = tapas_instance.process_input(table, query, tbl_name)
+            >>> result = tapas_instance.predict_input(model_input, table)
+            >>> print(result)
+            [['1234567890', '0987654321', ...]], # Just an example, actual output may differ
+        """
+        # Step 1: Pass the model_input to the model for forward propagation to generate outputs.
+        outputs = self.model(**model_input)
+        # Step 2: Move the model_input tensor to cpu.
         model_input.to('cpu')
+        # Step 3: Move the output tensors to CPU and detach them from the computational graph.
         outputs = {idx: outputs[idx].cpu().detach() for idx in outputs}
+        # Step 4: Detach any tensors in model_input from the computational graph.
         [model_input[idx].detach() for idx in model_input]
 
+        # Step 5: Retrieve the coordinates from the logits using a tokenizer function.
         pred_query_cords, _ = self.tokenizer.convert_logits_to_predictions(
             model_input,
             outputs['logits'],
             outputs['logits_aggregation']
         )
+        # Step 6: Construct a list of answers.
         answers = []
         for tbl_cords in pred_query_cords:
             query_answer = defaultdict(list)
+            # For each coordinate set in the predicted query coordinates,
+            # construct a dictionary of row-wise query answers.
             [query_answer[row].append(table.iat[(row, col)])
              for row, col in tbl_cords]
             answers.extend(list(query_answer.values()))
-
+        # Step 7: Dispose of potentially memory-heavy variables.
         del model_input
         del outputs
-
+        # Step 8: Return the list of processed query answers derived from the model's predictions.  
         return answers
