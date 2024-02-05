@@ -12,9 +12,7 @@ class AbstractModel(ABC):
     def __init__(self, force_cpu=False, *args, **kwargs):
         # set up logger
         self.logger = logging
-        self.device = torch.device("cuda" if torch.cuda.is_available()
-                                             and not force_cpu
-                                   else "cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() and not force_cpu else "cpu")
         self.name = self.__class__.__name__
 
     def predict(self,
@@ -44,4 +42,3 @@ class AbstractModel(ABC):
     @abstractmethod
     def predict_input(self, model_input, table) -> list[Any]:
         raise NotImplementedError
-

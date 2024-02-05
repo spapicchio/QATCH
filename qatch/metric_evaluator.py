@@ -74,18 +74,18 @@ class MetricEvaluator:
         """
         if task.upper() == 'QA':
             # add the new metrics at the bottom of the dataframe
-            df_metrics = df.apply(lambda row: self.evaluate_single_test_QA(row,
+            df_metrics = df.apply(lambda row: self.evaluate_single_test_QA(row.to_dict(),
                                                                            prediction_col_name,
                                                                            target_col_name),
                                   axis=1, result_type='expand')
         else:
-            df_metrics = df.apply(lambda row: self.evaluate_single_test_SP(row,
+            df_metrics = df.apply(lambda row: self.evaluate_single_test_SP(row.to_dict(),
                                                                            prediction_col_name,
                                                                            target_col_name), axis=1,
                                   result_type='expand')
         return pd.concat([df, df_metrics], axis=1).replace({np.nan: None})
 
-    def evaluate_single_test_QA(self, test: dict | pd.Series, prediction_col_name: str, target_col_name: str) -> dict:
+    def evaluate_single_test_QA(self, test: dict, prediction_col_name: str, target_col_name: str) -> dict:
         """
         Evaluates metric scores on a single test QA task where a test is a dictionary (or pd.Series) and the
         `prediction_col_name` and `target_col_name` are the column names in the test data containing model predictions
@@ -135,7 +135,7 @@ class MetricEvaluator:
             metric2evaluation[f'{metric}_{prediction_col_name}'] = evaluation
         return metric2evaluation
 
-    def evaluate_single_test_SP(self, test: dict | pd.Series, prediction_col_name: str, target_col_name: str) -> dict:
+    def evaluate_single_test_SP(self, test: dict, prediction_col_name: str, target_col_name: str) -> dict:
         """
         Evaluates metrics for a single SQL prediction test by fetching the results of the predicted and
         target queries from the database.

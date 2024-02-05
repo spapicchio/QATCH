@@ -124,7 +124,8 @@ class SpiderReader:
         df = df[df.tbl_name.notna()]
         return df
 
-    def _get_simple_sql_mask(self, values: pd.Series):
+    @staticmethod
+    def _get_simple_sql_mask(values: pd.Series):
         """
         Build simple mask to detect whether the SQL granularity required is present or not
         :param values: series where each element is a dict with the SQL query

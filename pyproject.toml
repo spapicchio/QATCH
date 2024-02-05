@@ -23,6 +23,7 @@ torch = { version = ">=2.0.0, !=2.0.1, !=2.1.0", extras = ['model'] }
 openai = { version = "~1.7.2", optional = true, extras = ["model"] }
 transformers = { version = ">=4.29.0", optional = true, extras = ["model"] }
 tiktoken = { version = "^0.5.1", optional = true, extras = ["model"] }
+openpyxl = "^3.1.2"
 
 [tool.poetry.extras]
 model = ["accelerate", "torch", "openai", "transformers", "tiktoken"]

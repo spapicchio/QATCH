@@ -9,7 +9,7 @@ from ..utils import _normalize_output_for_QA, linearize_table
 class LLama2_QA(AbstractLLama2):
     @property
     def name(self):
-        return 'LLama2_QA_code'
+        return 'LLama2_QA'
 
     @property
     def prompt(self):

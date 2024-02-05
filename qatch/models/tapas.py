@@ -19,13 +19,34 @@ class Tapas(AbstractModel):
                       query: str,
                       tbl_name: str) -> Any | None:
         """
-        Processes the input to the model.
-        - TAPAS works with a table containing only string.
-        - The model input cannot be longer than 512 tokens
-        return NONE if the combination of queries and table is too long to be tokenized
-        :param table: table to analize to retrieve the answer
-        :param query: list or single query to answer
-        :return: processed input or NONE if the input is too long
+        Processes a given input for the model by first checking if it exceeds the model's maximum token limit.
+        If the input is too long, it returns None. Otherwise, it transforms the input into a specific format that the model accepts.
+
+        Note:
+            The TAPAS model works specifically with tables that only contain strings and has a model input limit of 512 tokens.
+
+        Args:
+          table (pd.DataFrame): The table to analyse in order to retrieve the answer.
+          query (str): The query or list of queries to answer.
+          tbl_name (str): The name of the table.
+
+        Returns:
+            Any | None: The processed input in a tokenized string format ready for model input,
+                        or None if the input length exceeds the model limit of 512 tokens.
+
+        Raises:
+            ValueError: When the length of the tokenized input exceeds the accepted length of the model.
+
+        Example:
+        ```python
+        # Assuming `model_process_input` is an instance of a model that implements this method
+        data = pd.DataFrame([["John Doe", "123-456-7890"],["Jane Doe", "098-765-4321"]],
+                            columns=["Name", "Phone Number"])
+        query = "what are all the phone numbers?"
+        tbl_name = "Contact Info"
+        processed_input = model.process_input(data, query, tbl_name)
+        print(processed_input)
+        ```
         """
         if table.shape[0] * table.shape[1] > 512:
             return None
@@ -66,6 +87,5 @@ class Tapas(AbstractModel):
 
         del model_input
         del outputs
-        
-        return answers
 
+        return answers
