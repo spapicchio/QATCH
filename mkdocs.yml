@@ -3,7 +3,7 @@ site_description: QATCH is a Python library that generates and evaluates tests f
 site_author: Simone Papicchio
 repo_url: https://github.com/spapicchio/QATCH
 repo_name: spapicchio/QATCH
-edit_uri: https://github.com/spapicchio/QATCH/tree/develop
+edit_uri: https://github.com/spapicchio/QATCH/
 
 theme:
   name: material
@@ -20,9 +20,10 @@ theme:
     - navigation.instant
     - navigation.instant.progress
     - navigation.top
+    - navigation.tabs.collapse
 
 extra:
-  version: 0.1.0
+  version: "1.5.18"
   generator: false
   social:
     - icon: fontawesome/brands/github
@@ -36,6 +37,9 @@ plugins:
         python:
           options:
             docstring_style: google
+            selection:
+              ignore:
+                - my_module.my_function
   - search
 
 markdown_extensions:
@@ -52,7 +56,9 @@ markdown_extensions:
 nav:
   - Introduction: index.md
   - Getting Started: getting_started.md
-  - "Step 0: Database Reader": database_reader.md
-  - "Step 1: SQL Generator": sql_generator.md
-  - "Step 3: Metrics": metrics.md
+  - Package:
+      - "Database Reader & Creation": database_reader.md
+      - "QATCH Generate": sql_generator.md
+      - "Supported Models": llms_models.md
+      - "QATCH Evaluate": metrics.md
 

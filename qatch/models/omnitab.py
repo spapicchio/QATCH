@@ -8,6 +8,34 @@ from .abstract_model import AbstractModel
 
 
 class Omnitab(AbstractModel):
+    """
+    The Omnitab class inherits from the AbstractModel and specializes it to parse tables using the Omnitab model.
+
+    Attributes:
+        tokenizer (AutoTokenizer): The tokenizer for input preprocessing.
+        model (AutoModelForSeq2SeqLM): The model used to answer the queries from the table.
+
+    Note:
+        - The model used in this class is 'neulab/omnitab-large-finetuned-wtq'.
+        - The Omnitab model works specifically with tables that only contain strings
+         and has a model input limit of 1024 tokens.
+
+    Examples:
+        >>>import pandas as pd
+        >>>from qatch.models import Tapas
+        >>>
+        >>> data = pd.DataFrame([
+        ...     ["John Doe", "123-456-7890"],
+        ...     ["Jane Doe", "098-765-4321"]
+        ... ], columns=["Name", "Phone Number"])
+        >>>
+        >>> omnitab_model = Omnitab("'neulab/omnitab-large-finetuned-wtq'")
+        >>> query = "What is John Doe's phone number?"
+        >>> answer = omnitab_model.predict(table=data, query=query, tbl_name='Contact Info')
+        >>> print(answer)
+        [['123-456-7890']]
+    """
+
     def __init__(self, model_name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -18,21 +46,6 @@ class Omnitab(AbstractModel):
     def process_input(self, table: pd.DataFrame,
                       query: str,
                       tbl_name: str) -> Any | None:
-        """
-        Processes a table and a query into a format that the model can handle.
-
-        The function transforms the table into a string, and tokenizes the table and the query.
-
-        If the input is too long for the model, a warning is logged and the function returns None.
-
-        Args:
-            table: The table to process, in pandas DataFrame format.
-            query: The query to process, in string format.
-            tbl_name: The table name, in string format.
-
-        Returns:
-            The processed input, ready to be fed into the model. If the input is too long, the function returns None.
-        """
         # Check dimensions of the table (rows*columns). If the size is larger than 1024,
         # we return None with a warning log. This is due to the limitation of the model input size.
         if table.shape[0] * table.shape[1] > 1024:
@@ -71,22 +84,5 @@ class Omnitab(AbstractModel):
 
     @override
     def predict_input(self, model_input, table) -> list[list[list[str]]]:
-        """
-        Overrides the parent class method to generate outputs from the model and then decode them back into text.
-
-        Use this method to predict a new output given the processed model inputs.
-
-        Args:
-            model_input (TYPE): Input data processed by the process_input method for model to predict.
-            table (pd.DataFrame): Original table used in model inputs.
-
-        Returns:
-            list[list[list[str]]]: List of decoded model outputs. Each output is represented by a list[list] strings.
-        Example:
-            >>> model_input = {"input_ids": [101, 1898, 102], "attention_mask": [1, 1, 1]}
-            >>> table = pd.DataFrame(...)
-            >>> model.predict_input(model_input, table)
-            [['hello', 'world'], ['foo', 'bar']]
-        """
         outputs = self.model.generate(**model_input)
         return self.tokenizer.batch_decode(outputs, skip_special_tokens=True)

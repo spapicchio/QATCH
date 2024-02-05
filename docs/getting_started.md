@@ -1,5 +1,3 @@
-
-
 ## Installation
 
 First need to install QATCH.

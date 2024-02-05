@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, override
 
 import pandas as pd
 
@@ -7,6 +7,42 @@ from ..utils import _normalize_output_for_QA, linearize_table
 
 
 class LLama2_QA(AbstractLLama2):
+    """
+    A Subclass of `AbstractLLama2` which provides functionality to act as a question answering model
+    for tabular data.
+
+    Attributes:
+        model_name (str): Name of the Llama model.
+        hugging_face_token (str, None): Token for the Hugging Face.
+        force_cpu (bool, optional): To force usage of cpu. Defaults to False.
+
+    Methods:
+        name: Property attribute which returns the model name.
+        prompt: Property attribute which provides instructions for the model in a defined format.
+        process_input: Converts input data into a format which model can interpret.
+        _normalize_output: Normalize the output for question answering.
+
+    Note:
+        - The model used in this class is "meta-llama/Llama-2-7b-chat-hf".
+        - The prompt contains few-shot examples to improve the QA task results
+
+
+    Examples:
+        >>> import pandas as pd
+        >>> from qatch.models import LLama2_QA
+        >>>
+        >>> data = pd.DataFrame([
+        ...     ["John Doe", "123-456-7890"],
+        ...     ["Jane Doe", "098-765-4321"]
+        ... ], columns=["Name", "Phone Number"])
+        >>>
+        >>> llama2_qa_instance = LLama2_QA("meta-llama/Llama-2-7b-chat-hf")
+        >>> query = "What is John Doe's phone number?"
+        >>> answer = llama2_qa_instance.predict(table=data, query=query, tbl_name='Contact Info')
+        >>> print(answer)
+        [['123-456-7890']]
+  """
+
     @property
     def name(self):
         return 'LLama2_QA'
@@ -44,6 +80,7 @@ class LLama2_QA(AbstractLLama2):
         [[26]]
         """
 
+    @override
     def process_input(self,
                       table: pd.DataFrame | None,
                       db_table_schema: dict | None,
@@ -59,5 +96,6 @@ class LLama2_QA(AbstractLLama2):
             [/INST]"""
         return model_input
 
+    @override
     def _normalize_output(self, text):
         return _normalize_output_for_QA(text)

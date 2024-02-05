@@ -21,23 +21,6 @@ class SingleDatabase:
 
     def __init__(self, db_path: str, db_name: str, tables: dict[str, pd.DataFrame] | None = None,
                  table2primary_key: dict[str, str] | None = None):
-        """
-        Initializes a new SingleDatabase object.
-
-        Args:
-            db_path (str): The path where the database file will be stored, or it is already stored.
-            db_name (str): The name of the database file (without the file extension).
-            tables (Optional[Dict[str, pd.DataFrame]]): A dictionary containing table names as keys and corresponding
-                Pandas DataFrames as values. If provided, these tables will be created in the database upon
-                initialization. Default is None.
-            table2primary_key (Optional[Dict[str, str]]): A dictionary mapping table names to primary keys.
-                For example, if you want to set the primary key of table `A` to be `Key_1`, you should pass
-                `table2primary_key={'A': 'Key_1'}`. Default is None.
-
-        Raises:
-            ValueError: If the specified `db_path` does not exist and no tables are provided.
-
-        """
         if db_path == '' or db_path == '.' or db_path == './':
             db_path = os.getcwd()
         db_path = os.path.join(db_path, db_name)

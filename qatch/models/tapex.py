@@ -11,6 +11,34 @@ from .abstract_model import AbstractModel
 
 
 class Tapex(AbstractModel):
+    """
+    The Tapex class inherits from the AbstractModel and specializes it to parse tables using the TAPEX model.
+
+    Attributes:
+        tokenizer (TapexTokenizer): The tokenizer for input preprocessing.
+        model (BartForConditionalGeneration): The model used to answer the queries from the table.
+
+    Note:
+        - The model used in this class is 'microsoft/tapex-large-finetuned-wtq'.
+        - The TAPEX model works specifically with tables that only contain strings
+         and has a model input limit of 1024 tokens.
+
+    Examples:
+        >>> import pandas as pd
+        >>> from qatch.models import Tapex
+        >>>
+        >>> data = pd.DataFrame([
+        ...     ["John Doe", "123-456-7890"],
+        ...     ["Jane Doe", "098-765-4321"]
+        ... ], columns=["Name", "Phone Number"])
+        >>>
+        >>> tapex_model = Tapex("microsoft/tapex-large-finetuned-wtq")
+        >>> query = "What is John Doe's phone number?"
+        >>> answer = tapex_model.predict(table=data, query=query, tbl_name='Contact Info')
+        >>> print(answer)
+        [['123-456-7890']]
+    """
+
     def __init__(self, model_name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tokenizer = TapexTokenizer.from_pretrained(model_name)

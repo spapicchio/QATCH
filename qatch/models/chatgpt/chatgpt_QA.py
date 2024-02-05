@@ -8,6 +8,43 @@ from ..utils import _normalize_output_for_QA, linearize_table
 
 
 class ChatGPT_QA(AbstractChatGPT):
+    """
+       A Subclass of `AbstractChatGPT` which provides functionality to act as a question answering model
+       for tabular data.
+
+       Attributes:
+           api_key (str): The API key for the OpenAI client.
+           api_org (str, optional): The organization ID for the OpenAI account. Defaults to None.
+           model_name (str, optional): The name of the model to use. Defaults to 'gpt-3.5-turbo-0613'.
+
+       Methods:
+           name: Property attribute which returns the model name.
+           prompt: Property attribute which provides instructions for the model in a defined format.
+           process_input: Converts input data into a format which model can interpret.
+           _normalize_output: Normalize the output for question answering.
+
+       Note:
+           - The model used in this class is "gpt-3.5-turbo-0613" but you can specify any version you want.
+           - The prompt contains few-shot examples to improve the QA task results
+
+
+       Examples:
+           >>> import pandas as pd
+           >>> from qatch.models import ChatGPT_QA
+           >>>
+           >>> data = pd.DataFrame([
+           ...     ["John Doe", "123-456-7890"],
+           ...     ["Jane Doe", "098-765-4321"]
+           ... ], columns=["Name", "Phone Number"])
+           >>>
+           >>> chatgpt_qa_instance =  ChatGPT_QA(api_key=credentials['api_key_chatgpt'],
+           >>>                                  api_org=credentials['api_org_chatgpt'],
+           >>>                                  model_name="gpt-3.5-turbo-0613")
+           >>> query = "What is John Doe's phone number?"
+           >>> answer = chatgpt_qa_instance.predict(table=data, query=query, tbl_name='Contact Info')
+           >>> print(answer)
+           [['123-456-7890']]
+     """
 
     def __init__(self, api_key: str,
                  api_org: str | None,

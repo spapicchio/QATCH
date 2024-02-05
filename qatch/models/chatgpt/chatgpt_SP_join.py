@@ -6,6 +6,51 @@ from .abstract_chatgpt import AbstractChatGPT
 
 
 class ChatGPT_SP_join(AbstractChatGPT):
+    """
+    Implementation of the Llama2 model specialized for semantic parsing (SP)
+    with JOIN statements. Inherits from the Abstract Llama2 model class.
+
+    This model processes the provided schemas and queries, and after transformation,
+    predicts the appropriate SQL statements.
+
+    Attributes:
+        api_key (str): The API key for the OpenAI client.
+        api_org (str, optional): The organization ID for the OpenAI account. Defaults to None.
+        model_name (str, optional): The name of the model to use. Defaults to 'gpt-3.5-turbo-0613'.
+
+    Methods:
+        name: Property attribute which returns the model name.
+        prompt: Property attribute which provides instructions for the model in a defined format:
+                Database table names: ["customer", "product"], Schema table "customer": [CustomerID, name, surname]
+                Schema table "product": [ProductID, CustomerID, name, surname, price]
+                Question: "which products did Simone buy?"
+        process_input: Processes given inputs into a form that model can consume.
+                       Extracts and structures relevant data for the SP task.
+        _normalize_output: Normalizes the text received from model predictions.
+                           Strips away unnecessary characters from the result SQL statement.
+
+    Note: For this model, the `table` parameter in predict and process_input methods
+            is not used and can be set to None.
+
+    Examples:
+        >>> chatgpt_sp_join = ChatGPT_SP_join(api_key=credentials['api_key_chatgpt'],
+           >>>                                  api_org=credentials['api_org_chatgpt'],
+           >>>                                  model_name="gpt-3.5-turbo-0613")
+        >>> # you need to specify all the database table schema
+        >>> # if you are using QATCH, you can use database.get_all_table_schema_given(db_id='name_of_the_database')
+        >>> db_table_schema = {
+        ...                    "student": {"name": ["StudentID", "Grade", "PhoneNumbers"]},
+        ...                    "customer": {"name": ["CustomerID", "name", "surname"]},
+        ...                    "product": {"name": ["ProductID", "CustomerID", "name", "surname", "price"]}
+        ...                   }
+        >>> query = "which products did Simone buy?"
+        >>> chatgpt_sp_join.predict(table=None,
+        >>>                       query=query,
+        >>>                       tbl_name=["customer", "product"],
+        >>>                       db_table_schema=db_table_schema)
+        SELECT T1.name, T2.name FROM "customer" as T1 JOIN "product" as T2 WHERE T1.name == "Simone"
+
+    """
 
     def __init__(self, api_key: str,
                  api_org: str | None,

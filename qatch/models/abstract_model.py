@@ -10,12 +10,6 @@ from .utils import check_prediction_list_dim
 
 class AbstractModel(ABC):
     def __init__(self, force_cpu=False, *args, **kwargs):
-        """
-        Initializes logger, device, and name based on class parameters.
-
-        Args:
-            force_cpu (bool, optional): If True, forces the model to run computations on CPU even if CUDA is available. Defaults to False.
-        """
         # set up logger
         self.logger = logging
         self.device = torch.device("cuda" if torch.cuda.is_available() and not force_cpu else "cpu")

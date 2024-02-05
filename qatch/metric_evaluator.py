@@ -26,15 +26,6 @@ class MetricEvaluator:
     """
 
     def __init__(self, databases: MultipleDatabases, metrics: list[str] | str | None = None):
-        """
-        initialize the MetricEvaluator object.
-
-        Args:
-            databases (MultipleDatabases): Object representing database connections.
-                This attribute stores information about multiple database connections.
-            metrics (list[str] | str | None): List of metric names to be evaluated. Default metrics include:
-                ['cell_precision', 'cell_recall', 'tuple_cardinality', 'tuple_constraint', 'tuple_order']
-        """
         if metrics is None:
             metrics = ['cell_precision', 'cell_recall',
                        'tuple_cardinality', 'tuple_constraint',
@@ -102,7 +93,7 @@ class MetricEvaluator:
         Returns:
             dict: A dictionary with keys are metric name and value is the evaluated metric score for each metric in `self.metrics`.
 
-        Example:
+        Examples:
             >>> eval_task = MetricEvaluator(databases, metrics=['cell_precision', 'cell_recall'])
             >>> test = {"sql_tags": "SELECT",
             ...         "prediction": [["wales", "scotland"], ["england"]],
@@ -156,7 +147,7 @@ class MetricEvaluator:
         Notes:
             If the predicted query cannot be run on the db, the resulting metrics are all zeros
 
-        Example:
+        Examples:
             >>> test = {'db_id': 'database1', 'target': 'SELECT DISTINCT emailisfree FROM fraud', 'prediction': 'SELECT emailsisfree, income FROM fraud'}
             >>> evaluator = MetricEvaluator(databases)
             >>> results = evaluator.evaluate_single_test_SP(test, 'prediction', 'target')

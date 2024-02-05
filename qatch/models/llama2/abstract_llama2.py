@@ -13,10 +13,29 @@ from ..utils import check_prediction_list_dim
 # pip install torch==2.0.1+cu118 -f https://download.pytorch.org/whl/torch_stable.html
 
 class AbstractLLama2(ABC):
+    """This is an abstract class for Llama models.
+
+    Attributes:
+        model_name (str): Name of the Llama model.
+        hugging_face_token (str, None): Token for the Hugging Face.
+        force_cpu (bool): To force usage of cpu.
+        tokenizer: Tokenizer from the pretrained model.
+        pipeline: Text generation pipeline.
+    """
+
     def __init__(self, model_name: str,
                  hugging_face_token: str | None,
                  force_cpu=False,
                  *args, **kwargs):
+        """
+        Initialize the Llama model configurations.
+
+        Args:
+            model_name (str): Name of the Llama model.
+            hugging_face_token (str, None): Token for the Hugging Face.
+            force_cpu (bool, optional): To force usage of cpu. Defaults to False.
+        """
+
         super().__init__(*args, **kwargs)
         self.model_name = model_name
         login(token=hugging_face_token)
@@ -33,11 +52,13 @@ class AbstractLLama2(ABC):
     @property
     @abstractmethod
     def prompt(self):
+        """Defines the prompt property in the child classes."""
         raise NotImplementedError
 
     @property
     @abstractmethod
     def name(self):
+        """Defines the name property in the child classes."""
         raise NotImplementedError
 
     def predict(self,
@@ -45,7 +66,18 @@ class AbstractLLama2(ABC):
                 query: str,
                 tbl_name: str | list[str],
                 db_table_schema: dict | None = None) -> list[Any] | list[None]:
-        """"""
+        """
+        Predict results based on the input data.
+
+        Args:
+            table (pd.DataFrame, None): The input table data.
+            query (str): The query to base the prediction on.
+            tbl_name (str, List[str]): The table name.
+            db_table_schema (Dict, None, optional): The table schema. Defaults to None.
+
+        Returns:
+            list: The list of results.
+        """
         model_input = self.process_input(table, db_table_schema, query, tbl_name)
         if model_input is None:
             """Table is too large to be processed"""
@@ -58,6 +90,15 @@ class AbstractLLama2(ABC):
         return result
 
     def predict_input(self, model_input) -> list[Any]:
+        """
+        Make a prediction based on the model input.
+
+        Args:
+            model_input (any): The input for the model.
+
+        Returns:
+            list: The resulting prediction.
+        """
         final_prompt = self.prompt + model_input
         sequences = self.pipeline(
             final_prompt,
@@ -73,6 +114,7 @@ class AbstractLLama2(ABC):
 
     @abstractmethod
     def _normalize_output(self, text):
+        """Provides the way to normalize output in the child classes."""
         raise NotImplementedError
 
     @abstractmethod
@@ -81,4 +123,16 @@ class AbstractLLama2(ABC):
                       db_table_schema: dict | None,
                       query: str,
                       query_tbl_name: str | list[str]) -> Any | None:
+        """
+        Defines the way to process input in the child classes.
+
+        Args:
+            table (pd.DataFrame, None): The input table data.
+            db_table_schema (Dict, None, optional): The table schema. Defaults to None.
+            query (str): The query to base the input processing on.
+            query_tbl_name (str, List[str]): The query table name.
+
+        Returns:
+            Any: The processed data.
+        """
         raise NotImplementedError
