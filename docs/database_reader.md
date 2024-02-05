@@ -21,9 +21,12 @@ databases = MultipleDatabases(db_save_path)
 Instead, if you want to specify different data you can use the *SingleDatabase* class 
 to create the sqlite databases in "db_save_path/db_id/db_id.sqlite"
 
+Assume the PKs have all different names. No two tables with the same PK name.
+
 ```python
-from qatch.database_reader import SingleDatabase
 import pandas as pd
+
+from qatch.database_reader import SingleDatabase
 
 # Create dummy table
 data = {
@@ -41,8 +44,12 @@ db_save_path = 'test_db'
 # define the name of the database
 db_id = 'olympic'
 
+# define the PK
+# Assume the PKs have all different names. Two tables cannot have same PK name.
+table2primary_key = {'olympic_games': 'id'}
+
 # create database connection
-db = SingleDatabase(db_path=db_save_path, db_name=db_id, tables=db_tables)
+db = SingleDatabase(db_path=db_save_path, db_name=db_id, tables=db_tables, table2primary_key=table2primary_key)
 ```
 
 

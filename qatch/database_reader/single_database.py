@@ -30,7 +30,9 @@ class SingleDatabase:
             tables (Optional[Dict[str, pd.DataFrame]]): A dictionary containing table names as keys and corresponding
                 Pandas DataFrames as values. If provided, these tables will be created in the database upon
                 initialization. Default is None.
-            table2primary_key: TODO
+            table2primary_key (Optional[Dict[str, str]]): A dictionary mapping table names to primary keys.
+                For example, if you want to set the primary key of table `A` to be `Key_1`, you should pass
+                `table2primary_key={'A': 'Key_1'}`. Default is None.
 
         Raises:
             ValueError: If the specified `db_path` does not exist and no tables are provided.
@@ -62,7 +64,7 @@ class SingleDatabase:
                 # CASE 2: tables provided and database does not exist
                 logging.info(f"provided tables are stored in {path_sqlite_file}")
                 existing_tables = list(tables.keys())
-                self._set_tables_in_db(tables, conn, table2primary_key)
+                self.set_tables_in_db(tables, conn, table2primary_key)
         else:
             if tables is not None:
                 # CASE 3: database already exists and tables are provided
@@ -80,44 +82,74 @@ class SingleDatabase:
                               for tbl_name in self.table_names}
 
     @staticmethod
-    def _set_tables_in_db(tables: dict[str, pd.DataFrame] | None,
-                          conn: sqlite3.Connection,
-                          table2primary_key: dict[str, str] | None):
+    def set_tables_in_db(tables: dict[str, pd.DataFrame] | None,
+                         conn: sqlite3.Connection,
+                         table2primary_key: dict[str, str] | None):
         """
-        Sets the tables in the database based on the provided dictionary.
+        Sets the tables in the SQLite database represented by the given connection object.
+
+        This method takes a dictionary of tables in which keys are table names and values are Pandas DataFrames
+        representing the tables, and sets these tables in the SQLite database represented by the `conn` connection object.
+
+        The optional `table2primary_key` argument can be used to set primary keys for some or all tables. If not provided,
+        all tables are created without primary keys.
+        If the table contains an attribute with the same name of a primary key, a foreign key relationship is created.
+
+        Note:
+            - If a table is named as 'table', the method will replace its name with 'my_table'.
+            - Assume the PKs have all different names. No two tables with the same PK name.
 
         Args:
-            tables (Optional[Dict[str, pd.DataFrame]]): A dictionary containing table names as keys and corresponding
-                Pandas DataFrames as values.
+            tables (Optional[Dict[str, pd.DataFrame]]): A dictionary of tables to set in the SQLite database.
+                Keys are table names and values are corresponding Pandas DataFrames.
+
             conn (sqlite3.Connection): A connection object representing the SQLite database.
+
+            table2primary_key (Optional[Dict[str, str]]): A dictionary mapping table names to primary keys.
+                For example, if you want to set the primary key of table `A` to be `Key_1`, you should pass
+                `table2primary_key={'A': 'Key_1'}`. Default is None.
         """
-        primary_key2table = {v: k for k, v in table2primary_key.items()} if table2primary_key else None
         for name, table in tables.items():
             if name == 'table':
                 name = 'my_table'
             if not table2primary_key:
                 table.to_sql(name, conn, if_exists='replace', index=False)
             else:
-                create_table_string = SingleDatabase._create_table_in_db(name, table, primary_key2table)
+                create_table_string = SingleDatabase._create_table_in_db(name, table, table2primary_key)
                 conn.cursor().execute(create_table_string)
                 table.to_sql(name, conn, if_exists='append', index=False)
 
     @staticmethod
-    def _create_table_in_db(name, table, primary_key2table):
+    def _create_table_in_db(name, table, table2primary_key):
         """
-        CREATE TABLE `match` (
-        "Round" real,
-        "Location" text,
-        "Country" text,
-        "Date" text,
-        "Fastest_Qualifying" text,
-        "Winning_Pilot" text,
-        "Winning_Aircraft" text,
-        PRIMARY KEY ("Round"),
-        FOREIGN KEY (`Winning_Aircraft`) REFERENCES `aircraft`(`Aircraft_ID`),
-        FOREIGN KEY (`Winning_Pilot`) REFERENCES `pilot`(`Pilot_Id`)
-        );
+        Returns a SQLite CREATE TABLE command as a string, constructed based on the given table name, DataFrame, and primary_key2table dict.
+
+        This method first converts pandas DataFrame dtypes to SQLite data types. Then, a SQLite CREATE TABLE command is built step by step.
+        The command includes creating simple columns, adding primary keys, and creating foreign key relationships.
+        Finally, the CREATE TABLE command is returned as a string.
+
+        Args:
+             name (str): The name of the table to be created in SQLite database.
+             table (pd.DataFrame): A pandas DataFrame holding the data and structure of the SQL table. The dtype of each column translated to SQLite data types.
+             table2primary_key (dict): A dictionary where the keys are the names of columns of the table, and the values are the names of the tables they are primary keys to.
+
+        Example:
+            >>> import pandas as pd
+            >>> from your_module import SingleDatabase
+
+            >>> name = 'sample_table'
+            >>> table = pd.DataFrame({
+            >>>    'id': [1, 2, 3],
+            >>>    'name': ['Alice', 'Bob', 'Charlie'],
+            >>>})
+            >>>primary_key2table = {
+            >>>    'sample_table_id': 'sample_table'
+            >>>}
+
+            >>>print(SingleDatabase._create_table_in_db(name,table,primary_key2table))
+            >>># Outputs: CREATE TABLE `sample_table`( "id" INTEGER, "name" TEXT, PRIMARY KEY ("id") );
         """
+
         def convert_pandas_dtype_to_sqlite_type(type_):
             if 'int' in type_:
                 return 'INTEGER'
@@ -126,6 +158,8 @@ class SingleDatabase:
             if 'object' in type_ or 'date' in type_:
                 return 'TEXT'
 
+        primary_key2table = {tbl_PK: tbl_name for tbl_name, tbl_PK in
+                             table2primary_key.items()} if table2primary_key else None
         column2type = {k: convert_pandas_dtype_to_sqlite_type(str(table.dtypes[k]))
                        for k in table.dtypes.index}
         create_table = [f'CREATE TABLE `{name}`(']

@@ -91,8 +91,8 @@ def test_create_table_in_db():
     table = pd.DataFrame({'Customer_ID': [1, 2, 3, 4, 5],
                           'Product_ID': [1, 2, 3, 4, 5],
                           'Name': list('simon')})
-    primary_key2table = {'Customer_ID': 'table_1', 'Product_ID': 'table_2'}
-    create_table_string = SingleDatabase._create_table_in_db(name, table, primary_key2table)
+    table2primary_key = {'table_1': 'Customer_ID', 'table_2': 'Product_ID'}
+    create_table_string = SingleDatabase._create_table_in_db(name, table, table2primary_key)
     expected = """CREATE TABLE `table_1`( "Customer_ID" INTEGER, "Product_ID" INTEGER, "Name" TEXT, PRIMARY KEY ("Customer_ID"), FOREIGN KEY (`Product_ID`) REFERENCES `table_2`(`Product_ID`) );"""
     assert expected.strip() == create_table_string.strip()
 
@@ -108,7 +108,7 @@ def test_set_tables_in_db(tmp_path):
 
     tables = {'table_1': table_1, 'table_2': table_2}
     conn = sqlite3.connect(os.path.join(tmp_path, f'{DB_NAME}.sqlite'))
-    SingleDatabase._set_tables_in_db(tables, conn, table2primary_key)
+    SingleDatabase.set_tables_in_db(tables, conn, table2primary_key)
     table_1_keys = conn.execute("PRAGMA foreign_key_list('{}') ".format('table_1')).fetchall()[0]
     table_2_keys = conn.execute("PRAGMA foreign_key_list('{}') ".format('table_2')).fetchall()[0]
     assert table_1_keys[2] == 'table_2'
