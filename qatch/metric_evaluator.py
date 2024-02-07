@@ -120,7 +120,7 @@ class MetricEvaluator:
             # initialize the metric column
             # evaluate the metric only for the test where the prediction is not equal to the target
             tqdm.pandas(desc=f'Evaluating {metric}')
-            if metric == 'tuple_order' and 'order' not in test[target_col_name].lower():
+            if metric == 'tuple_order' and 'order by' not in test[target_col_name].lower():
                 continue
             evaluation = generator.evaluate_single_test_metric(test[new_target_col], test[prediction_col_name])
             metric2evaluation[f'{metric}_{prediction_col_name}'] = evaluation

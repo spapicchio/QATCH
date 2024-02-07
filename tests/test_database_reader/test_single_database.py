@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -21,7 +22,28 @@ def single_database(tmp_path):
     db = SingleDatabase(db_path=tmp_path, db_name=DB_NAME, tables={TABLE_NAME: TABLE_DATAFRAME})
     yield db  # Provide the fixture object
     # Teardown: Clean up the temporary database and tables after testing
-    db.close_connection()
+
+
+def test_init_database(tmp_path):
+    tmp_path = str(tmp_path)
+    # Initial setup
+    table = pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}], columns=['a', 'b'])
+    tables = {'test_table': table}
+    primary_keys = {'test_table': 'a'}
+
+    # Stage 1: the database does not exist -> we create one
+    db = SingleDatabase(tmp_path, 'fake_db', tables, primary_keys)
+    assert db.table_names == ['test_table']
+
+    # Stage 2: the database does exist -> we do not overwrite
+    new_table = pd.DataFrame([{"c": 5, "d": 6}, {"c": 7, "d": 8}], columns=['c', 'd'])
+    db = SingleDatabase(tmp_path, 'fake_db', {'new_table': new_table}, None)
+    assert db.table_names == ['test_table']
+
+    # Stage 3: Same table of stage 1
+    result = db.run_query("SELECT * FROM test_table")
+    assert result == [(1, 2), (3, 4)]
+
 
 
 # Tests for SingleDatabase class methods
@@ -32,7 +54,9 @@ def test_get_table_from_name(single_database):
 
 def test_get_schema_given(single_database):
     schema = single_database.get_schema_given(TABLE_NAME)
-    expected_schema = pd.read_sql_query(f"PRAGMA table_info({TABLE_NAME})", single_database.conn)
+    with single_database.connect_cursor() as cursor:
+        conn = cursor.connection
+        expected_schema = pd.read_sql_query(f"PRAGMA table_info({TABLE_NAME})", conn)
     assert schema.equals(expected_schema)
 
 
@@ -80,10 +104,8 @@ def test_existing_db_with_tables(tmp_path):
         conn.close()
 
     # Test: Initialize SingleDatabase with tables
-    db = SingleDatabase(db_path=tmp_path, db_name=DB_NAME, tables={TABLE_NAME: TABLE_DATAFRAME})
+    db = SingleDatabase(db_path=str(tmp_path), db_name=DB_NAME, tables={TABLE_NAME: TABLE_DATAFRAME})
     assert TABLE_NAME in db.table_names
-    # Teardown: Close the connection and remove the temporary database directory
-    db.close_connection()
 
 
 def test_create_table_in_db():
@@ -115,3 +137,28 @@ def test_set_tables_in_db(tmp_path):
     assert table_1_keys[3] == table_1_keys[4] == 'Product_ID'
     assert table_2_keys[3] == table_2_keys[4] == 'Customer_ID'
     assert table_2_keys[2] == 'table_1'
+
+
+# Behavior Test
+@pytest.mark.parametrize("db_path, db_name, cwd, expected", [
+    ('.', 'database', '/current_directory', '/current_directory/database'),
+    ('./', 'database', '/current_directory', '/current_directory/database'),
+    ('', 'database', '/current_directory', '/current_directory/database'),
+    ('/path', 'database', '/current_directory', '/path/database')
+])
+def test__ensure_valid_directory(db_path, db_name, cwd, expected, monkeypatch):
+    # Setup
+    result = str(Path(expected))
+
+    # Mock dependencies
+    def mock_getcwd():
+        return cwd
+
+    monkeypatch.setattr(os, 'getcwd', mock_getcwd)
+    monkeypatch.setattr(os, 'makedirs', lambda x, exist_ok: None)
+
+    # Exercise
+    actual = SingleDatabase._ensure_valid_directory(db_path, db_name)
+
+    # Verify
+    assert actual == result
