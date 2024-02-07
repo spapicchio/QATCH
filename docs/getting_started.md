@@ -1,5 +1,3 @@
-
-
 ## Installation
 
 First need to install QATCH.
@@ -32,11 +30,13 @@ If your data is not stored in a sqlite database you can use our code to generate
 If this is not the case, you can skip this passage.
 
 ```python
-from qatch.database_reader import SingleDatabase
 import pandas as pd
+
+from qatch.database_reader import SingleDatabase
 
 # Create dummy table
 data = {
+    "id": [0, 1, 2, 3, 4, 5],
     "year": [1896, 1900, 1904, 2004, 2008, 2012],
     "city": ["athens", "paris", "st. louis", "athens", "beijing", "london"]
 }
@@ -45,6 +45,8 @@ table = pd.DataFrame.from_dict(data)
 # define the tables in the database (<table_name> : <table>)
 db_tables = {'olympic_games': table}
 
+# Assume the PKs have all different names. Two tables cannot have same PK name.
+table2primary_key = {'olympic_games': 'id'}
 # define where to store the sqlite database
 db_save_path = 'test_db'
 
@@ -52,9 +54,8 @@ db_save_path = 'test_db'
 db_id = 'olympic'
 
 # create database connection
-db = SingleDatabase(db_path=db_save_path, db_name=db_id, tables=db_tables)
+db = SingleDatabase(db_path=db_save_path, db_name=db_id, tables=db_tables, table2primary_key=table2primary_key)
 ```
-
 This class will create the sqlite database in "db_save_path/db_id/db_id.sqlite".
 
 Once you have the database stored in this format "db_save_path/db_id/db_id.sqlite",
@@ -109,11 +110,8 @@ model = Tapas(model_name="google/tapas-large-finetuned-wtq")
 # iterate for each row and run prediction
 tqdm.pandas(desc=f'Predicting for {model.name}')
 tests_df[f'predictions_{model.name}'] = tests_df.progress_apply(
-    lambda row: model.predict(
-        table=databases.get_table(db_id=row['db_id'], tbl_name=row['tbl_name']),
-        query=row['question'],
-        tbl_name=row['tbl_name']
-    ),
+    lambda row: model.predict(table=databases.get_table(db_id=row['db_id'], tbl_name=row['tbl_name']),
+                              query=row['question'], tbl_name=row['tbl_name']),
     axis=1
 )
 ```

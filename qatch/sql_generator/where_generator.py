@@ -66,19 +66,14 @@ class WhereGenerator(AbstractSqlGenerator):
             >>> generator._generate_where_numerical("table_name", ["numbers"], sample_df)
             >>> generator.sql_generated
             {
-                "sql_tags": ['WHERE-NUM-MAX-VALUES-EMPTY', 'WHERE-NUM-MAX-VALUES',
-                            'WHERE-NUM-MIN-VALUES', 'WHERE-NUM-MIN-VALUES-EMPTY',
+                "sql_tags": ['WHERE-NUM-MAX-VALUES', 'WHERE-NUM-MIN-VALUES',
                             'WHERE-NUM-MEAN-VALUES', 'WHERE-NUM-MEAN-VALUES'],
-                "queries": ['SELECT * FROM "table_name" WHERE "numbers" > 5',
-                            'SELECT * FROM "table_name" WHERE "numbers" < 5',
-                            'SELECT * FROM "table_name" WHERE "numbers" > 1',
-                            'SELECT * FROM "table_name" WHERE "numbers" < 1',
+                "queries": ['SELECT * FROM "table_name" WHERE "numbers" < 5',
+                            'SELECT * FROM "table_name" WHERE "numbers" > 1,
                             'SELECT * FROM "table_name" WHERE "numbers" > 3.0'
                             'SELECT * FROM "table_name" WHERE "numbers" < 3.0'],
-                "question": ['Show the data of the table "table_name" where "numbers" is greater than 5',
-                            'Show the data of the table "table_name" where "numbers" is less than 5',
+                "question": ['Show the data of the table "table_name" where "numbers" is less than 5',
                             'Show the data of the table "table_name" where "numbers" is greater than 1',
-                            'Show the data of the table "table_name" where "numbers" is less than 1',
                             'Show the data of the table "table_name" where "numbers" is greater than 3.0',
                             'Show the data of the table "table_name" where "numbers" is less than 3.0'],
             }
@@ -161,11 +156,13 @@ class WhereGenerator(AbstractSqlGenerator):
                                                          min_elements, mean_values):
             queries, questions = _generate_given_value(max_value, col)
             sql_tags = ['WHERE-NUM-MAX-VALUES-EMPTY', 'WHERE-NUM-MAX-VALUES']
-            self.append_sql_generated(sql_tags, queries, questions)
+            # avoid empty results
+            self.append_sql_generated(sql_tags[1:], queries[1:], questions[1:])
 
             queries, questions = _generate_given_value(min_value, col)
             sql_tags = ['WHERE-NUM-MIN-VALUES', 'WHERE-NUM-MIN-VALUES-EMPTY']
-            self.append_sql_generated(sql_tags, queries, questions)
+            # avoid empty results
+            self.append_sql_generated(sql_tags[:1], queries[:1], questions[:1])
 
             queries, questions = _generate_given_value(mean_value, col)
             sql_tags = ['WHERE-NUM-MEAN-VALUES'] * len(queries)
@@ -224,7 +221,7 @@ class WhereGenerator(AbstractSqlGenerator):
     @staticmethod
     def _get_median_value(values):
         """
-        Returns the meadin value if the input is numerical. Null values are not considered in the calculation.
+        Returns the median value if the input is numerical. Null values are not considered in the calculation.
 
         Args:
             values (np.array): Array of numerical values.

@@ -9,7 +9,8 @@ from .sql_generator import (SelectGenerator,
                             GroupByGenerator,
                             HavingGenerator,
                             SimpleAggGenerator,
-                            NullGenerator)
+                            NullGenerator,
+                            JoinGenerator)
 
 
 class TestGenerator:
@@ -37,7 +38,8 @@ class TestGenerator:
                             'groupby': GroupByGenerator,
                             'having': HavingGenerator,
                             'simpleAgg': SimpleAggGenerator,
-                            'nullCount': NullGenerator}
+                            'nullCount': NullGenerator,
+                            'join': JoinGenerator}
 
     def generate(self,
                  generators: list[str] | str | None = None,

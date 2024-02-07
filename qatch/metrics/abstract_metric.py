@@ -41,7 +41,7 @@ class AbstractMetric(ABC):
         Returns:
             float: The evaluation score for the test.
         """
-        if prediction is None:
+        if prediction is None or prediction == [None]:
             # in case the model was not able to predict anything
             return 0.0
 

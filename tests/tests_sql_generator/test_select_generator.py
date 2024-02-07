@@ -36,14 +36,16 @@ class TestSelectGenerator:
         }
 
     def test_select_random_col(self, select_generator, mock_single_database):
-        select_generator._select_random_col('test_table')
+        for _ in range(100):
+            select_generator.empty_sql_generated()
+            select_generator._select_random_col('test_table')
 
-        assert select_generator.sql_generated == {
-            'sql_tags': ['SELECT-RANDOM-COL', 'SELECT-RANDOM-COL', 'SELECT-RANDOM-COL'],
-            'queries': ['SELECT "col2" FROM "test_table"',
-                        'SELECT "col3", "col2" FROM "test_table"',
-                        'SELECT "col2", "col3", "col1" FROM "test_table"'],
-            'questions': ['Show all "col2" in the table test_table',
-                          'Show all "col3", "col2" in the table test_table',
-                          'Show all "col2", "col3", "col1" in the table test_table']
-        }
+            assert select_generator.sql_generated == {
+                'sql_tags': ['SELECT-RANDOM-COL', 'SELECT-RANDOM-COL', 'SELECT-RANDOM-COL'],
+                'queries': ['SELECT "col2" FROM "test_table"',
+                            'SELECT "col2", "col3" FROM "test_table"',
+                            'SELECT "col2", "col3", "col1" FROM "test_table"'],
+                'questions': ['Show all "col2" in the table test_table',
+                              'Show all "col2", "col3" in the table test_table',
+                              'Show all "col2", "col3", "col1" in the table test_table']
+            }

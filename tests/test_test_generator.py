@@ -1,13 +1,9 @@
-import os
-import shutil
-
 import pandas as pd
 import pytest
 
 from qatch.database_reader import MultipleDatabases, SingleDatabase
 from qatch.test_generator import TestGenerator
 
-DB_PATH = 'test_db'
 DB_NAME = 'test_database'
 TABLE_NAME = 'test_table'
 TABLE_DICT = {
@@ -15,10 +11,11 @@ TABLE_DICT = {
     'column2': ['A', 'B', 'A', 'C'],
     'column3': [10.5, 20.3, 15.2, 18.7],
     'column4': ['A', 'B', 'A', 'C'],
-    'column5': ['A', 'B', 'A', 'C'],
+    'column5': ['A', 'B', 'A', None],
     'column6': [10.5, 20.3, 15.2, 18.7],
     'column7': [10.5, 20.3, 15.2, 18.7],
     'column8': ['A', 'B', 'A', 'C'],
+    'col_id': [1111, 2222, 3333, 4444],
 }
 TABLE_DATAFRAME = pd.DataFrame(TABLE_DICT)
 
@@ -30,15 +27,20 @@ PREDICTION_DATAFRAME = pd.DataFrame(TABLE_DICT_PRED)
 
 
 @pytest.fixture
-def multiple_databases():
-    os.makedirs(DB_PATH)
+def multiple_databases(tmp_path):
+    tmp_path = str(tmp_path)
     # create 3 databases with the same table for the MultipleDatabas
-    _ = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_1', tables={TABLE_NAME: TABLE_DATAFRAME})
-    _ = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_2', tables={TABLE_NAME: TABLE_DATAFRAME})
-    _ = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_3', tables={TABLE_NAME: TABLE_DATAFRAME})
-    yield MultipleDatabases(DB_PATH)
-    # Teardown: Close the databases and remove the temporary directory
-    shutil.rmtree(DB_PATH)
+    _ = SingleDatabase(db_path=tmp_path, db_name=f'{DB_NAME}_1', tables={TABLE_NAME: TABLE_DATAFRAME})
+    _ = SingleDatabase(db_path=tmp_path, db_name=f'{DB_NAME}_2', tables={TABLE_NAME: TABLE_DATAFRAME})
+    _ = SingleDatabase(db_path=tmp_path, db_name=f'{DB_NAME}_3', tables={TABLE_NAME: TABLE_DATAFRAME})
+    _ = SingleDatabase(db_path=tmp_path,
+                       db_name=f'{DB_NAME}_4',
+                       tables={TABLE_NAME: TABLE_DATAFRAME,
+                               'test_table_2': pd.DataFrame({'col_id': [2222], 'col2': ['A']}
+                                                            )
+                               }
+                       )
+    return MultipleDatabases(tmp_path)
 
 
 @pytest.fixture
@@ -48,8 +50,8 @@ def test_generator(multiple_databases) -> TestGenerator:
 
 @pytest.mark.parametrize("generators, db_names,  expected_result", [
     (None, None, (['select', 'orderby', 'distinct', 'where', 'groupby',
-                   'having', 'simpleAgg', 'nullCount'],
-                  [f'{DB_NAME}_1', f'{DB_NAME}_2', f'{DB_NAME}_3'])
+                   'having', 'simpleAgg', 'nullCount', 'join'],
+                  [f'{DB_NAME}_1', f'{DB_NAME}_2', f'{DB_NAME}_3', f'{DB_NAME}_4'])
      ),
     ('select', f'{DB_NAME}_1', (['select'],
                                 [f'{DB_NAME}_1'])
@@ -81,7 +83,9 @@ def test_init_parameters_error(test_generator, generators, db_names):
     (None, None),
     (['select', 'orderby'], [f'{DB_NAME}_1', f'{DB_NAME}_2']),
     (None, [f'{DB_NAME}_1']),
-    (['select'], None)
+    (['select'], None),
+    (['join'], [f'{DB_NAME}_4']),
+
 ])
 def test_generate(test_generator, generators, db_names):
     tests_df = test_generator.generate(generators=generators, db_names=db_names)

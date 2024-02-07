@@ -19,7 +19,8 @@ class TupleConstraintTag(AbstractMetric):
         Returns:
             float: Score between [0, 1].
                 - 0 indicates NONE of the schema/cardinality/cell_values  are the same in prediction.
-                - 1 indicates the schema, the cardinality and the cell values of the prediction tuples are equal to the target ones.
+                - 1 indicates the schema, the cardinality and the cell values of
+                    the prediction tuples are equal to the target ones.
 
         Examples:
             >>> evaluator = TupleConstraintTag()
