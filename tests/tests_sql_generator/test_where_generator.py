@@ -51,15 +51,15 @@ class TestWhereGenerator:
         num_cols = ['column1', 'column3']
         where_generator._generate_where_numerical(table_name, num_cols, sample_data)
 
-        # generate 6 queries (max, min, mean * 2 [>, <]) for each column,
-        # so in this case we expect 12 queries
-        assert len(where_generator.sql_generated['sql_tags']) == 12
-        assert len(where_generator.sql_generated['queries']) == 12
-        assert len(where_generator.sql_generated['questions']) == 12
+        # generate 4 queries (< max , > min, < mean, > mean) for each column,
+        # so in this case we expect 8 queries
+        assert len(where_generator.sql_generated['sql_tags']) == 8
+        assert len(where_generator.sql_generated['queries']) == 8
+        assert len(where_generator.sql_generated['questions']) == 8
 
-        assert 'SELECT * FROM "sample_table" WHERE "column1" > "4"' in where_generator.sql_generated['queries']
-        assert 'SELECT * FROM "sample_table" WHERE "column1" < "4"' in where_generator.sql_generated['queries']
-        assert 'Show the data of the table "sample_table" where "column1" is greater than 4' in \
+        assert 'SELECT * FROM `sample_table` WHERE `column1` > 1' in where_generator.sql_generated['queries']
+        assert 'SELECT * FROM `sample_table` WHERE `column1` < 4' in where_generator.sql_generated['queries']
+        assert 'Show the data of the table "sample_table" where "column1" is greater than 1' in \
                where_generator.sql_generated['questions']
         assert 'Show the data of the table "sample_table" where "column1" is less than 4' in \
                where_generator.sql_generated['questions']

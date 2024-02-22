@@ -63,10 +63,10 @@ class DistinctGenerator(AbstractSqlGenerator):
             table_name (str): The name of the table in the database.
             cat_columns (List[str]): List of categorical column names.
         """
-        queries = [f'SELECT DISTINCT "{col}" FROM "{table_name}"'
+        queries = [f'SELECT DISTINCT `{col}` FROM `{table_name}`'
                    for col in cat_columns]
 
-        questions = [f'Show the different "{col}" in the table {table_name}'
+        questions = [f'Show the different "{col}" in the table "{table_name}"'
                      for col in cat_columns]
 
         sql_tags = ['DISTINCT-SINGLE'] * len(queries)
@@ -81,7 +81,7 @@ class DistinctGenerator(AbstractSqlGenerator):
             cat_columns (List[str]): List of categorical column names.
         """
         combinations = self._comb_random(cat_columns)
-        queries = [f'SELECT DISTINCT {self._get_col_comb_str(comb)} FROM "{table_name}"'
+        queries = [f'SELECT DISTINCT {self._get_col_comb_str(comb)} FROM `{table_name}`'
                    for comb in combinations]
 
         questions = [f'Show the different {self._get_col_comb_str(comb)} in the table "{table_name}"'

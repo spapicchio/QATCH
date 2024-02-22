@@ -1,14 +1,9 @@
-import os
-import shutil
-import sqlite3
-
 import pandas as pd
 import pytest
 
 from qatch import MetricEvaluator
 from qatch.database_reader import MultipleDatabases, SingleDatabase
 
-DB_PATH = 'test_db'
 DB_NAME = 'test_database'
 TABLE_NAME = 'test_table'
 TABLE_DICT = {'id': [1, 2, 3], 'name': ['Alice', 'Bob', 'Charlie']}
@@ -22,15 +17,12 @@ PREDICTION_DATAFRAME = pd.DataFrame(TABLE_DICT_PRED)
 
 
 @pytest.fixture
-def multiple_databases():
-    os.makedirs(DB_PATH)
+def multiple_databases(tmp_path):
     # create 3 databases with the same table for the MultipleDatabase
-    db_1 = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_1', tables={TABLE_NAME: TABLE_DATAFRAME})
-    db_2 = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_2', tables={TABLE_NAME: TABLE_DATAFRAME})
-    db_3 = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_3', tables={TABLE_NAME: TABLE_DATAFRAME})
-    yield MultipleDatabases(DB_PATH)
-    # Teardown: Close the databases and remove the temporary directory
-    shutil.rmtree(DB_PATH)
+    db_1 = SingleDatabase(db_path=tmp_path, db_name=f'{DB_NAME}_1', tables={TABLE_NAME: TABLE_DATAFRAME})
+    db_2 = SingleDatabase(db_path=tmp_path, db_name=f'{DB_NAME}_2', tables={TABLE_NAME: TABLE_DATAFRAME})
+    db_3 = SingleDatabase(db_path=tmp_path, db_name=f'{DB_NAME}_3', tables={TABLE_NAME: TABLE_DATAFRAME})
+    yield MultipleDatabases(tmp_path)
 
 
 @pytest.fixture
@@ -48,55 +40,22 @@ def test_metric_evaluator_init(multiple_databases):
     assert evaluator.metrics == ['tuple_order']
 
 
-def test_get_query_results_from_db(metric_evaluator):
-    df_result, _ = metric_evaluator._get_query_results_from_db(PREDICTION_DATAFRAME)
-    # assert that the prediction has been calculated
-    assert 'query_result' in df_result.columns
-
-    # assert that the prediction is correct
-    query_result = [[1, 'Alice'], [2, 'Bob'], [3, 'Charlie']]
-    assert df_result['query_result'].tolist() == [query_result] * 3
-
-
-def test_get_query_results_from_db_wrong_query(metric_evaluator):
-    dict_pred = {'db_id': [f'{DB_NAME}_1', f'{DB_NAME}_2', f'{DB_NAME}_3'],
-                 'query': [f'SELECT * FROM wrong_table_name'] * 3,
-                 'prediction': [f'SELECT * FROM {TABLE_NAME}'] * 3}
-
-    pred_df = pd.DataFrame(dict_pred)
-    # check if raise an error
-    with pytest.raises(sqlite3.OperationalError):
-        metric_evaluator._get_query_results_from_db(pred_df)
-
-
 def test_get_SP_query_results_from_db_equal(metric_evaluator):
     # the predictions are equal to the queries
-    df, pred_col = metric_evaluator._get_SP_query_results_from_db(PREDICTION_DATAFRAME, 'prediction')
-    assert df[pred_col].tolist() == ['EQUAL'] * len(PREDICTION_DATAFRAME)
-
-
-def test_get_SP_query_results_from_db_different(metric_evaluator):
-    """run the prediction query only if they are different to the queries"""
-    pred_df = pd.DataFrame({'db_id': [f'{DB_NAME}_1'],
-                            'query': [f'SELECT * FROM {TABLE_NAME}'],
-                            'prediction': [f'SELECT "name" FROM {TABLE_NAME}']}
-                           )
-    # the predictions are different to the queries
-    df, pred_col = metric_evaluator._get_SP_query_results_from_db(pred_df, 'prediction')
-    target = [[x] for x in TABLE_DATAFRAME['name'].tolist()]
-    assert df[pred_col][0] == target
+    dict_pred = {'db_id': f'{DB_NAME}_1',
+                 'query': f'SELECT * FROM  table ORDER BY "name" ASC',
+                 'prediction': f'SELECT * FROM  table ORDER BY "name" ASC'}
+    output = metric_evaluator.evaluate_single_test_SP(dict_pred, 'prediction', 'query')
+    assert all([val == 1 for x, val in output.items()])
 
 
 def test_get_SP_query_results_from_db_error_query(metric_evaluator):
-    """if the prediction query is wrong, return None"""
-    pred_df = pd.DataFrame({'db_id': [f'{DB_NAME}_1'],
-                            'query': [f'SELECT * FROM {TABLE_NAME}'],
-                            'prediction': [f'SELECT "name" FROM error_table_name']}
-                           )
-    # the predictions are different to the queries
-    df, pred_col = metric_evaluator._get_SP_query_results_from_db(pred_df, 'prediction')
-    target = None
-    assert df[pred_col][0] == target
+    """if the prediction query is wrong, return 0"""
+    dict_pred = {'db_id': f'{DB_NAME}_1',
+                 'query': f'SELECT * FROM  table ORDER BY "name" ASC',
+                 'prediction': f'SELECT * FROM  wrong_table ORDER BY "name" ASC'}
+    output = metric_evaluator.evaluate_single_test_SP(dict_pred, 'prediction', 'query')
+    assert all([val == 0 for x, val in output.items()])
 
 
 @pytest.mark.parametrize("target, prediction, expected_result", [
@@ -109,13 +68,13 @@ def test_get_SP_query_results_from_db_error_query(metric_evaluator):
     ("", "", True),  # Empty strings
 ])
 def test_create_mask_target_equal_prediction(metric_evaluator, target, prediction, expected_result):
-    output = metric_evaluator._create_mask_target_equal_prediction(target, prediction)
+    output = metric_evaluator.are_cleaned_sql_identical(target, prediction)
     assert output == expected_result
 
 
 @pytest.mark.parametrize("predictions, expected_result", [
     ([f'SELECT * FROM {TABLE_NAME}'] * 3, []),
-    ([f'SELECT "name" FROM {TABLE_NAME}'] * 3, ['cell_recall_prediction_result', 'tuple_constraint_prediction_result'])
+    ([f'SELECT "name" FROM {TABLE_NAME}'] * 3, ['cell_recall_prediction', 'tuple_constraint_prediction'])
 ])
 def test_evaluate_with_df_no_order(metric_evaluator, predictions, expected_result):
     """expected result contains the metrics that are not 1.0 with the specified predictions"""
@@ -124,8 +83,8 @@ def test_evaluate_with_df_no_order(metric_evaluator, predictions, expected_resul
     df = metric_evaluator.evaluate_with_df(PREDICTION_DATAFRAME, 'prediction', task='SP')
     metrics = metric_evaluator.metrics
     for metric in metrics:
-        metric = f'{metric}_prediction_result'
-        if metric == 'tuple_order_prediction_result':
+        metric = f'{metric}_prediction'
+        if metric == 'tuple_order_prediction':
             # always NONE in this case because no order
             assert df[metric].tolist() == [None] * len(PREDICTION_DATAFRAME)
             continue
@@ -144,13 +103,14 @@ def test_evaluate_with_df_no_order(metric_evaluator, predictions, expected_resul
     (
             [f'SELECT * FROM {TABLE_NAME} ORDER BY "name" DESC'] * 3,
             [f'SELECT * FROM {TABLE_NAME} ORDER BY "name" ASC'] * 3,  # predictions all different
-            ['tuple_order_prediction_result']),
+            ['tuple_order_prediction']),
     (
             [f'SELECT * FROM {TABLE_NAME} ORDER BY "name" DESC'] * 3,
             [f'SELECT * FROM {TABLE_NAME} ORDER BY ASC'] * 3,  # wrong prediction
             # all the metrics are 0 because the prediction is None
-            ['cell_precision_prediction_result', 'cell_recall_prediction_result',
-             'tuple_cardinality_prediction_result', 'tuple_constraint_prediction_result', 'tuple_order_prediction_result']
+            ['cell_precision_prediction', 'cell_recall_prediction',
+             'tuple_cardinality_prediction', 'tuple_constraint_prediction',
+             'tuple_order_prediction']
     )
 ])
 def test_evaluate_with_df_with_order(metric_evaluator, query, predictions, expected_result):
@@ -162,7 +122,7 @@ def test_evaluate_with_df_with_order(metric_evaluator, query, predictions, expec
     df = metric_evaluator.evaluate_with_df(PREDICTION_DATAFRAME, 'prediction', task='SP')
     metrics = metric_evaluator.metrics
     for metric in metrics:
-        metric = f'{metric}_prediction_result'
+        metric = f'{metric}_prediction'
         if metric not in expected_result:
             assert df[metric].tolist() == [1.0] * len(PREDICTION_DATAFRAME)
         else:

@@ -1,5 +1,3 @@
-import shutil
-
 import pandas as pd
 import pytest
 
@@ -37,14 +35,11 @@ class TestAbstractSqlGenerator:
         return df
 
     @pytest.fixture
-    def mock_single_database(self, sample_data):
+    def mock_single_database(self, sample_data, tmp_path):
         # Setup: Create a temporary database and table for testing
-        db = SingleDatabase(db_path=DB_PATH, db_name=DB_NAME, tables={TABLE_NAME:
-                                                                          sample_data})
+        db = SingleDatabase(db_path=tmp_path, db_name=DB_NAME, tables={TABLE_NAME: sample_data})
         yield db  # Provide the fixture object
         # Teardown: Clean up the temporary database and tables after testing
-        db.close_connection()
-        shutil.rmtree(DB_PATH)
 
     @pytest.fixture
     def sql_generator(self, mock_single_database):

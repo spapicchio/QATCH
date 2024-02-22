@@ -1,21 +1,21 @@
+import logging
 from abc import ABC, abstractmethod
 from time import sleep
 from typing import Any
 
 import openai
 import pandas as pd
+from openai import OpenAI
 
-from ..abstract_model import AbstractModel
 
-
-class AbstractChatGPT(AbstractModel, ABC):
-    def __init__(self, api_key: str, api_org: str | None, model_name="gpt-3.5-turbo-0613",
+class AbstractChatGPT(ABC):
+    def __init__(self, api_key: str, api_org: str | None,
+                 model_name="gpt-3.5-turbo-0613",
                  *args, **kwargs):
-        super().__init__(*args, kwargs)
         # initialize openAI
+        self.logger = logging
         self.api_key = api_key
-        openai.organization = api_org
-        openai.api_key = api_key
+        self.client = OpenAI(api_key=api_key, organization=api_org, max_retries=3)
         self.model_name = model_name
 
     @property
@@ -23,17 +23,18 @@ class AbstractChatGPT(AbstractModel, ABC):
     def prompt(self):
         raise NotImplementedError
 
-    def predict(self, table: pd.DataFrame,
+    def predict(self, table: pd.DataFrame | None,
                 query: str,
-                tbl_name: str) -> list[Any] | list[None]:
-        """override"""
+                tbl_name: str | list[str],
+                db_table_schema: dict | None = None) -> list[Any] | list[None]:
         """wrap function to process input and predict queries
         excepts the openAI errors and return an empty list"""
         # 1. model input
-        model_input = self.process_input(table, query, tbl_name)
+        model_input = self.process_input(table, db_table_schema, query, tbl_name)
         if model_input is None:
             """Table is too large to be processed"""
             return [None]
+
         pred = ['nan']
         count = 1
         while pred == ['nan']:
@@ -41,7 +42,7 @@ class AbstractChatGPT(AbstractModel, ABC):
                 self.logger.error('Too many errors, aborting.')
                 raise ValueError('Too many errors, aborting.')
             # 2. predict
-            pred = self.predict_input(model_input, table)
+            pred = self._call_api(model_input)
             if pred == ['nan']:
                 # error occurred
                 sleep(60)
@@ -49,44 +50,39 @@ class AbstractChatGPT(AbstractModel, ABC):
                 count += 1
         return pred
 
-    def predict_input(self, model_input, table) -> list[Any]:
+    def _call_api(self, model_input, table=None) -> list[Any]:
         try:
-            content = self._predict_with_api(model_input)
-        except openai.error.InvalidRequestError as e:
+            # content = self._predict_with_api(model_input)
+            content = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=self.prompt + [model_input],
+                temperature=0.0,
+                timeout=60 * 3,  # after 3 min (default 10)
+            )
+            content = self._normalize_api_output(content)
+        except openai.BadRequestError as e:
             # raise error because the input is too long
             self.logger.error(e)
             return [None]
-        except openai.error.RateLimitError as e:
+        except openai.RateLimitError as e:
             """Too many requests to the API"""
             self.logger.error(e)
             return ['nan']
-        except openai.error.APIError as e:
+        except openai.APIConnectionError as e:
             """Too many requests to the API"""
-            self.logger.error(e)
-            return ['nan']
-        except openai.error.ServiceUnavailableError as e:
-            """Too many requests to the API"""
-            self.logger.error(e)
-            return ['nan']
-        except openai.error.Timeout as e:
             self.logger.error(e)
             return ['nan']
         else:
             return content
 
-    def _predict_with_api(self, model_input):
-        response = openai.ChatCompletion.create(
-            model=self.model_name,
-            messages=self.prompt + [model_input],
-            temperature=0.0,  # make it deterministic
-            # max_tokens=4097, # max tokens in the generated output
-            # top_p=1, ## alternative to temperature
-            # frequency_penalty=0,
-            # presence_penalty=0
-        )
-        content = self._normalize_api_output(response)
-        return content
-
     @abstractmethod
     def _normalize_api_output(self, api_output):
+        raise NotImplementedError
+
+    @abstractmethod
+    def process_input(self,
+                      table: pd.DataFrame | None,
+                      db_table_schema: dict | None,
+                      query: str,
+                      query_tbl_name: str | list[str]) -> Any | None:
         raise NotImplementedError

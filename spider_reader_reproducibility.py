@@ -16,14 +16,14 @@ class SQLGranularity(Enum):
 
 
 class SpiderReader:
-    def __init__(self, spider_base_path: str):
+    def __init__(self, spider_base_path: str, for_train: bool = True):
         # path where all the data is stored
         if not os.path.exists(spider_base_path):
             raise FileNotFoundError(f"Path {spider_base_path} does not exist")
         self.spider_base_path = spider_base_path
         self._tables_too_large = ['Player_Attributes', 'player', 'routes']
         self._spider_dbs_info_df = self._init_spider_dbs_info_df()
-        self._spider_train_df = self._init_spider_train_df()
+        self._spider_train_df = self._init_spider_df(for_train=for_train)
         self._sql_granularity2mask = self._init_sql_granularity2mask()
 
     def _init_spider_dbs_info_df(self):
@@ -34,13 +34,16 @@ class SpiderReader:
         df = pd.read_json(os.path.join(self.spider_base_path, "tables.json"))
         return df.set_index('db_id')
 
-    def _init_spider_train_df(self):
+    def _init_spider_df(self, for_train):
         """consider only the questions based on single table DBs 'FROM x'
         :return: df with columns
             db_id, query, query_toks, query_toks_no_value, question, questiontoks, sql"""
-        train_df = pd.read_json(os.path.join(self.spider_base_path, "train_spider.json"))
-        mask_single_table = train_df.sql.map(lambda r: len(r['from']['table_units']) == 1)
-        return train_df[mask_single_table]
+        if for_train:
+            df = pd.read_json(os.path.join(self.spider_base_path, "train_spider.json"))
+        else:
+            df = pd.read_json(os.path.join(self.spider_base_path, "dev.json"))
+        mask_single_table = df.sql.map(lambda r: len(r['from']['table_units']) == 1)
+        return df[mask_single_table]
 
     def _init_sql_granularity2mask(self):
         """
@@ -121,7 +124,8 @@ class SpiderReader:
         df = df[df.tbl_name.notna()]
         return df
 
-    def _get_simple_sql_mask(self, values: pd.Series):
+    @staticmethod
+    def _get_simple_sql_mask(values: pd.Series):
         """
         Build simple mask to detect whether the SQL granularity required is present or not
         :param values: series where each element is a dict with the SQL query
@@ -136,10 +140,12 @@ class SpiderReader:
             simple_where = [True]
             # avoid SQL with WHERE with inner queries
             if len(sql['where']) > 0:
-                simple_where = [not isinstance(x, dict) for cond in sql['where'] for x in
-                                cond]
+                simple_where = [not isinstance(x, dict)
+                                for cond in sql['where']
+                                for x in cond]
             # avoid SQL with FROM with inner queries
-            simple_tbl = [tbl_unit[0] != 'sql' for tbl_unit in sql['from']['table_units']]
+            simple_tbl = [tbl_unit[0] != 'sql'
+                          for tbl_unit in sql['from']['table_units']]
             return all(simple_where) and all(simple_tbl)
 
         return {

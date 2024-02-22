@@ -1,6 +1,3 @@
-import os
-import shutil
-
 import pandas as pd
 import pytest
 
@@ -17,15 +14,12 @@ TABLE_DATAFRAME = pd.DataFrame(TABLE_DICT)
 
 # Fixture to create a temporary MultipleDatabases object for testing
 @pytest.fixture
-def multiple_databases():
-    os.makedirs(DB_PATH)
+def multiple_databases(tmp_path):
     # create 3 databases with the same table for the MultipleDatabas
-    db_1 = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_1', tables={TABLE_NAME: TABLE_DATAFRAME})
-    db_2 = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_2', tables={TABLE_NAME: TABLE_DATAFRAME})
-    db_3 = SingleDatabase(db_path=DB_PATH, db_name=f'{DB_NAME}_3', tables={TABLE_NAME: TABLE_DATAFRAME})
-    yield MultipleDatabases(DB_PATH)
-    # Teardown: Close the databases and remove the temporary directory
-    shutil.rmtree(DB_PATH)
+    db_1 = SingleDatabase(db_path=tmp_path, db_name=f'{DB_NAME}_1', tables={TABLE_NAME: TABLE_DATAFRAME})
+    db_2 = SingleDatabase(db_path=tmp_path, db_name=f'{DB_NAME}_2', tables={TABLE_NAME: TABLE_DATAFRAME})
+    db_3 = SingleDatabase(db_path=tmp_path, db_name=f'{DB_NAME}_3', tables={TABLE_NAME: TABLE_DATAFRAME})
+    yield MultipleDatabases(tmp_path)
 
 
 # Tests for MultipleDatabases class methods
@@ -36,11 +30,11 @@ def test_open_db(multiple_databases):
         assert db_id in multiple_databases.db_ids2db
 
 
-def test_open_db_limit(multiple_databases):
+def test_open_db_limit(multiple_databases, tmp_path):
     # Open more databases than the limit, ensure FIFO strategy
     for i in range(20):
         db_id = f'{DB_NAME}_{i}'
-        SingleDatabase(db_path=DB_PATH, db_name=db_id, tables={TABLE_NAME: TABLE_DATAFRAME})
+        SingleDatabase(db_path=tmp_path, db_name=db_id, tables={TABLE_NAME: TABLE_DATAFRAME})
         multiple_databases.open_db(db_id)
     assert len(multiple_databases.db_ids2db) == 15
 
@@ -56,9 +50,9 @@ def test_get_schema(multiple_databases):
     db_id = f'{DB_NAME}_1'
     # Test retrieving the schema of the table from the database
     schema = multiple_databases.get_schema(db_id, TABLE_NAME)
-    expected_schema = pd.read_sql_query(f"PRAGMA table_info({TABLE_NAME})",
-                                        multiple_databases[db_id].conn)
-    assert schema.equals(expected_schema)
+    with multiple_databases[db_id].connect_cursor() as cursor:
+        expected_schema = pd.read_sql_query(f"PRAGMA table_info({TABLE_NAME})", cursor.connection)
+        assert schema.equals(expected_schema)
 
 
 def test_run_query(multiple_databases):

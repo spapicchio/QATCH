@@ -101,7 +101,7 @@ class AbstractSqlGenerator(ABC):
         Returns:
             str: String representation of the column combination.
         """
-        return ", ".join([f'"{str(c)}"' for c in comb])
+        return ", ".join([f'`{str(c)}`' for c in comb])
 
     def _comb_random(self, columns: list[str]) -> list[list[str]]:
         def _get_sample(_columns, k):

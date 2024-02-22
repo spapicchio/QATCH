@@ -1,4 +1,3 @@
-import shutil
 from unittest.mock import patch
 
 import numpy as np
@@ -22,7 +21,7 @@ def generate_synthetic_data():
     col4 = np.random.choice(['Red', 'Blue', 'Green'], NUM_SAMPLES)
     col5 = np.random.choice(['Small', 'Medium', 'Large'], NUM_SAMPLES)
     df = pd.DataFrame({
-        'col1': col1,
+        'col 1': col1,
         'col2': col2,
         'col3': col3,
         'col4': col4,
@@ -36,14 +35,10 @@ TABLE_DATAFRAME = generate_synthetic_data()
 
 # Fixture to create a temporary SingleDatabase object for testing
 @pytest.fixture
-def single_database():
+def single_database(tmp_path):
     # Setup: Create a temporary database and table for testing
-    db = SingleDatabase(db_path=DB_PATH, db_name=DB_NAME, tables={TABLE_NAME:
-                                                                      TABLE_DATAFRAME})
+    db = SingleDatabase(db_path=tmp_path, db_name=DB_NAME, tables={TABLE_NAME: TABLE_DATAFRAME})
     yield db  # Provide the fixture object
-    # Teardown: Clean up the temporary database and tables after testing
-    db.close_connection()
-    shutil.rmtree(DB_PATH)
 
 
 @pytest.fixture
@@ -57,6 +52,7 @@ def test_get_average_of_count_cat_col(having_generator):
     avg_cat_col = having_generator._get_average_of_count_cat_col(TABLE_NAME, cat_col)
     assert target == avg_cat_col
 
+
 def test_get_average_of_sum_avg_cat_col(having_generator):
     cat_col = 'col2'
     num_col = 'col3'
@@ -65,10 +61,11 @@ def test_get_average_of_sum_avg_cat_col(having_generator):
     avg_cat_col = having_generator._get_average_of_sum_avg_cat_col(TABLE_NAME, cat_col, num_col)
     assert (target_sum, target_avg) == avg_cat_col
 
+
 def test_having_generator(having_generator):
     # numerical and categorical attributes present
     with patch.object(having_generator, '_sample_cat_num_cols',
-                      return_value=([], ['cat_col_1', 'cat_col_2'], ['num_col_1', 'num_col_2'])):
+                      return_value=([], ['col2', 'col4'], ['col 1', 'col3'])):
         generated_sql = having_generator.sql_generate(TABLE_NAME)
         assert 'HAVING-COUNT-EQ' in generated_sql['sql_tags']
         assert 'HAVING-COUNT-LS' in generated_sql['sql_tags']
@@ -83,7 +80,7 @@ def test_having_generator(having_generator):
         assert len(generated_sql['queries']) == 22
     # numerical attributes present
     with patch.object(having_generator, '_sample_cat_num_cols',
-                      return_value=([], [], ['num_col_1', 'num_col_2'])):
+                      return_value=([], [], ['col 1', 'col3'])):
         generated_sql = having_generator.sql_generate(TABLE_NAME)
         # at least one column attribute is required (no groupby otherwise)
         assert len(generated_sql['sql_tags']) == 0

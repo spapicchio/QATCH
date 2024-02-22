@@ -15,12 +15,6 @@ class MultipleDatabases:
     """
 
     def __init__(self, db_path: str, _max_db_in_memory=15):
-        """Initializes the MultipleDatabases object.
-
-        Args:
-            db_path (str): The base path where the database files will be stored.
-            _max_db_in_memory (int): The maximum number of databases to keep in memory. Default is 15.
-        """
         self.db_path = db_path
         self.db_ids2db: dict[str, SingleDatabase] = dict()
         self._max_db_in_memory = _max_db_in_memory
@@ -31,28 +25,16 @@ class MultipleDatabases:
         Returns:
             list[str]: A list of database file names.
         """
-        return [x for x in os.listdir(self.db_path)]
+        # return x only if it is a directory
+        return [x for x in os.listdir(self.db_path) if os.path.isdir(os.path.join(self.db_path, x))]
 
     def __contains__(self, other: str) -> bool:
-        """Checks if a database with the given name exists in the managed databases.
-
-        Args:
-            other (str): The name of the database to check.
-
-        Returns:
-            bool: True if the database exists, False otherwise.
-        """
+        # Checks if a database with the given name exists in the managed databases.
         return any(other in db_id for db_id in self.db_ids2db)
 
     def __getitem__(self, key: str) -> SingleDatabase:
-        """Allows accessing a specific database by its name.
-
-        Args:
-            key (str): The name of the database to access.
-
-        Returns:
-            SingleDatabase: The SingleDatabase object corresponding to the given database name.
-        """
+        # Allows accessing a specific database by its name
+        # if the key does not exist, open the db
         if key not in self.db_ids2db:
             self.open_db(key)
         return self.db_ids2db[key]
@@ -92,6 +74,18 @@ class MultipleDatabases:
             pd.DataFrame: A Pandas DataFrame representing the schema of the specified table.
         """
         return self[db_id].get_schema_given(tbl_name)
+
+    def get_all_table_schema_given(self, db_id: str) -> dict[str, pd.DataFrame]:
+        """Retrieves all the table schema from the database.
+
+        Args:
+            db_id (str): The name of the database.
+
+        Returns:
+            pd.DataFrame: A Pandas DataFrame representing the schema of the specified table.
+        """
+
+        return self[db_id].table_schemas
 
     def run_multiple_queries(self, db_id: str, queries: list) -> list[list]:
         """Executes multiple queries on the specified database and returns the results.

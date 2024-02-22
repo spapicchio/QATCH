@@ -73,6 +73,38 @@ class SelectGenerator(AbstractSqlGenerator):
         self._select_random_col(table_name)
         return self.sql_generated
 
+    def _select_single_col(self, table_name):
+        """Generates SELECT SQL queries and corresponding questions for a single column of a given table.
+
+        This method selects each column of a given table one by one and generates SQL queries
+        and corresponding questions. These queries and questions are stored in the 'sql_generated' dictionary attribute of the class.
+
+        Args:
+            table_name (str): Name of the table.
+        Example:
+            Assume the 'users' table has two columns 'id' and 'name'.
+
+                >>> self.database = SingleDatabase('sqlite:///my_db.sqlite3')
+                >>> sql_gen = SelectGenerator(self.database)
+                >>> sql_gen._select_single_col('users')
+                ...
+                >>> print(sql_gen.sql_generated)
+                {
+                    "sql_tags": ["SELECT-SINGLE-COL", "SELECT-SINGLE-COL"],
+                    "queries": ["SELECT "id" FROM users;", "SELECT "name" FROM users;"],
+                    "questions": ["What are the "id" for all users?", "What are the "name" of all users?"]
+                }
+        """
+        columns = self.database.get_schema_given(table_name).name.tolist()
+        columns = [[col] for col in columns]
+        # sort columns
+        questions = self._build_questions(columns, table_name)
+        queries = self._build_queries(columns, table_name)
+        self.append_sql_generated(sql_tags=['SELECT-SINGLE-COL'] * len(queries),
+                                  queries=queries,
+                                  questions=questions)
+        return self.sql_generated
+
     def _select_all_table(self, table_name: str):
         """
         Generate the SQL query and question for selecting all rows in the table.
@@ -81,7 +113,7 @@ class SelectGenerator(AbstractSqlGenerator):
             table_name (str): The name of the table in the database.
         """
         sql_tag = ['SELECT-ALL']
-        query = [f'SELECT * FROM "{table_name}"']
+        query = [f'SELECT * FROM `{table_name}`']
         question = [f"Show all the rows in the table {table_name}"]
         self.append_sql_generated(sql_tags=sql_tag, queries=query, questions=question)
 
@@ -131,7 +163,7 @@ class SelectGenerator(AbstractSqlGenerator):
         return [f'Show all {self._get_col_comb_str(comb)} in the table {table_name}'
                 for comb in combinations]
 
-    def _build_queries(self, combinations: list[str], table_name: str) -> list[str]:
+    def _build_queries(self, combinations: list[list[str]], table_name: str) -> list[str]:
         """
         Builds SQL queries corresponding to the given column combinations and table name.
 
@@ -142,7 +174,7 @@ class SelectGenerator(AbstractSqlGenerator):
         Returns:
             list[str]: A list of SQL queries corresponding to the column combinations.
         """
-        return [f'SELECT {self._get_col_comb_str(comb)} FROM "{table_name}"'
+        return [f'SELECT {self._get_col_comb_str(comb)} FROM `{table_name}`'
                 for comb in combinations]
 
     @staticmethod

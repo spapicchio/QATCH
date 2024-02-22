@@ -46,14 +46,14 @@ class HavingGenerator(AbstractSqlGenerator):
             {
                 "sql_tags": ["HAVING-COUNT-GR", "HAVING-COUNT-LS", "HAVING-COUNT-EQ"],
                 "queries": [
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) >= 2',
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) <= 2',
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING count(*) = 2'
+                    'SELECT `colors` FROM `table_name` GROUP BY `colors` HAVING count(*) >= 2',
+                    'SELECT `colors` FROM `table_name` GROUP BY `colors` HAVING count(*) <= 2',
+                    'SELECT `colors` FROM `table_name` GROUP BY `colors` HAVING count(*) = 2'
                 ],
                 "questions": [
-                    'Find all the "colors" that have at least 2 records in table "table_name"',
-                    'Find all the "colors" that have at most 2 records in table "table_name"',
-                    'Find all the "colors" that have exactly 2 records in table "table_name"'
+                    'Find all the `colors` that have at least 2 records in table `table_name`',
+                    'Find all the `colors` that have at most 2 records in table `table_name`',
+                    'Find all the `colors` that have exactly 2 records in table `table_name`'
                 ]
             }
             >>> generator._build_having_agg(table_name, ["colors"], ["numbers"], df)
@@ -61,16 +61,16 @@ class HavingGenerator(AbstractSqlGenerator):
             {
                 "sql_tags": ["HAVING-AGG-AVG-GR", "HAVING-AGG-AVG-LS", "HAVING-AGG-SUM-GR", "HAVING-AGG-SUM-LS"],
                 "queries": [
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING AVG("numbers") >= 5.0',
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING AVG("numbers") <= 5.0',
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING SUM("numbers") >= 10.0',
-                    'SELECT "colors" FROM "table_name" GROUP BY "colors" HAVING SUM("numbers") <= 10.0'
+                    'SELECT `colors` FROM `table_name` GROUP BY `colors` HAVING AVG(`numbers`) >= 5.0',
+                    'SELECT `colors` FROM `table_name` GROUP BY `colors` HAVING AVG(`numbers`) <= 5.0',
+                    'SELECT `colors` FROM `table_name` GROUP BY `colors` HAVING SUM(`numbers`) >= 10.0',
+                    'SELECT `colors` FROM `table_name` GROUP BY `colors` HAVING SUM(`numbers`) <= 10.0'
                 ],
                 "questions": [
-                    'List the "colors" which average "numbers" is at least 5.0 in table "table_name"',
-                    'List the "colors" which average "numbers" is at most 5.0 in table "table_name"',
-                    'List the "colors" which summation of "numbers" is at least 5.0 in table "table_name"',
-                    'List the "colors" which summation of "numbers" is at most 5.0 in table "table_name"'
+                    'List the `colors` which average `numbers` is at least 5.0 in table `table_name`',
+                    'List the `colors` which average `numbers` is at most 5.0 in table `table_name`',
+                    'List the `colors` which summation of `numbers` is at least 5.0 in table `table_name`',
+                    'List the `colors` which summation of `numbers` is at most 5.0 in table `table_name`'
                 ]
             }
         """
@@ -95,9 +95,9 @@ class HavingGenerator(AbstractSqlGenerator):
             mean_count = self._get_average_of_count_cat_col(table_name, cat_col)
             # int(df.groupby(cat_col).count().mean().values[0])
             queries = [
-                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) >= {mean_count}""",
-                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) <= {mean_count}""",
-                f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING count(*) = {mean_count}"""
+                f"""SELECT `{cat_col}` FROM `{table_name}` GROUP BY `{cat_col}` HAVING count(*) >= {mean_count}""",
+                f"""SELECT `{cat_col}` FROM `{table_name}` GROUP BY `{cat_col}` HAVING count(*) <= {mean_count}""",
+                f"""SELECT `{cat_col}` FROM `{table_name}` GROUP BY `{cat_col}` HAVING count(*) = {mean_count}"""
             ]
 
             questions = [
@@ -132,10 +132,10 @@ class HavingGenerator(AbstractSqlGenerator):
                 # mean_mean_mean = round(mean_mean[num_col].mean(), 2)
                 mean_mean_sum, mean_mean_mean = self._get_average_of_sum_avg_cat_col(table_name, cat_col, num_col)
                 queries = [
-                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING AVG("{num_col}") >= {mean_mean_mean}""",
-                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING AVG("{num_col}") <= {mean_mean_mean}""",
-                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING SUM("{num_col}") >= {mean_mean_sum}""",
-                    f"""SELECT "{cat_col}" FROM "{table_name}" GROUP BY "{cat_col}" HAVING SUM("{num_col}") <= {mean_mean_sum}""",
+                    f"""SELECT `{cat_col}` FROM `{table_name}` GROUP BY `{cat_col}` HAVING AVG(`{num_col}`) >= {mean_mean_mean}""",
+                    f"""SELECT `{cat_col}` FROM `{table_name}` GROUP BY `{cat_col}` HAVING AVG(`{num_col}`) <= {mean_mean_mean}""",
+                    f"""SELECT `{cat_col}` FROM `{table_name}` GROUP BY `{cat_col}` HAVING SUM(`{num_col}`) >= {mean_mean_sum}""",
+                    f"""SELECT `{cat_col}` FROM `{table_name}` GROUP BY `{cat_col}` HAVING SUM(`{num_col}`) <= {mean_mean_sum}""",
                 ]
 
                 questions = [
@@ -164,7 +164,7 @@ class HavingGenerator(AbstractSqlGenerator):
         """
         # TODO: pandas performs faster when number of tuples is 5e4 or more
         # SQL query to get the average count for each category
-        inner_query = f'SELECT COUNT(*) AS row_count FROM "{table_name}" GROUP BY "{cat_col}"'
+        inner_query = f'SELECT COUNT(*) AS row_count FROM `{table_name}` GROUP BY `{cat_col}`'
         # Run the inner query and get the average of row counts
         average = self.database.run_query(f'SELECT AVG(row_count) FROM ({inner_query})')[0][0]
         return int(average)
@@ -183,8 +183,8 @@ class HavingGenerator(AbstractSqlGenerator):
         """
         # TODO: pandas performs faster when number of tuples is 5e4 or more
         # SQL queries to get the average sum and average of numerical column for each category
-        inner_query_sum = f'SELECT SUM("{num_col}") AS sum_col FROM "{table_name}" GROUP BY "{cat_col}"'
-        inner_query_avg = f'SELECT AVG("{num_col}") AS avg_col FROM "{table_name}" GROUP BY "{cat_col}"'
+        inner_query_sum = f'SELECT SUM(`{num_col}`) AS sum_col FROM `{table_name}` GROUP BY `{cat_col}`'
+        inner_query_avg = f'SELECT AVG(`{num_col}`) AS avg_col FROM `{table_name}` GROUP BY `{cat_col}`'
         # Run the inner queries and get the average of sums and averages
         average_sum = self.database.run_query(f'SELECT AVG(sum_col) FROM ({inner_query_sum})')[0][0]
         average_avg = self.database.run_query(f'SELECT AVG(avg_col) FROM ({inner_query_avg})')[0][0]

@@ -13,18 +13,25 @@ def mock_database():
     return mock_db
 
 
-def test_order_by_generator(mock_database):
+def test_generate_order_asc(mock_database):
     generator = OrderByGenerator(mock_database)
     table_name = 'example_table'
-
-    generated_sql = generator.sql_generate(table_name)
-
-    assert 'ORDERBY-SINGLE' in generated_sql['sql_tags']
-
-    assert len(generated_sql['queries']) == 6  # three ascending, three descending
-
-    query = f'SELECT * FROM "{table_name}" ORDER BY "col1" ASC'
+    generator._generate_order_asc(table_name, ['col1', 'col2', 'col3'])
+    assert 'ORDERBY-SINGLE' in generator.sql_generated['sql_tags']
+    query = f'SELECT * FROM `{table_name}` ORDER BY `col1` ASC'
     question = f'Show all data ordered by "col1" in ascending order for the table "{table_name}"'
 
-    assert query in generated_sql['queries']
-    assert question in generated_sql['questions']
+    assert query in generator.sql_generated['queries']
+    assert question in generator.sql_generated['questions']
+
+
+def test_generate_order_desc(mock_database):
+    generator = OrderByGenerator(mock_database)
+    table_name = 'example_table'
+    generator._generate_order_desc(table_name, ['col1', 'col2', 'col3'])
+    assert 'ORDERBY-SINGLE' in generator.sql_generated['sql_tags']
+    query = f'SELECT * FROM `{table_name}` ORDER BY `col1` DESC'
+    question = f'Show all data ordered by col1 in descending order for the table {table_name}'
+
+    assert query in generator.sql_generated['queries']
+    assert question in generator.sql_generated['questions']

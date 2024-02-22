@@ -1,4 +1,3 @@
-import shutil
 from unittest.mock import patch
 
 import pandas as pd
@@ -8,7 +7,6 @@ from qatch.database_reader import SingleDatabase
 from qatch.sql_generator import NullGenerator
 
 # Define test data
-DB_PATH = 'test_db'
 DB_NAME = 'test_database'
 TABLE_NAME = 'test_table'
 TABLE_DICT = {'id': [1, None, 3], 'name': ['Alice', 'Bob', None]}
@@ -17,13 +15,10 @@ TABLE_DATAFRAME = pd.DataFrame(TABLE_DICT)
 
 # Fixture to create a temporary SingleDatabase object for testing
 @pytest.fixture
-def single_database():
+def single_database(tmp_path):
     # Setup: Create a temporary database and table for testing
-    db = SingleDatabase(db_path=DB_PATH, db_name=DB_NAME, tables={TABLE_NAME: TABLE_DATAFRAME})
+    db = SingleDatabase(db_path=tmp_path, db_name=DB_NAME, tables={TABLE_NAME: TABLE_DATAFRAME})
     yield db  # Provide the fixture object
-    # Teardown: Clean up the temporary database and tables after testing
-    db.close_connection()
-    shutil.rmtree(DB_PATH)
 
 
 @pytest.fixture
