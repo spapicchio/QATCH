@@ -112,7 +112,12 @@ class MetricEvaluator:
 
         # Runs the target query on the database
         new_target_col = f'{target_col_name}_result'
-        test[new_target_col] = self.databases.run_query(test['db_id'], test[target_col_name])
+        try:
+            test[new_target_col] = self.databases.run_query(test['db_id'], test[target_col_name])
+        except sqlite3.Error as e:
+            # catch any possible error of prediction and return all zeros
+            logging.error(e)
+            return {f'{metric}_{prediction_col_name}': 0 for metric in self.metrics}
 
         metric2evaluation = {f'{metric}_{prediction_col_name}': None for metric in self.metrics}
         for metric in self.metrics:
