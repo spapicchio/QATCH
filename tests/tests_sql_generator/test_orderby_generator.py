@@ -18,7 +18,7 @@ def test_generate_order_asc(mock_database):
     table_name = 'example_table'
     generator._generate_order_asc(table_name, ['col1', 'col2', 'col3'])
     assert 'ORDERBY-SINGLE' in generator.sql_generated['sql_tags']
-    query = f'SELECT * FROM "{table_name}" ORDER BY "col1" ASC'
+    query = f'SELECT * FROM `{table_name}` ORDER BY `col1` ASC'
     question = f'Show all data ordered by "col1" in ascending order for the table "{table_name}"'
 
     assert query in generator.sql_generated['queries']
@@ -30,7 +30,7 @@ def test_generate_order_desc(mock_database):
     table_name = 'example_table'
     generator._generate_order_desc(table_name, ['col1', 'col2', 'col3'])
     assert 'ORDERBY-SINGLE' in generator.sql_generated['sql_tags']
-    query = f'SELECT * FROM "{table_name}" ORDER BY "col1" DESC'
+    query = f'SELECT * FROM `{table_name}` ORDER BY `col1` DESC'
     question = f'Show all data ordered by col1 in descending order for the table {table_name}'
 
     assert query in generator.sql_generated['queries']

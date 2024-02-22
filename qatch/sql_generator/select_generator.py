@@ -113,7 +113,7 @@ class SelectGenerator(AbstractSqlGenerator):
             table_name (str): The name of the table in the database.
         """
         sql_tag = ['SELECT-ALL']
-        query = [f'SELECT * FROM "{table_name}"']
+        query = [f'SELECT * FROM `{table_name}`']
         question = [f"Show all the rows in the table {table_name}"]
         self.append_sql_generated(sql_tags=sql_tag, queries=query, questions=question)
 
@@ -174,7 +174,7 @@ class SelectGenerator(AbstractSqlGenerator):
         Returns:
             list[str]: A list of SQL queries corresponding to the column combinations.
         """
-        return [f'SELECT {self._get_col_comb_str(comb)} FROM "{table_name}"'
+        return [f'SELECT {self._get_col_comb_str(comb)} FROM `{table_name}`'
                 for comb in combinations]
 
     @staticmethod

@@ -57,8 +57,8 @@ class TestWhereGenerator:
         assert len(where_generator.sql_generated['queries']) == 8
         assert len(where_generator.sql_generated['questions']) == 8
 
-        assert 'SELECT * FROM "sample_table" WHERE "column1" > 1' in where_generator.sql_generated['queries']
-        assert 'SELECT * FROM "sample_table" WHERE "column1" < 4' in where_generator.sql_generated['queries']
+        assert 'SELECT * FROM `sample_table` WHERE `column1` > 1' in where_generator.sql_generated['queries']
+        assert 'SELECT * FROM `sample_table` WHERE `column1` < 4' in where_generator.sql_generated['queries']
         assert 'Show the data of the table "sample_table" where "column1" is greater than 1' in \
                where_generator.sql_generated['questions']
         assert 'Show the data of the table "sample_table" where "column1" is less than 4' in \

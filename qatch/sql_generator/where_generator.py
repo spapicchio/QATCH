@@ -101,12 +101,12 @@ class WhereGenerator(AbstractSqlGenerator):
         least_frequent_elements = [self._get_least_frequent_or_min_value(df[col].values) for col in cat_cols]
         for col, most_freq, least_freq in zip(cat_cols, most_frequent_elements, least_frequent_elements):
             queries = [
-                f"""SELECT * FROM "{table_name}" WHERE "{col}" == "{most_freq}" """,
-                f"""SELECT * FROM "{table_name}" WHERE "{col}" == "{least_freq}" """,
-                f"""SELECT * FROM "{table_name}" WHERE "{col}" != "{most_freq}" """,
-                f"""SELECT * FROM "{table_name}" WHERE "{col}" != "{least_freq}" """,
-                f"""SELECT * FROM "{table_name}" WHERE NOT "{col}" == "{most_freq}" """,
-                f"""SELECT * FROM "{table_name}" WHERE NOT "{col}" == "{least_freq}" """,
+                f"""SELECT * FROM `{table_name}` WHERE `{col}` == `{most_freq}` """,
+                f"""SELECT * FROM `{table_name}` WHERE `{col}` == `{least_freq}` """,
+                f"""SELECT * FROM `{table_name}` WHERE `{col}` != `{most_freq}` """,
+                f"""SELECT * FROM `{table_name}` WHERE `{col}` != `{least_freq}` """,
+                f"""SELECT * FROM `{table_name}` WHERE NOT `{col}` == `{most_freq}` """,
+                f"""SELECT * FROM `{table_name}` WHERE NOT `{col}` == `{least_freq}` """,
             ]
 
             questions = [
@@ -136,8 +136,8 @@ class WhereGenerator(AbstractSqlGenerator):
 
         def _generate_given_value(number, n_col):
             queries_n = [
-                f'SELECT * FROM "{table_name}" WHERE "{n_col}" > {number}',
-                f'SELECT * FROM "{table_name}" WHERE "{n_col}" < {number}',
+                f'SELECT * FROM `{table_name}` WHERE `{n_col}` > {number}',
+                f'SELECT * FROM `{table_name}` WHERE `{n_col}` < {number}',
             ]
             questions_n = [
                 f'Show the data of the table "{table_name}" where "{n_col}" is greater than {number}',
@@ -190,7 +190,7 @@ class WhereGenerator(AbstractSqlGenerator):
         else:
             unique_values, counts = np.unique(values, return_counts=True)
             index_of_max_count = np.argmax(counts)
-            most_frequent_value = unique_values[index_of_max_count]
+            most_frequent_value: str = unique_values[index_of_max_count]
             return most_frequent_value.replace('"', '').replace("'", '').strip()
 
     @staticmethod
@@ -215,7 +215,7 @@ class WhereGenerator(AbstractSqlGenerator):
         else:
             unique_values, counts = np.unique(values, return_counts=True)
             index_of_min_count = np.argmin(counts)
-            lest_frequent_value = unique_values[index_of_min_count]
+            lest_frequent_value: str = unique_values[index_of_min_count]
             return lest_frequent_value.replace('"', '').replace("'", '').strip()
 
     @staticmethod

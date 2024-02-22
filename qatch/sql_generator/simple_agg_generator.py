@@ -80,12 +80,12 @@ class SimpleAggGenerator(AbstractSqlGenerator):
             cat_cols (List[str]): List of categorical columns in the table.
         """
 
-        queries = [f'SELECT COUNT(*) FROM "{table_name}"']
+        queries = [f'SELECT COUNT(*) FROM `{table_name}`']
         questions = [f'Count the records in table "{table_name}"?']
         sql_tags = ['SIMPLE-AGG-COUNT']
 
         for cat_col in cat_cols:
-            queries += [f'SELECT COUNT(DISTINCT"{cat_col}") FROM "{table_name}"']
+            queries += [f'SELECT COUNT(DISTINCT `{cat_col}`) FROM `{table_name}`']
             questions += [f'How many different "{cat_col}" are in table "{table_name}"?']
             sql_tags += ['SIMPLE-AGG-COUNT-DISTINCT']
 
@@ -101,9 +101,9 @@ class SimpleAggGenerator(AbstractSqlGenerator):
         """
         for num_col in num_cols:
             queries = [
-                f'SELECT MAX("{num_col}") FROM "{table_name}"',
-                f'SELECT MIN("{num_col}") FROM "{table_name}"',
-                f'SELECT AVG("{num_col}") FROM "{table_name}"'
+                f'SELECT MAX(`{num_col}`) FROM `{table_name}`',
+                f'SELECT MIN(`{num_col}`) FROM `{table_name}`',
+                f'SELECT AVG(`{num_col}`) FROM `{table_name}`'
             ]
             questions = [
                 f'Find the maximum "{num_col}" for the table "{table_name}"',

@@ -98,7 +98,7 @@ class JoinGenerator(AbstractSqlGenerator):
         for t2, join_col in table_to_join2cols.items():
             for col in join_col:
                 # create the join query
-                queries.append(f'SELECT * FROM "{table_name}" AS T1 JOIN {t2} AS T2 ON T1.{col}=T2.{col}')
+                queries.append(f'SELECT * FROM `{table_name}` AS T1 JOIN {t2} AS T2 ON T1.`{col}`=T2.`{col}`')
                 questions.append(f'Join all the records from table "{table_name}" with table "{t2}" on "{col}"')
                 sql_tags.append('JOIN-PROJECT-ALL')
         self.append_sql_generated(sql_tags, queries, questions)
@@ -135,8 +135,8 @@ class JoinGenerator(AbstractSqlGenerator):
                 continue
             for col in join_col:
                 # create the join query
-                queries.append(f'SELECT T1.{t1_cat_cols[0]}, T2."{t2_cat_cols[0]}" '
-                               f'FROM "{table_name}" AS T1 JOIN {t2} AS T2 ON T1.{col}=T2.{col}')
+                queries.append(f'SELECT T1.`{t1_cat_cols[0]}`, T2.`{t2_cat_cols[0]}` '
+                               f'FROM `{table_name}` AS T1 JOIN {t2} AS T2 ON T1.`{col}`=T2.`{col}`')
                 questions.append(
                     f'List all the "{t1_cat_cols[0]}" and "{t2_cat_cols[0]}" from the table "{table_name}" and the table "{t2}" '
                     f'where {col} is the same')

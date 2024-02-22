@@ -21,7 +21,7 @@ class TestSelectGenerator:
         select_generator._select_all_table('test_table')
         assert select_generator.sql_generated == {
             'sql_tags': ['SELECT-ALL'],
-            'queries': ['SELECT * FROM "test_table"'],
+            'queries': ['SELECT * FROM `test_table`'],
             'questions': ['Show all the rows in the table test_table']
         }
 
@@ -29,10 +29,10 @@ class TestSelectGenerator:
         select_generator._select_add_col('test_table')
         assert select_generator.sql_generated == {
             'sql_tags': ['SELECT-ADD-COL', 'SELECT-ADD-COL'],
-            'queries': ['SELECT "col1" FROM "test_table"',
-                        'SELECT "col1", "col2" FROM "test_table"'],
-            'questions': ['Show all "col1" in the table test_table',
-                          'Show all "col1", "col2" in the table test_table'],
+            'queries': ['SELECT `col1` FROM `test_table`',
+                        'SELECT `col1`, `col2` FROM `test_table`'],
+            'questions': ['Show all `col1` in the table test_table',
+                          'Show all `col1`, `col2` in the table test_table'],
         }
 
     def test_select_random_col(self, select_generator, mock_single_database):
@@ -42,10 +42,10 @@ class TestSelectGenerator:
 
             assert select_generator.sql_generated == {
                 'sql_tags': ['SELECT-RANDOM-COL', 'SELECT-RANDOM-COL', 'SELECT-RANDOM-COL'],
-                'queries': ['SELECT "col2" FROM "test_table"',
-                            'SELECT "col2", "col3" FROM "test_table"',
-                            'SELECT "col2", "col3", "col1" FROM "test_table"'],
-                'questions': ['Show all "col2" in the table test_table',
-                              'Show all "col2", "col3" in the table test_table',
-                              'Show all "col2", "col3", "col1" in the table test_table']
+                'queries': ['SELECT `col2` FROM `test_table`',
+                            'SELECT `col2`, `col3` FROM `test_table`',
+                            'SELECT `col2`, `col3`, `col1` FROM `test_table`'],
+                'questions': ['Show all `col2` in the table test_table',
+                              'Show all `col2`, `col3` in the table test_table',
+                              'Show all `col2`, `col3`, `col1` in the table test_table']
             }
