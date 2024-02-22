@@ -10,8 +10,11 @@ This repository is the official implementation of [QATCH: Benchmarking SQL-centr
 to appear in NeurIPS Dataset and Benchmark track 2023.
 
 # 🔥 Updates
-- [**2021-11-06**]: Camera ready version is now available! [check it out](https://openreview.net/forum?id=XOpaPrb0U5)! 
-- [**2021-11-05**]: QATCH can now be donwloaded from pip! Do not forget to check the [documentation](https://spapicchio.github.io/QATCH/)! 
+- [**2024-Jan-22**]: Add [DAMBER: (Data-AMBiguity testER)](https://github.com/spapicchio/QATCH/tree/master/damber#readme) 
+- [**2024-Jan-10**]: Add JOIN tests for proprietary data 
+- [**2023-Dec-15**]: new License: Apache-2.0 
+- [**2023-Nov-06**]: Camera ready version is now available! [check it out](https://openreview.net/forum?id=XOpaPrb0U5)! 
+- [**2023-Nov-05**]: QATCH can now be donwloaded from pip! Do not forget to check the [documentation](https://spapicchio.github.io/QATCH/)! 
 
 # 🏴󠁶󠁵󠁭󠁡󠁰󠁿 Overview
 
