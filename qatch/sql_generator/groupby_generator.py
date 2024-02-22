@@ -41,14 +41,14 @@ class GroupByGenerator(AbstractSqlGenerator):
             >>> generator.sql_generated
             {
                 "sql_tags": ["GROUPBY-NO-AGGR"],
-                "queries": ["SELECT \"colors\" FROM \"table_name\" GROUP BY \"colors\""],
+                "queries": ["SELECT `colors` FROM `table_name` GROUP BY `colors`"],
                 "questions": ["Show all \"colors\" in the table "table_name" for each \"colors\""]
             }
             >>> generator._build_group_by_with_count("table_name", ["colors"])
             >>> generator.sql_generated
             {
                 "sql_tags": ["GROUPBY-COUNT"],
-                "queries": ["SELECT \"colors\", COUNT(*) FROM \"table_name\" GROUP BY \"colors\""],
+                "queries": ["SELECT `colors`, COUNT(*) FROM `table_name` GROUP BY `colors`"],
                 "questions": ["For each \"colors\", count the number of rows in table "table_name""]
             }
             >>> generator._build_group_by_with_agg("table_name")
@@ -56,16 +56,16 @@ class GroupByGenerator(AbstractSqlGenerator):
             {
                 "sql_tags": ["GROUPBY-AGG-MIN", "GROUPBY-AGG-MAX", "GROUPBY-AGG-AVG", "GROUPBY-AGG-SUM"],
                 "queries": [
-                    "SELECT \"colors\", MIN(\"numbers\") FROM \"table_name\" GROUP BY \"colors\"",
-                    "SELECT \"colors\", MAX(\"numbers\") FROM \"table_name\" GROUP BY \"colors\"",
-                    "SELECT \"colors\", AVG(\"numbers\") FROM \"table_name\" GROUP BY \"colors\"",
-                    "SELECT \"colors\", SUM(\"numbers\") FROM \"table_name\" GROUP BY \"colors\""
+                    "SELECT `colors`, MIN(`numbers`) FROM `table_name` GROUP BY `colors`",
+                    "SELECT `colors`, MAX(`numbers`) FROM `table_name` GROUP BY `colors`",
+                    "SELECT `colors`, AVG(`numbers`) FROM `table_name` GROUP BY `colors`",
+                    "SELECT `colors`, SUM(`numbers`) FROM `table_name` GROUP BY `colors`"
                 ],
                 "questions": [
-                    "For each \"colors\", find the min of \"numbers\" in table "table_name"",
-                    "For each \"colors\", find the max of \"numbers\" in table "table_name"",
-                    "For each \"colors\", find the avg of \"numbers\" in table "table_name"",
-                    "For each \"colors\", find the sum of \"numbers\" in table "table_name""
+                    "For each `colors`, find the min of `numbers` in table `table_name`",
+                    "For each `colors`, find the max of `numbers` in table `table_name`",
+                    "For each `colors`, find the avg of `numbers` in table `table_name`",
+                    "For each `colors`, find the sum of `numbers` in table `table_name`"
                 ]
             }
         """
@@ -93,7 +93,7 @@ class GroupByGenerator(AbstractSqlGenerator):
                      for comb in random_combinations]
 
         queries = [f'SELECT {self._get_col_comb_str(comb)} FROM ' \
-                   f'"{table_name}" GROUP BY {self._get_col_comb_str(comb)}'
+                   f'`{table_name}` GROUP BY {self._get_col_comb_str(comb)}'
                    for comb in random_combinations]
 
         sql_tags = ['GROUPBY-NO-AGGR'] * len(queries)
@@ -111,7 +111,7 @@ class GroupByGenerator(AbstractSqlGenerator):
         """
         questions = [f'For each "{col}", count the number of rows in table "{table_name}"'
                      for col in cat_cols]
-        queries = [f'SELECT "{col}", COUNT(*) FROM "{table_name}" GROUP BY "{col}"'
+        queries = [f'SELECT `{col}`, COUNT(*) FROM `{table_name}` GROUP BY `{col}`'
                    for col in cat_cols]
         sql_tags = ['GROUPBY-COUNT'] * len(queries)
 
@@ -133,7 +133,7 @@ class GroupByGenerator(AbstractSqlGenerator):
                          for c_col in cat_cols
                          for n_col in num_cols]
 
-            queries = [f'SELECT "{c_col}", {agg.upper()}("{n_col}") FROM "{table_name}" GROUP BY "{c_col}"'
+            queries = [f'SELECT `{c_col}`, {agg.upper()}(`{n_col}`) FROM `{table_name}` GROUP BY `{c_col}`'
                        for c_col in cat_cols
                        for n_col in num_cols]
 

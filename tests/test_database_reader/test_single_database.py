@@ -45,7 +45,6 @@ def test_init_database(tmp_path):
     assert result == [(1, 2), (3, 4)]
 
 
-
 # Tests for SingleDatabase class methods
 def test_get_table_from_name(single_database):
     table_data = single_database.get_table_given(TABLE_NAME)
@@ -120,19 +119,31 @@ def test_create_table_in_db():
 
 
 def test_set_tables_in_db(tmp_path):
+    # 1. Two sample dataframes are created that represent tables
     table_1 = pd.DataFrame({'Customer_ID': [1, 2, 3, 4, 5],
                             'Product_ID': [1, 2, 3, 4, 5],
                             'Name': list('simon')})
     table_2 = pd.DataFrame({'Product_ID': [1, 2, 3, 4, 5],
                             'Customer_ID': [1, 2, 3, 4, 5],
                             'Name': list('papic')})
+
+    # 2. Define primary key for each table
     table2primary_key = {'table_1': 'Customer_ID', 'table_2': 'Product_ID'}
 
+    # 3. Put the tables into a dictionary
     tables = {'table_1': table_1, 'table_2': table_2}
-    conn = sqlite3.connect(os.path.join(tmp_path, f'{DB_NAME}.sqlite'))
-    SingleDatabase.set_tables_in_db(tables, conn, table2primary_key)
+
+    # 4. Connect to the SQLite database
+    DB_NAME = 'test'
+
+    # 5. Instantiate the SingleDatabase object
+    db = SingleDatabase(db_path=tmp_path, db_name=DB_NAME, tables=tables, table2primary_key=table2primary_key)
+    conn = sqlite3.connect(db.db_path_sqlite)
+    # 6. Check the foreign keys of the tables in the database
     table_1_keys = conn.execute("PRAGMA foreign_key_list('{}') ".format('table_1')).fetchall()[0]
     table_2_keys = conn.execute("PRAGMA foreign_key_list('{}') ".format('table_2')).fetchall()[0]
+
+    # 8. These assertions verify that the tables have been created correctly.
     assert table_1_keys[2] == 'table_2'
     assert table_1_keys[3] == table_1_keys[4] == 'Product_ID'
     assert table_2_keys[3] == table_2_keys[4] == 'Customer_ID'

@@ -28,14 +28,14 @@ def test_distinct_generator(mock_database):
     assert len(generated_sql['queries']) == 4  # two for single column and two for multiple columns
     assert len(generated_sql['questions']) == 4
 
-    single_col_query = f'SELECT DISTINCT "col1" FROM "{table_name}"'
-    mult_col_query = f'SELECT DISTINCT "col2", "col1" FROM "{table_name}"'
+    single_col_query = f'SELECT DISTINCT `col1` FROM `{table_name}`'
+    mult_col_query = f'SELECT DISTINCT `col2`, `col1` FROM `{table_name}`'
 
     assert single_col_query in generated_sql['queries']
     assert mult_col_query in generated_sql['queries']
 
-    single_col_question = f'Show the different "col1" in the table {table_name}'
-    mult_col_question = f'Show the different "col2", "col1" in the table "{table_name}"'
+    single_col_question = f'Show the different "col1" in the table "{table_name}"'
+    mult_col_question = f'Show the different `col2`, `col1` in the table "{table_name}"'
 
     assert single_col_question in generated_sql['questions']
     assert mult_col_question in generated_sql['questions']

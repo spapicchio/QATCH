@@ -68,7 +68,7 @@ class NullGenerator(AbstractSqlGenerator):
             table_name (str): The name of the table in the database.
             null_cols (list): List of column names with NULL values.
         """
-        queries = [f'SELECT COUNT(*) FROM "{table_name}" WHERE "{col}" IS NULL'
+        queries = [f'SELECT COUNT(*) FROM `{table_name}` WHERE `{col}` IS NULL'
                    for col in null_cols]
 
         questions = [f'Count the rows where the values of "{col}" are missing in table "{table_name}"'
@@ -85,7 +85,7 @@ class NullGenerator(AbstractSqlGenerator):
             table_name (str): The name of the table in the database.
             null_cols (list): List of column names with NULL values.
         """
-        queries = [f'SELECT COUNT(*) FROM "{table_name}" WHERE "{col}" IS NOT NULL'
+        queries = [f'SELECT COUNT(*) FROM `{table_name}` WHERE `{col}` IS NOT NULL'
                    for col in null_cols]
 
         questions = [f'Count the rows where the values of "{col}" are not missing in table "{table_name}"'

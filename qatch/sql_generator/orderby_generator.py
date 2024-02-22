@@ -110,7 +110,7 @@ class OrderByGenerator(AbstractSqlGenerator):
             table_name (str): The name of the table in the database.
             columns (list): List of column names.
         """
-        queries = [f'SELECT * FROM "{table_name}" ORDER BY "{col}" ASC'
+        queries = [f'SELECT * FROM `{table_name}` ORDER BY `{col}` ASC'
                    for col in columns]
 
         questions = [
@@ -128,7 +128,7 @@ class OrderByGenerator(AbstractSqlGenerator):
             table_name (str): The name of the table in the database.
             columns (list): List of column names.
         """
-        queries = [f'SELECT * FROM "{table_name}" ORDER BY "{col}" DESC'
+        queries = [f'SELECT * FROM `{table_name}` ORDER BY `{col}` DESC'
                    for col in columns]
 
         questions = [
@@ -146,7 +146,7 @@ class OrderByGenerator(AbstractSqlGenerator):
             table_name (str): The name of the table in the database.
             columns (list): List of column names.
         """
-        queries = [f'SELECT "{col}" FROM "{table_name}" ORDER BY "{col}" ASC'
+        queries = [f'SELECT `{col}` FROM `{table_name}` ORDER BY `{col}` ASC'
                    for col in columns]
 
         questions = [
@@ -164,7 +164,7 @@ class OrderByGenerator(AbstractSqlGenerator):
             table_name (str): The name of the table in the database.
             columns (list): List of column names.
         """
-        queries = [f'SELECT "{col}" FROM "{table_name}" ORDER BY "{col}" DESC'
+        queries = [f'SELECT `{col}` FROM `{table_name}` ORDER BY `{col}` DESC'
                    for col in columns]
 
         questions = [
