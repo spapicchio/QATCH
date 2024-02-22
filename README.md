@@ -6,8 +6,15 @@
  </kbd>
  </p>
 
-This repository is the official implementation of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data]()
+This repository is the official implementation of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data](https://openreview.net/forum?id=XOpaPrb0U5)
 to appear in NeurIPS Dataset and Benchmark track 2023.
+
+# 🔥 Updates
+- [**2024-Jan-22**]: Add [DAMBER: (Data-AMBiguity testER)](https://github.com/spapicchio/QATCH/tree/master/damber#readme) 
+- [**2024-Jan-10**]: Add JOIN tests for proprietary data 
+- [**2023-Dec-15**]: new License: Apache-2.0 
+- [**2023-Nov-06**]: Camera ready version is now available! [check it out](https://openreview.net/forum?id=XOpaPrb0U5)! 
+- [**2023-Nov-05**]: QATCH can now be donwloaded from pip! Do not forget to check the [documentation](https://spapicchio.github.io/QATCH/)! 
 
 # 🏴󠁶󠁵󠁭󠁡󠁰󠁿 Overview
 
@@ -23,7 +30,7 @@ to appear in NeurIPS Dataset and Benchmark track 2023.
 * ***Where can I check the results?*** The generated tests along with the predictions and the metric scores can be
   downloaded [here](https://drive.google.com/uc?export=download&id=1_z8N52QNAHnxpHv54VhbvYu7DbKV6QRv). This is to
   prevent the costly generation of test results with the openAI API and to build trust in our results.
-* 
+
 
  <figure style="text-align:center">
   <img src="docs/img/qatch-full-pipeline.png">
@@ -289,14 +296,6 @@ python main_reproducibility.py -gtf spider --task QA --model_name Tapas -dsp tes
 ```
 Instead, for the not supported models (because an API does not exist),
 the only difference is that the prediction phase has to be done by the user.
-
-# 📝 License
-
-The source code of our project is released, for research purposes only, under the following Common
-Law License: [CC BY-NC](LICENSE). Citing directly the Creative Commons
-License [website](https://creativecommons.org/about/cclicenses/):<br>
-*"This license allows reusers to distribute, remix, adapt, and build upon the material
-in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator."*
 
 
 
