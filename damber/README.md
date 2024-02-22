@@ -1,6 +1,13 @@
-# DAMBER1 (**D**ata-**AMB**iguity test**ER**)
+# DAMBER (**D**ata-**AMB**iguity test**ER**)
+ <figure style="text-align:center">
 
-<img src="docs/img/first_draft_ambiguous_qatch.drawio.png" width="70%">
+</figure>
+
+<p align="center">
+ <kbd>
+     <img src="../docs/img/first_draft_ambiguous_qatch.drawio.png" alt="Damber's pipeline"  style="border-radius:90%">
+ </kbd>
+ </p>
 
 
 **DAMBER1 (Data-AMBiguity testER)** is a new pipeline for ambiguous test generation and evaluation tailored to SP on
