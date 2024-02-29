@@ -267,7 +267,7 @@ paper.
 
  Data               | Link                                                                                                | # rows | # categorical cols | # numerical cols | example cols                 
 --------------------|-----------------------------------------------------------------------------------------------------|--------|--------------------|------------------|------------------------------
- Spider             | [link](https://huggingface.co/datasets/spider)                                                      | -      | -                  | -                | -                            
+ Spider             | [link](https://yale-lily.github.io/spider)                                                      | -      | -                  | -                | -                            
  Sales-transactions | [link](https://www.kaggle.com/datasets/gabrielramos87/an-online-shop-business)                      | 500k   | 5                  | 3                | ProductNo, Date              
  Fitness-trackers   | [link](https://www.kaggle.com/datasets/devsubhash/fitness-trackers-products-ecommerce)              | 565    | 8                  | 3                | Brand Name, Display          
  Account-fraud      | [link](https://www.kaggle.com/datasets/sgpjesus/bank-account-fraud-dataset-neurips-2022)            | 1M     | 4                  | 26               | DaysSinceRequest, Velocity6h 
