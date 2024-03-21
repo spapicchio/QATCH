@@ -94,6 +94,37 @@ def test_evaluate_with_df_no_order(metric_evaluator, predictions, expected_resul
             assert df[metric].tolist() != [1.0] * len(PREDICTION_DATAFRAME)
 
 
+@pytest.mark.parametrize("predictions", [
+    ([
+        [1, 2, [3]],
+        [[[1, 2, 3]]],
+        [[1, 2, 3], [[1, 2, 3]]]
+    ]),
+])
+def test_evaluate_with_df_return_zeros(metric_evaluator, predictions):
+    PREDICTION_DATAFRAME['prediction'] = predictions
+    df = metric_evaluator.evaluate_with_df(PREDICTION_DATAFRAME, 'prediction', task='QA')
+    metrics = metric_evaluator.metrics
+    for metric in metrics:
+        metric = f'{metric}_prediction'
+        assert df[metric].tolist() == [0] * len(PREDICTION_DATAFRAME)
+
+@pytest.mark.parametrize("predictions", [
+    ([
+        [[1, 2, 3]],
+        [[1, 2, 3]],
+        [[1, 2, 3]],
+    ]),
+])
+def test_evaluate_with_df_target_already_list(metric_evaluator, predictions):
+    PREDICTION_DATAFRAME['prediction'] = predictions
+    PREDICTION_DATAFRAME['query'] = predictions
+    df = metric_evaluator.evaluate_with_df(PREDICTION_DATAFRAME, 'prediction', task='QA')
+    metrics = metric_evaluator.metrics
+    for metric in metrics:
+        metric = f'{metric}_prediction'
+        assert df[metric].tolist() == [1] * len(PREDICTION_DATAFRAME)
+
 @pytest.mark.parametrize("query, predictions, expected_result", [
     (
             [f'SELECT * FROM {TABLE_NAME} ORDER BY "name" ASC'] * 3,

@@ -13,17 +13,6 @@ class DistinctGenerator(AbstractSqlGenerator):
             Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
     """
 
-    def __int__(self, database: SingleDatabase, seed=2023):
-        """
-        Initializes the DistinctSqlGenerator object.
-
-        Args:
-            database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
-            seed (int): The seed value for randomization. Default is 2023.
-        """
-
-        super().__init__(database, seed)
-
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """
         Generates DISTINCT SQL queries and corresponding questions based on categorical columns of a table.
@@ -50,6 +39,7 @@ class DistinctGenerator(AbstractSqlGenerator):
             "queries": ["SELECT DISTINCT \"colors\", \"names\" FROM \"table_name\""],
             "questions": ["Show the different \"colors\", \"names\" in the table table_name"]}
         """
+        self.empty_sql_generated()
         _, cat_cols, _ = self._sample_cat_num_cols(table_name)
         self._distinct_single_col(table_name, cat_cols)
         self._distinct_mult_col(table_name, cat_cols)

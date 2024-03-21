@@ -56,6 +56,7 @@ db_id = 'olympic'
 # create database connection
 db = SingleDatabase(db_path=db_save_path, db_name=db_id, tables=db_tables, table2primary_key=table2primary_key)
 ```
+
 This class will create the sqlite database in "db_save_path/db_id/db_id.sqlite".
 
 Once you have the database stored in this format "db_save_path/db_id/db_id.sqlite",
@@ -92,7 +93,6 @@ The tests_df dataframe contains:
 - *sql_tags*: the SQL generator used to create the test.
 - *query*: The generated query. Used to evaluate the model.
 - *question*: The generated question associated with the query. Used as input for the model.
-
 
 ## Step 2: TRL model predictions
 
@@ -137,6 +137,7 @@ from qatch.models import LLama2_QA
 model = LLama2_QA(model_name="meta-llama/Llama-2-7b-chat-hf",
                   hugging_face_token="your_hugging_face_token")
 ```
+
 The tests_df dataframe after the prediction phase contains:
 
 - *db_id*: The database name associated with the test.
@@ -158,6 +159,34 @@ tests_df = evaluator.evaluate_with_df(tests_df,
                                       prediction_col_name="<prediction_col_name>",
                                       task="QA")
 ```
+
+You do not have to specify the "databases" in case the "target" and "predictions" are already executed for QA:
+
+```python
+eval_task = MetricEvaluator(databases=None, metrics=['cell_precision', 'cell_recall'])
+
+test = {"sql_tags": "SELECT",
+        "prediction": [["wales", "scotland"], ["england"]],
+        "target": [["scotland", "wales"], ["england"]]}
+
+df = pd.DataFrame(test)
+prediction_col_name = "prediction"
+target_col_name = "target"
+
+result = eval_task.evaluate_with_df(df, prediction_col_name, 'QA', target_col_name)
+print(result)
+# {'cell_precision_prediction': 1.0, 'cell_recall_prediction': 1.0}
+```
+
+**Attention**
+
+For SP, if you have both the target and the predictions already executed, you have to specify the task as 'QA'
+
+This because when using task 'SP' there are automatic controls on the query syntactic which are not available if they have
+already been executed.
+
+
+
 The final dataframe contains:
 
 - *db_id*: The database name associated with the test.

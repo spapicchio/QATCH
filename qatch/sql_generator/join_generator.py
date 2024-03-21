@@ -6,23 +6,9 @@ class JoinGenerator(AbstractSqlGenerator):
     A class for generating SQL queries, and questions based on input tables in a database.
 
     Attributes:
-        inherits all attributes from the `AbstractSqlGenerator` class
-
-    Methods:
-        sql_generate(table_name: str) -> dict[str, list]:
-            Main method to generate the SQL queries, given a table name.
-
-        _generate_join_project_all(table_name: str, table_to_join2cols: dict):
-            Helper method to generate SQL queries that joins all records from two tables.
-
-        _generate_join_cat_columns(table_name: str, table_to_join2cols: dict):
-            Helper method to generate SQL queries that joins by categorical columns from two tables.
-
-        _get_columns_to_join(tbl_1_cols: list, tbl_2_cols: list) -> list:
-            Helper method to get the common columns from both the provided tables.
-
-        _get_table_name_to_join(table_name: str) -> dict:
-            Helper method to get all tables that can be joined with the given table on common columns.
+        database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
+        sql_generated (dict): A dictionary containing generated SQL tags, queries, and questions.
+            Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
     """
 
     def sql_generate(self, table_name: str) -> dict[str, list]:
@@ -39,10 +25,9 @@ class JoinGenerator(AbstractSqlGenerator):
         Returns:
             dict[str, list]: A dictionary where the keys are SQL tags and the values are lists of generated SQL queries.
 
-        Example:
+        Examples:
              Assuming a MultipleDatabases object "database" with two tables, 'orders' and 'customers', 'orders' table has columns
             ['order_id', 'product', 'customer_id'] and 'customers' table has columns ['customer_id', 'name', 'address'].
-
             >>> generator = JoinGenerator(database)
             >>> generator._generate_join_project_all("orders")
             >>> generator.sql_generated

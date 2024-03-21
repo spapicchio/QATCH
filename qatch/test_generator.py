@@ -23,12 +23,6 @@ class TestGenerator:
     """
 
     def __init__(self, databases: MultipleDatabases):
-        """
-        Initialize the TestGenerator with a MultipleDatabases object.
-
-        Args:
-            databases (MultipleDatabases): Object representing database connections.
-        """
         self.databases = databases
 
         self._generators = {'select': SelectGenerator,
