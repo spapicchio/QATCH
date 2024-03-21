@@ -63,17 +63,18 @@ class MetricEvaluator:
         Returns:
             pd.DataFrame: Output DataFrame that has the original DataFrame along with the evaluated metric DataFrame.
         """
+        tqdm.pandas(desc='Evaluating tests')
         if task.upper() == 'QA':
             # add the new metrics at the bottom of the dataframe
-            df_metrics = df.apply(lambda row: self.evaluate_single_test_QA(row.to_dict(),
-                                                                           prediction_col_name,
-                                                                           target_col_name),
-                                  axis=1, result_type='expand')
+            df_metrics = df.progress_apply(lambda row: self.evaluate_single_test_QA(row.to_dict(),
+                                                                                    prediction_col_name,
+                                                                                    target_col_name),
+                                           axis=1, result_type='expand')
         else:
-            df_metrics = df.apply(lambda row: self.evaluate_single_test_SP(row.to_dict(),
-                                                                           prediction_col_name,
-                                                                           target_col_name), axis=1,
-                                  result_type='expand')
+            df_metrics = df.progress_apply(lambda row: self.evaluate_single_test_SP(row.to_dict(),
+                                                                                    prediction_col_name,
+                                                                                    target_col_name), axis=1,
+                                           result_type='expand')
         return pd.concat([df, df_metrics], axis=1).replace({np.nan: None})
 
     def evaluate_single_test_QA(self, test: dict, prediction_col_name: str, target_col_name: str) -> dict:

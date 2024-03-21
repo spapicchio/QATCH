@@ -18,12 +18,6 @@ class AbstractSqlGenerator(ABC):
     """
 
     def __init__(self, database: SingleDatabase, seed=2023):
-        """Initialize the AbstractSqlGenerator object.
-
-        Args:
-            database (SingleDatabase): The SingleDatabase object representing the database to generate SQL from.
-            seed (int): The seed value for randomization. Default is 2023.
-        """
         self.seed = seed
         self.database = database
         self.sql_generated = {"sql_tags": [], "queries": [], "questions": []}

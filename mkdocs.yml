@@ -59,6 +59,6 @@ nav:
   - Package:
       - "Database Reader & Creation": database_reader.md
       - "QATCH Generate": sql_generator.md
-      - "Supported Models": llms_models.md
+      - "Supported Models": supported_models.md
       - "QATCH Evaluate": metrics.md
 

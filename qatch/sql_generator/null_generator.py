@@ -14,16 +14,6 @@ class NullGenerator(AbstractSqlGenerator):
             Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
     """
 
-    def __init__(self, database: SingleDatabase, seed=2023):
-        """
-        Initializes the NullGenerator object.
-
-        Args:
-            database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
-            seed (int): The seed value for randomization. Default is 2023.
-        """
-        super().__init__(database, seed)
-
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """
         Generates NULL queries and corresponding questions.

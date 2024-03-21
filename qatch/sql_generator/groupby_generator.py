@@ -13,16 +13,6 @@ class GroupByGenerator(AbstractSqlGenerator):
             Format: {"sql_tags": list[str], "queries": list[str], "questions": list[str]}
     """
 
-    def __init__(self, database: SingleDatabase, seed=2023):
-        """
-        Initializes the GroupBy object.
-
-        Args:
-            database (SingleDatabase): The SingleDatabase object representing the database to generate queries from.
-            seed (int): The seed to use for the random number generator.
-        """
-        super().__init__(database, seed)
-
     def sql_generate(self, table_name: str) -> dict[str, list]:
         """
         Generates Group By queries and corresponding questions for both categorical and numerical columns.

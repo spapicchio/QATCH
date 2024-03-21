@@ -64,9 +64,9 @@ def init_model(model_name, credentials_path=None):
     return model
 
 
-def step_0_1_get_spider_data(spider_input_path):
+def step_0_1_get_spider_data(spider_input_path, for_train):
     # spider data
-    spider_reader = SpiderReader(spider_base_path=spider_input_path)
+    spider_reader = SpiderReader(spider_base_path=spider_input_path, for_train=for_train)
     tests_df = spider_reader.get_df_sql_granularity(sql_level=None)
 
     databases = MultipleDatabases(db_path=os.path.join(spider_input_path, 'database'))
@@ -122,7 +122,8 @@ def step_1_generate_tests(databases, seed):
 def step_2_run_tests(tests_df, databases, model):
     tqdm.pandas(desc=f'Predicting for {model.name}')
     tests_df[f'predictions_{model.name}'] = tests_df.progress_apply(lambda row: model.predict(
-        table=databases.get_table(db_id=row['db_id'], tbl_name=row['tbl_name']) if isinstance(row['tbl_name'], str) else None,
+        table=databases.get_table(db_id=row['db_id'], tbl_name=row['tbl_name']) if isinstance(row['tbl_name'],
+                                                                                              str) else None,
         query=row['question'],
         tbl_name=row['tbl_name'],
         db_table_schema=databases.get_all_table_schema_given(db_id=row['db_id'])
@@ -228,7 +229,7 @@ if __name__ == '__main__':
                         help='the base path where the proprietary data is stored. '
                              'Default is data')
 
-    parser.add_argument('--spider_input_path', type=str, default='./data/spider_dev',
+    parser.add_argument('--spider_input_path', type=str, default='./data/spider',
                         help='the base path where the spider_dev data is stored. '
                              'Default is data')
 
