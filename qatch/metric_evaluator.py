@@ -25,7 +25,7 @@ class MetricEvaluator:
             ['cell_precision', 'cell_recall', 'tuple_cardinality', 'tuple_constraint', 'tuple_order']
     """
 
-    def __init__(self, databases: MultipleDatabases, metrics: list[str] | str | None = None):
+    def __init__(self, databases: MultipleDatabases | None = None, metrics: list[str] | str | None = None):
         if metrics is None:
             metrics = ['cell_precision', 'cell_recall',
                        'tuple_cardinality', 'tuple_constraint',
@@ -52,18 +52,59 @@ class MetricEvaluator:
         (Question Answering) or SP (Semantic Parsing). Then, it concatenates the original DataFrame
         and the evaluated metric DataFrame.
 
+        Notes:
+            - df must contains at lest two columns 'target_col_name' and 'prediction_col_name'
+            - 'target_col_name' is the target SQL query that anwers the NL question | the target cell tables
+            - 'prediction_col_name' can be either the predicted SQL or the predicted cells
+            - for QA, return zeros if predicted cells are not compliant with expected format: [["wales", "scotland"], ["england"]]
+            - for both tasks, return zeros if the 'target_col_name' SQL query cannot be executed over the input databases
+            - if 'target_col_name' contains the table cells, Tuple Order is calculated by default. Check if it is necessary.
+
         Args:
             df (pd.DataFrame): Input DataFrame where each row represents a test.
             prediction_col_name (str): Name of the column in the DataFrame that contains predictions.
             task (str): Type of evaluation task. Could be `QA` or `SP`.
             target_col_name (str): Name of the column in the DataFrame that contains target queries.
-            Default is `'query'`.
+            Default is 'query'.
             keep_target (bool): FALSE by default. If TRUE, keeps the target query.
 
         Returns:
             pd.DataFrame: Output DataFrame that has the original DataFrame along with the evaluated metric DataFrame.
+
+        Examples:
+            You do not have to specify the "databases" in case the "target" and "predictions" are already executed for QA:
+
+            >>> eval_task = MetricEvaluator(databases=None, metrics=['cell_precision', 'cell_recall'])
+            >>> test = {"sql_tags": "SELECT",
+            ...         "prediction": [["wales", "scotland"], ["england"]],
+            ...         "target": [["scotland", "wales"], ["england"]]}
+            >>> df = pd.DataFrame(test)
+            >>> prediction_col_name = "prediction"
+            >>> target_col_name = "target"
+            >>> result = eval_task.evaluate_with_df(df, prediction_col_name, 'QA', target_col_name)
+            >>> print(result)
+            {'cell_precision_prediction': 0.66, 'cell_recall_prediction': 1.0}
+
+            If this is not the case, you have to load the "databases" to execute the "target" queries.
+
+            >>> eval_task = MetricEvaluator(databases=databases, metrics=['cell_precision', 'cell_recall'])
+            >>> test = {"sql_tags": "SELECT",
+            ...         "prediction": [["wales", "scotland"], ["england"]],
+            ...         "target": ['SELECT * FROM table']}
+            >>> df = pd.DataFrame(test)
+            >>> prediction_col_name = "prediction"
+            >>> target_col_name = "target"
+            >>> result = eval_task.evaluate_with_df(df, prediction_col_name, 'QA', target_col_name)
+            >>> print(result)
+            {'cell_precision_prediction': 0.66, 'cell_recall_prediction': 1.0}
+
+        Note:
+            For SP, if you have both the target and the predictions already executed, you have to specify the task as 'QA'
+
+            This because when using task 'SP' there are automatic controls on the query syntactic which is not available if they are already executed
+
         """
-        tqdm.pandas(desc='Evaluating tests')
+        tqdm.pandas(desc=f'Evaluating {task} tests')
         if task.upper() == 'QA':
             # add the new metrics at the bottom of the dataframe
             df_metrics = df.progress_apply(lambda row: self.evaluate_single_test_QA(row.to_dict(),
@@ -94,6 +135,10 @@ class MetricEvaluator:
         Returns:
             dict: A dictionary with keys are metric name and value is the evaluated metric score for each metric in `self.metrics`.
 
+        Notes:
+            - return zeros if prediction is not compliant with expected format: [["wales", "scotland"], ["england"]]
+            - return zeros if target query cannot be executed over the databases
+
         Examples:
             >>> eval_task = MetricEvaluator(databases, metrics=['cell_precision', 'cell_recall'])
             >>> test = {"sql_tags": "SELECT",
@@ -110,23 +155,36 @@ class MetricEvaluator:
             "wales" and "scotland" are in the correct position.
             `cell_recall_prediction` is 2/2 = 1, all actual outcomes are included in the prediction.
         """
+        output_in_case_error = {f'{metric}_{prediction_col_name}': 0 for metric in self.metrics}
+        if not CellPrecisionTag.is_table_well_structured(test[prediction_col_name]):
+            return output_in_case_error
 
-        # Runs the target query on the database
+        # Runs the target query on the database only if necessary
         new_target_col = f'{target_col_name}_result'
-        try:
-            test[new_target_col] = self.databases.run_query(test['db_id'], test[target_col_name])
-        except sqlite3.Error as e:
-            # catch any possible error of prediction and return all zeros
-            logging.error(e)
-            return {f'{metric}_{prediction_col_name}': 0 for metric in self.metrics}
+        if isinstance(test[target_col_name], list):
+            logging.warning('The target tables is passed as input, '
+                            'the TUPLE ORDER is calucated by default because there is no way to check if it is an ORDERBY test')
+            # if the target is already a list of list, we do not need to run the SQL over the databases
+            if not CellPrecisionTag.is_table_well_structured(test[target_col_name]):
+                return output_in_case_error
+            test[new_target_col] = test[target_col_name]
+        else:
+            try:
+                test[new_target_col] = self.databases.run_query(test['db_id'], test[target_col_name])
+            except sqlite3.Error as e:
+                # catch any possible error of prediction and return all zeros
+                logging.error(e)
+                return output_in_case_error
 
+        # if there are no errors,  compute the metric results
         metric2evaluation = {f'{metric}_{prediction_col_name}': None for metric in self.metrics}
         for metric in self.metrics:
             generator = self._tags_generator[metric]
             # initialize the metric column
             # evaluate the metric only for the test where the prediction is not equal to the target
             tqdm.pandas(desc=f'Evaluating {metric}')
-            if metric == 'tuple_order' and 'order by' not in test[target_col_name].lower():
+            if metric == 'tuple_order' and not isinstance(test[target_col_name], list) and 'order by' not in test[
+                target_col_name].lower():
                 continue
             evaluation = generator.evaluate_single_test_metric(test[new_target_col], test[prediction_col_name])
             metric2evaluation[f'{metric}_{prediction_col_name}'] = evaluation

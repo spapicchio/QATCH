@@ -1,3 +1,4 @@
+import logging
 import math
 import re
 from abc import ABC, abstractmethod
@@ -26,6 +27,23 @@ class AbstractMetric(ABC):
             list[float]: A list of evaluation scores for each test.
         """
         return list(map(self.evaluate_single_test_metric, targets, predictions))
+
+    @staticmethod
+    def is_table_well_structured(linearized_table: list[list]) -> bool:
+        warning_output = ('Table should be a list of list:  [["wales", "scotland"], ["england"]].'
+                          f' Returning zero')
+        try:
+            linearized_table = np.array(linearized_table)
+        except ValueError:
+            # This error is raised when the linearized_table does not have the correct structure: [[1,2,3], [[1],2,3]]
+            return False
+
+        # case where there is not the correct shape: [1,2,4] | [[[1], [2]]]
+        if len(linearized_table.shape) != 2:
+            logging.warning(warning_output)
+            return False
+
+        return True
 
     def evaluate_single_test_metric(self,
                                     target: list[list],
