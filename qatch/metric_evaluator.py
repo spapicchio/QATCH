@@ -83,7 +83,7 @@ class MetricEvaluator:
             >>> target_col_name = "target"
             >>> result = eval_task.evaluate_with_df(df, prediction_col_name, 'QA', target_col_name)
             >>> print(result)
-            {'cell_precision_prediction': 0.66, 'cell_recall_prediction': 1.0}
+            {'cell_precision_prediction': 1.0, 'cell_recall_prediction': 1.0}
 
             If this is not the case, you have to load the "databases" to execute the "target" queries.
 
@@ -96,12 +96,13 @@ class MetricEvaluator:
             >>> target_col_name = "target"
             >>> result = eval_task.evaluate_with_df(df, prediction_col_name, 'QA', target_col_name)
             >>> print(result)
-            {'cell_precision_prediction': 0.66, 'cell_recall_prediction': 1.0}
+            {'cell_precision_prediction': 1.0, 'cell_recall_prediction': 1.0}
 
         Note:
             For SP, if you have both the target and the predictions already executed, you have to specify the task as 'QA'
 
-            This because when using task 'SP' there are automatic controls on the query syntactic which is not available if they are already executed
+            This because when using task 'SP' there are automatic controls on the query syntactic which are not available if they have
+            already been executed.
 
         """
         tqdm.pandas(desc=f'Evaluating {task} tests')
@@ -148,12 +149,7 @@ class MetricEvaluator:
             >>> target_col_name = "target"
             >>>result = eval_task.evaluate_single_test_QA(test, prediction_col_name, target_col_name)
             >>> print(result)
-            {'cell_precision_prediction': 0.66, 'cell_recall_prediction': 1.0}
-
-        Notes:
-            In the above example, `cell_precision_prediction` is calculated as 2/3 = 0.66,
-            "wales" and "scotland" are in the correct position.
-            `cell_recall_prediction` is 2/2 = 1, all actual outcomes are included in the prediction.
+            {'cell_precision_prediction': 1.0, 'cell_recall_prediction': 1.0}
         """
         output_in_case_error = {f'{metric}_{prediction_col_name}': 0 for metric in self.metrics}
         if not CellPrecisionTag.is_table_well_structured(test[prediction_col_name]):
@@ -169,6 +165,10 @@ class MetricEvaluator:
                 return output_in_case_error
             test[new_target_col] = test[target_col_name]
         else:
+            if self.databases is None:
+                raise ValueError(
+                    f'The {target_col_name} is a query but no database is specified in the MetricEvaluator.'
+                    f'Plese initialize is as MetricEvaluator(databases)')
             try:
                 test[new_target_col] = self.databases.run_query(test['db_id'], test[target_col_name])
             except sqlite3.Error as e:
