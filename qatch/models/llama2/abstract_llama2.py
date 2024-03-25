@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import logging
 from abc import abstractmethod, ABC
 from typing import Any
 
@@ -39,14 +42,15 @@ class AbstractLLama2(ABC):
         super().__init__(*args, **kwargs)
         self.model_name = model_name
         login(token=hugging_face_token)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, truncation=True, truncation_side='right')
         self.pipeline = transformers.pipeline(
             "text-generation",
             model=self.model_name,
             torch_dtype=torch.float16 if not force_cpu else torch.float32,
             tokenizer=self.tokenizer,
             device_map={"": 0} if not force_cpu else 'cpu',
-            trust_remote_code=True
+            trust_remote_code=True,
+            truncation=True
         )
 
     @property
@@ -79,8 +83,9 @@ class AbstractLLama2(ABC):
             list: The list of results.
         """
         model_input = self.process_input(table, db_table_schema, query, tbl_name)
-        if model_input is None:
-            """Table is too large to be processed"""
+        # print("\033[32m" + f'{tbl_name}: {len(self.tokenizer.tokenize(self.prompt + model_input))}' + "\033[0m")
+        if model_input is None or len(self.tokenizer.tokenize(self.prompt + model_input)) > 2048:
+            logging.info(f'Table is too large to be processed {tbl_name}')
             result = None
         else:
             result = self.predict_input(model_input)
@@ -106,7 +111,7 @@ class AbstractLLama2(ABC):
             num_return_sequences=1,
             eos_token_id=self.tokenizer.eos_token_id,
             max_new_tokens=2048,
-            batch_size=1
+            batch_size=1,
         )
         text = sequences[0]['generated_text']
         text = text.replace(final_prompt, '').strip()

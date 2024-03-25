@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
 from time import sleep
 from typing import Any
 
-import openai
 import pandas as pd
-from openai import OpenAI
+from openai import OpenAI, BadRequestError, RateLimitError, APIConnectionError
 
 
 class AbstractChatGPT(ABC):
@@ -60,15 +61,15 @@ class AbstractChatGPT(ABC):
                 timeout=60 * 3,  # after 3 min (default 10)
             )
             content = self._normalize_api_output(content)
-        except openai.BadRequestError as e:
+        except BadRequestError as e:
             # raise error because the input is too long
             self.logger.error(e)
             return [None]
-        except openai.RateLimitError as e:
+        except RateLimitError as e:
             """Too many requests to the API"""
             self.logger.error(e)
             return ['nan']
-        except openai.APIConnectionError as e:
+        except APIConnectionError as e:
             """Too many requests to the API"""
             self.logger.error(e)
             return ['nan']
