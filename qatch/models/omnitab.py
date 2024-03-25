@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, override
+from typing import Any
 
 import pandas as pd
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
@@ -42,7 +44,6 @@ class Omnitab(AbstractModel):
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
         self.model.to(self.device)
 
-    @override
     def process_input(self, table: pd.DataFrame,
                       query: str,
                       tbl_name: str) -> Any | None:
@@ -82,7 +83,6 @@ class Omnitab(AbstractModel):
         # into the model subsequently.
         return model_input.to(self.device)
 
-    @override
     def predict_input(self, model_input, table) -> list[list[list[str]]]:
         outputs = self.model.generate(**model_input)
         return self.tokenizer.batch_decode(outputs, skip_special_tokens=True)

@@ -1,4 +1,6 @@
-from typing import Any, override
+from __future__ import annotations
+
+from typing import Any
 
 import pandas as pd
 
@@ -50,7 +52,7 @@ class LLama2_QA(AbstractLLama2):
     @property
     def prompt(self):
         return """\
-        [INST] I want you to act as a question answering model for tabular data.
+        <<SYS>> I want you to act as a question answering model for tabular data.
         I will pass you a table with one question. 
         I want you to return the elements in the table that answer the question.
         I want you to return the answer in format: list of list (row and columns).
@@ -61,7 +63,7 @@ class LLama2_QA(AbstractLLama2):
         The answer must be a list of tuples. Then for each tuple, a list of elements. For each element a list of cell values and the header. 
         Do not use different formats in the answer. 
         Do not repeat the instruction in the answer.
-        [/INST]
+        <</SYS>>
         [INST] Table Name: "Body_Builders"
         Table: "[[['Simone', '[H] Name'], ['Papicchio', '[H] Surname']], [['Marco', '[H] Name'], ['Clemente', '[H] Surname']]]"
         Question: "Show all information about each body builder"
@@ -80,7 +82,6 @@ class LLama2_QA(AbstractLLama2):
         [[26]]
         """
 
-    @override
     def process_input(self,
                       table: pd.DataFrame | None,
                       db_table_schema: dict | None,
@@ -96,6 +97,5 @@ class LLama2_QA(AbstractLLama2):
             [/INST]"""
         return model_input
 
-    @override
     def _normalize_output(self, text):
         return _normalize_output_for_QA(text)
