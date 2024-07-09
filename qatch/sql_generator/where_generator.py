@@ -90,12 +90,12 @@ class WhereGenerator(AbstractSqlGenerator):
         least_frequent_elements = [self._get_least_frequent_or_min_value(df[col].values) for col in cat_cols]
         for col, most_freq, least_freq in zip(cat_cols, most_frequent_elements, least_frequent_elements):
             queries = [
-                f"""SELECT * FROM `{table_name}` WHERE `{col}` == `{most_freq}` """,
-                f"""SELECT * FROM `{table_name}` WHERE `{col}` == `{least_freq}` """,
-                f"""SELECT * FROM `{table_name}` WHERE `{col}` != `{most_freq}` """,
-                f"""SELECT * FROM `{table_name}` WHERE `{col}` != `{least_freq}` """,
-                f"""SELECT * FROM `{table_name}` WHERE NOT `{col}` == `{most_freq}` """,
-                f"""SELECT * FROM `{table_name}` WHERE NOT `{col}` == `{least_freq}` """,
+                f"""SELECT * FROM `{table_name}` WHERE `{col}` == '{most_freq}'""",
+                f"""SELECT * FROM `{table_name}` WHERE `{col}` == '{least_freq}'""",
+                f"""SELECT * FROM `{table_name}` WHERE `{col}` != '{most_freq}'""",
+                f"""SELECT * FROM `{table_name}` WHERE `{col}` != '{least_freq}'""",
+                f"""SELECT * FROM `{table_name}` WHERE NOT `{col}` == '{most_freq}'""",
+                f"""SELECT * FROM `{table_name}` WHERE NOT `{col}` == '{least_freq}'""",
             ]
 
             questions = [
