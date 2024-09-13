@@ -1,4 +1,4 @@
-import numpy as np
+from itertools import chain
 
 from .abstract_metric import AbstractMetric
 
@@ -41,7 +41,8 @@ class CellRecallTag(AbstractMetric):
             >>> evaluator.evaluate_single_no_special_case(target, prediction)
             1.0
         """
-        target = np.array(target)
-        prediction = np.array(prediction)
-        sum_cell_match = np.sum(np.isin(target, prediction))
-        return round(sum_cell_match / target.size, 3)
+        target = set(chain.from_iterable(target))
+        prediction = set(chain.from_iterable(prediction))
+        intersected_cells = target.intersection(prediction)
+        sum_cell_match = len(intersected_cells)
+        return round(sum_cell_match / len(target), 3)
