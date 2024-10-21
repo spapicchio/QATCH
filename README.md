@@ -7,7 +7,7 @@
  </p>
 
 This repository is the official implementation of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data](https://openreview.net/forum?id=XOpaPrb0U5)
-to appear in NeurIPS Dataset and Benchmark track 2023.
+NeurIPS Dataset and Benchmark track 2023.
 
 # 🔥 Updates
 - [**2024-Jan-22**]: Add [DAMBER: (Data-AMBiguity testER)](https://github.com/spapicchio/QATCH/tree/master/damber#readme) 
