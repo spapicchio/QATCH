@@ -277,6 +277,17 @@ paper.
  Adult-census       | [link](https://www.kaggle.com/datasets/uciml/adult-census-income)                                   | 32.6k  | 9                  | 6                | education, fnlwgt            
  Mushrooms          | [link](https://www.kaggle.com/datasets/uciml/mushroom-classification)                               | 8.1k   | 23                 | 0                | cap-shape, ring-type         
 
+
+
+The experiments using JOIN involved specific, joinable tables from the following datasets:
+Domain              | Full Name               | Link                                                                        | Selected tables           
+--------------------|-----------------------|-----------------------------------------------------------------------------|-----------------------
+Medicine            | MIMIC-III              | [link](https://www.kaggle.com/datasets/asjad99/mimiciii)                    |admissions, callout, caregivers, caregivers             
+Finance             | Home Credit Default Risk  | [link](https://www.kaggle.com/datasets/megancrenshaw/home-credit-default-risk) |application, bureau, bureau_balance, credit_card_balance, installments_payments, previous_application       
+Ecommerce           | Instacart Market Basket | [link](https://www.kaggle.com/c/instacart-market-basket-analysis/data) |aisles, department, products, order_products, orders           
+
+
+
 # Run Experiments
 
 Current version of QATCH supports SP and QA tasks, however since we rely on third-party models
