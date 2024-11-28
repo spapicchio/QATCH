@@ -6,7 +6,14 @@ import pandas as pd
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 
-from .checklist_generators.select_generator import SelectGenerator
+from .checklist_generators import (
+    ProjectGenerator,
+    SelectGenerator,
+    DistinctGenerator,
+    SimpleAggGenerator,
+    OrderByGenerator
+
+)
 from .connectors import Connector
 from .state_orchestrator import StateOrchestrator
 
@@ -17,7 +24,11 @@ class Orchestrator:
         if list_node_fun is None:
             list_node_fun = [
 
-                ('Project', SelectGenerator().graph_call),
+                ('Project', ProjectGenerator().graph_call),
+                ('Select', SelectGenerator().graph_call),
+                ('Distinct', DistinctGenerator().graph_call),
+                ('SimpleAgg', SimpleAggGenerator().graph_call),
+                ('OrderBy', OrderByGenerator().graph_call),
             ]
         for node_name, node_fun in list_node_fun:
             graph.add_node(node_name, node_fun)

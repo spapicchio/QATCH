@@ -10,59 +10,43 @@ class SelectGenerator(BaseGenerator):
         return 'SELECT'
 
     def template_generator(self, table: ConnectorTable) -> list[SingleQA]:
-        columns = list(table.tbl_col2metadata.keys())
-        tbl_name = table.tbl_name
+        table_name = table.tbl_name
+        tests = []
+        tests += self.test_where_cat(table.cat_col2metadata, table_name)
+        tests += self.test_where_num(table.num_col2metadata, table_name)
 
-        select_tests = []
-        select_tests += self._project_single_col(columns, tbl_name)
-        select_tests += self._project_all_table(tbl_name)
-        select_tests += self._project_add_col(columns, tbl_name)
-        select_tests += self._project_random_combination_cols(columns, tbl_name)
+        return tests
 
-        return select_tests
+    def test_where_cat(self, cat_cols, table_name) -> list[SingleQA]:
+        operations = [
+            ('==', 'is equal to'),
+            ('!=', 'is different from'),
+        ]
+        tests = []
+        for cat_col, metadata in cat_cols.items():
+            for operation in operations:
+                sample_element = random.sample(metadata.sample_data, 1)
+                single_test = SingleQA(
+                    query=f"""SELECT * FROM `{table_name}` WHERE `{cat_col}` {operation[0]} '{sample_element}'""",
+                    question=f'Show the data of the table {table_name} where {cat_col} {operation[1]} {sample_element}',
+                    sql_tag=f'WHERE-CAT',
+                )
+                tests.append(single_test)
+        return tests
 
-    def _project_all_table(self, tbl_name) -> list[SingleQA]:
-        return [SingleQA(
-            query=f'SELECT * FROM `{tbl_name}`',
-            question=f"Show all the rows in the table {tbl_name}",
-            sql_tag='SELECT-ALL',
-        )]
-
-    def _project_single_col(self, columns, tbl_name) -> list[SingleQA]:
-        output = []
-        for col_name in columns:
-            test = SingleQA(
-                query=f'SELECT `{col_name}` FROM `{tbl_name}`',
-                question=f'Show all {col_name} in the table {tbl_name}',
-                sql_tag='SELECT-SINGLE-COL',
-            )
-            output.append(test)
-        return output
-
-    def _project_add_col(self, columns, tbl_name) -> list[SingleQA]:
-        output = []
-        for i in range(1, len(columns)):
-            selected_cols = columns[:i]
-            query_cols = ", ".join([f'`{col}`' for col in selected_cols])
-            question_cols = ", ".join([f'{col}' for col in selected_cols])
-            test = SingleQA(
-                query=f'SELECT {query_cols} FROM `{tbl_name}`',
-                question=f'Show all {question_cols} in the table {tbl_name}',
-                sql_tag='SELECT-ADD-COL',
-            )
-            output.append(test)
-        return output
-
-    def _project_random_combination_cols(self, columns, tbl_name) -> list[SingleQA]:
-        output = []
-        for i in range(1, len(columns)):
-            random_columns = random.sample(columns, i)
-            query_cols = ", ".join([f'`{col}`' for col in random_columns])
-            question_cols = ", ".join([f'{col}' for col in random_columns])
-            test = SingleQA(
-                query=f'SELECT {query_cols} FROM `{tbl_name}`',
-                question=f'Show all {question_cols} in the table {tbl_name}',
-                sql_tag='SELECT-RANDOM-COL',
-            )
-            output.append(test)
-        return output
+    def test_where_num(self, num_cols, table_name) -> list[SingleQA]:
+        operations = [
+            ('>', 'is greater than'),
+            ('<', 'is less than'),
+        ]
+        tests = []
+        for num_col, metadata in num_cols.items():
+            for operation in operations:
+                sample_element = random.sample(metadata.sample_data, 1)
+                single_test = SingleQA(
+                    query=f'SELECT * FROM `{table_name}` WHERE `{num_col}` > {sample_element}',
+                    question=f'Show the data of the table {table_name} where {num_col} {operation[1]} {sample_element}',
+                    sql_tag=f'WHERE-NUM',
+                )
+                tests.append(single_test)
+        return tests
