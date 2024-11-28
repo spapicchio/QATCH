@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
-from typing import Literal, Optional, Generator
+from typing import Literal, Generator
 
 import pandas as pd
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ConnectorTableColumn(BaseModel):
