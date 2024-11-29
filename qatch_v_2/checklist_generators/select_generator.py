@@ -21,6 +21,7 @@ class SelectGenerator(BaseGenerator):
         operations = [
             ('==', 'is equal to'),
             ('!=', 'is different from'),
+            ('!=', 'not equal to'),
         ]
         tests = []
         for cat_col, metadata in cat_cols.items():
