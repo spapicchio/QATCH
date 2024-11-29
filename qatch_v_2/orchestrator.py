@@ -42,7 +42,8 @@ class Orchestrator:
         self.graph = graph.compile()
 
     def generate_dataset(self, connector: Connector) -> pd.DataFrame:
-        state = self.graph.invoke({'connector': connector})
+        database = connector.load_tables_from_database()
+        state = self.graph.invoke({'database': database, 'connector': connector})
         dataset = state['generated_templates']
         dataset = pd.DataFrame(dataset)
         dataset = dataset.loc[:, ['db_path', 'db_id', 'tbl_name', 'test_category', 'sql_tag', 'query', 'question']]

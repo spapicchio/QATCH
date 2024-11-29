@@ -31,13 +31,13 @@ class BaseGenerator(ABC):
         raise NotImplementedError
 
     def graph_call(self, state: StateOrchestrator) -> dict[Literal['generated_templates']: list[BaseTest]]:
-        connector = state['connector']
-        self.connector = connector
+        database = state['database']
+        connector = self.connector = state['connector']
         table_tests = []
-        for table in connector.load_tables_from_database():
+        for tbl_name, table in database.items():
             tests = self.template_generator(table)
 
-            tests = [self.expand_single_qa(table, test) for test in tests]
+            tests = [self.create_base_test(table, test) for test in tests]
 
             table_tests.append(tests)
         # flatten the table tests
@@ -48,7 +48,7 @@ class BaseGenerator(ABC):
 
         return {'generated_templates': table_tests}
 
-    def expand_single_qa(self, table, test: SingleQA) -> BaseTest:
+    def create_base_test(self, table, test: SingleQA) -> BaseTest:
         return BaseTest(
             **test,
             db_id=table.db_name,

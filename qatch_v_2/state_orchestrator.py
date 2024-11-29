@@ -1,9 +1,10 @@
 import operator
 from typing import Annotated, TypedDict
 
-from .connectors import Connector
+from .connectors import ConnectorTable
 
 
 class StateOrchestrator(TypedDict):
-    connector: Connector
+    connector: ConnectorTable
+    database: dict[str, ConnectorTable]
     generated_templates: Annotated[list, operator.add]

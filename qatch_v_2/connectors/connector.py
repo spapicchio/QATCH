@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
-from typing import Literal, Generator
+from typing import Literal
 
 import pandas as pd
 from pydantic import BaseModel
@@ -24,6 +24,8 @@ class ConnectorTable(BaseModel):
     tbl_col2metadata: dict[str, ConnectorTableColumn]
     cat_col2metadata: dict[str, ConnectorTableColumn]
     num_col2metadata: dict[str, ConnectorTableColumn]
+    primary_key: list[ConnectorTableColumn] | None
+    foreign_keys: dict[str, ConnectorTable | str] | None
 
 
 class Connector(ABC):
@@ -40,7 +42,7 @@ class Connector(ABC):
         self.table2primary_key = table2primary_key
 
     @abstractmethod
-    def load_tables_from_database(self, *args, **kwargs) -> Generator[ConnectorTable, None, None]:
+    def load_tables_from_database(self, *args, **kwargs) -> dict[str, ConnectorTable]:
         """Load the table from any possible database.
         This method is a generator, yielding table inputs one-by-one.
         """
