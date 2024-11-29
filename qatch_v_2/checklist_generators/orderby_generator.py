@@ -1,4 +1,5 @@
 from .base_generator import BaseGenerator, SingleQA
+from .utils import utils_list_sample
 from ..connectors import ConnectorTable
 
 
@@ -11,13 +12,15 @@ class OrderByGenerator(BaseGenerator):
         columns = list(table.tbl_col2metadata.keys())
         tbl_name = table.tbl_name
 
-        select_tests = []
-        select_tests += self._all_table_order(columns, tbl_name)
+        select_tests = self._all_table_order(columns, tbl_name)
         select_tests += self._single_col_order(columns, tbl_name)
 
         return select_tests
 
     def _all_table_order(self, columns, tbl_name) -> list[SingleQA]:
+        # number of tests: len(columns) * 2
+        columns = utils_list_sample(columns, k=1)
+
         tests = []
         operations = [
             ('ASC', 'ascending'),
@@ -34,6 +37,9 @@ class OrderByGenerator(BaseGenerator):
         return tests
 
     def _single_col_order(self, columns, tbl_name) -> list[SingleQA]:
+        # number of tests: len(columns) * 2
+        columns = utils_list_sample(columns, k=1)
+
         tests = []
         operations = [
             ('ASC', 'ascending'),

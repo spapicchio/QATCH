@@ -9,6 +9,7 @@ class NullGenerator(BaseGenerator):
 
     def template_generator(self, table: ConnectorTable) -> list[SingleQA]:
         # Mostly of this tests will be empty, but the `BaseGenerator` class will remove them
+        # number of test = len(column with null values in table)
         columns = table.tbl_col2metadata.keys()
         table_name = table.tbl_name
         tests = []

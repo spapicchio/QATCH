@@ -1,6 +1,7 @@
 import random
 
 from .base_generator import BaseGenerator, SingleQA
+from .utils import utils_list_sample
 from ..connectors import ConnectorTable
 
 
@@ -18,11 +19,15 @@ class SelectGenerator(BaseGenerator):
         return tests
 
     def test_where_cat(self, cat_cols, table_name) -> list[SingleQA]:
+        # num of tests = len(cat_cols) x len(operations)
         operations = [
             ('==', 'is equal to'),
             ('!=', 'is different from'),
             ('!=', 'not equal to'),
         ]
+
+        cat_cols = utils_list_sample(cat_cols, k=3)
+
         tests = []
         for cat_col, metadata in cat_cols.items():
             for operation in operations:
@@ -36,11 +41,14 @@ class SelectGenerator(BaseGenerator):
         return tests
 
     def test_where_num(self, num_cols, table_name) -> list[SingleQA]:
+        # num of tests = len(num_cols) x len(operations)
         operations = [
             ('>', 'is greater than'),
             ('<', 'is less than'),
         ]
-        num_cols = {col: metadata for col, metadata in num_cols.items() if 'id' not in col.lower()}
+        num_cols_name = utils_list_sample(num_cols.keys(), k=3)
+
+        num_cols = {col: num_cols[col] for col in num_cols_name if 'id' not in col.lower()}
 
         tests = []
         for num_col, metadata in num_cols.items():

@@ -1,6 +1,7 @@
 import random
 
 from .base_generator import BaseGenerator, SingleQA
+from .utils import utils_list_sample
 from ..connectors import ConnectorTable
 
 
@@ -16,7 +17,7 @@ class ProjectGenerator(BaseGenerator):
         select_tests = []
         select_tests += self._project_single_col(columns, tbl_name)
         select_tests += self._project_all_table(tbl_name)
-        select_tests += self._project_add_col(columns, tbl_name)
+        # select_tests += self._project_add_col(columns, tbl_name)
         select_tests += self._project_random_combination_cols(columns, tbl_name)
 
         return select_tests
@@ -30,6 +31,7 @@ class ProjectGenerator(BaseGenerator):
 
     def _project_single_col(self, columns, tbl_name) -> list[SingleQA]:
         output = []
+        columns = utils_list_sample(columns, k=5)
         for col_name in columns:
             test = SingleQA(
                 query=f'SELECT `{col_name}` FROM `{tbl_name}`',
@@ -54,6 +56,7 @@ class ProjectGenerator(BaseGenerator):
         return output
 
     def _project_random_combination_cols(self, columns, tbl_name) -> list[SingleQA]:
+        # num of tests = len(columns) - 1
         output = []
         for i in range(1, len(columns)):
             random_columns = random.sample(columns, i)

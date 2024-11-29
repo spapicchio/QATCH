@@ -1,4 +1,5 @@
 from .base_generator import BaseGenerator, SingleQA
+from .utils import utils_list_sample
 from ..connectors import ConnectorTable
 
 
@@ -15,6 +16,7 @@ class JoinGenerator(BaseGenerator):
         return tests
 
     def generate_join_project_all(self, table: ConnectorTable) -> list[SingleQA]:
+        # num of tests = len(foreign_key)
         table_name = table.tbl_name
         tests = []
         for foreign_key in table.foreign_keys:
@@ -31,18 +33,25 @@ class JoinGenerator(BaseGenerator):
         return tests
 
     def generate_join_project_single(self, table: ConnectorTable) -> list[SingleQA]:
+        # num of tests = len(foreign_key) x len(cat_cols_parent) - 1  x len(cat_cols_child) - 1
+
         table_name = table.tbl_name
         tests = []
         cat_cols_parent = table.cat_col2metadata.keys()
+        cat_cols_parent = utils_list_sample(cat_cols_parent, k=3)
 
         for foreign_key in table.foreign_keys:
+
             table_name_2 = foreign_key['child_table'].tbl_name
             parent_col = foreign_key['parent_column']
             child_col = foreign_key['child_column']
             cat_cols_child = foreign_key['child_table'].cat_col2metadata.keys()
+            cat_cols_child = utils_list_sample(cat_cols_child, k=3)
+            
             for cat_col_parent in cat_cols_parent:
                 if cat_col_parent == parent_col:
                     continue
+
                 for cat_col_child in cat_cols_child:
                     if cat_col_child == child_col:
                         continue
@@ -58,4 +67,3 @@ class JoinGenerator(BaseGenerator):
                     )
                     tests.append(test)
         return tests
-

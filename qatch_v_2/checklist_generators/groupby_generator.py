@@ -1,4 +1,5 @@
 from .base_generator import BaseGenerator, SingleQA
+from .utils import utils_list_sample
 from ..connectors import ConnectorTable
 
 
@@ -18,7 +19,9 @@ class GrouByGenerator(BaseGenerator):
         return tests
 
     def test_group_count_cat(self, cat_columns, table_name):
+        # num of tests len(cat_col)
         tests = []
+        cat_columns = utils_list_sample(cat_columns, k=5)
         for cat_col in cat_columns:
             single_test = SingleQA(
                 query=f'SELECT `{cat_col}`, COUNT(*) FROM `{table_name}` GROUP BY `{cat_col}`',
@@ -29,6 +32,7 @@ class GrouByGenerator(BaseGenerator):
         return tests
 
     def test_group_cat_agg_num(self, cat_cols, num_cols, table_name):
+        # num tests = len(cat_cols) x len(num_cols) x len(operations)
         operations = [
             'min',
             'max',
@@ -36,6 +40,11 @@ class GrouByGenerator(BaseGenerator):
             'sum',
         ]
         tests = []
+
+        num_cols = [col for col in num_cols if 'id' not in col.lower()]
+
+        cat_cols = utils_list_sample(cat_cols, k=2)
+        num_cols = utils_list_sample(num_cols, k=2)
 
         for cat_col in cat_cols:
             for num_col in num_cols:

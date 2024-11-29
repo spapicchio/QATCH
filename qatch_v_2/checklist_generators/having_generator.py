@@ -1,4 +1,5 @@
 from .base_generator import BaseGenerator, SingleQA
+from .utils import utils_list_sample
 from ..connectors import ConnectorTable
 
 
@@ -17,6 +18,9 @@ class HavingGenerator(BaseGenerator):
         return tests
 
     def test_having_count_cat(self, cat_cols, table_name) -> list[SingleQA]:
+        # num tests = len(cat_cols) x len(operations)
+        cat_cols = utils_list_sample(cat_cols, k=3)
+
         operations = [
             ('>=', 'at least'),
             ('<=', 'at most'),
@@ -36,6 +40,10 @@ class HavingGenerator(BaseGenerator):
         return tests
 
     def test_having_agg_num(self, cat_cols, num_cols, table_name):
+        # num tests = len(cat_cols) x len(num_cols) x len(operations) x len(symbols)
+        cat_cols = utils_list_sample(cat_cols, k=2)
+        num_cols = utils_list_sample(num_cols, k=2)
+
         tests = []
         operations = [
             ('AVG', 'average'),

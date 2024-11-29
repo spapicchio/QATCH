@@ -1,4 +1,5 @@
 from .base_generator import BaseGenerator, SingleQA
+from .utils import utils_list_sample
 from ..connectors import ConnectorTable
 
 
@@ -18,6 +19,9 @@ class SimpleAggGenerator(BaseGenerator):
         return tests
 
     def test_count_cat(self, cat_columns, table_name):
+        # num tests = len(cat_columns)
+        cat_columns = utils_list_sample(cat_columns, k=5)
+
         tests = []
         for cat_col in cat_columns:
             single_test = SingleQA(
@@ -29,8 +33,11 @@ class SimpleAggGenerator(BaseGenerator):
         return tests
 
     def test_agg_num(self, num_cols, table_name):
-        # remove num_cols with ID. No sense to calculate sum/avg over ids
+        # num tests = len(num_cols) x len(operations)
+
+        # remove num_cols with ID. No meaning to calculate max/min/avg over ids
         num_cols = [col for col in num_cols if 'id' not in col.lower()]
+        num_cols = utils_list_sample(num_cols, k=2)
 
         operations = [
             ('MAX', 'maximum'),
