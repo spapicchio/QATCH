@@ -12,11 +12,21 @@ class ExecutionAccuracy(BaseEvaluator):
         if len(target) != len(prediction):
             return 0.0
 
+        gold_row_set = set()
+        pred_row_set = set()
+
         for gold_row, predicted_row in zip(target, prediction):
-            if tuple(sort_with_different_types(gold_row)) != tuple(sort_with_different_types(predicted_row)):
+            gold_row_set.add(tuple(sort_with_different_types(gold_row)))
+            pred_row_set.add(tuple(sort_with_different_types(predicted_row)))
+
+        while len(pred_row_set) > 0:
+            pred_row = pred_row_set.pop()
+            if pred_row in gold_row_set:
+                gold_row_set.remove(pred_row)
+            else:
                 return 0.0
 
-        return 1.0
+        return 1.0 if len(gold_row_set) == 0 else 0.0
 
 
 def sort_key(x):
