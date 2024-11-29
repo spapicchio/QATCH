@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Callable
-
 import pandas as pd
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
@@ -20,22 +18,30 @@ from .checklist_generators import (
 from .connectors import Connector
 from .state_orchestrator import StateOrchestrator
 
+name2generator = {
+    'project': ProjectGenerator,
+    'distinct': DistinctGenerator,
+    'select': SelectGenerator,
+    'simple': SimpleAggGenerator,
+    'orderby': OrderByGenerator,
+    'groupby': GrouByGenerator,
+    'having': HavingGenerator,
+    'join': JoinGenerator
+}
+
 
 class Orchestrator:
-    def __init__(self, list_node_fun: list[tuple[str, Callable]] | None = None):
+    def __init__(self, generator_names: list[str] | None = None):
         graph = StateGraph(StateOrchestrator)
-        if list_node_fun is None:
-            list_node_fun = [
 
-                # ('Project', ProjectGenerator().graph_call),
-                # ('Select', SelectGenerator().graph_call),
-                # ('Distinct', DistinctGenerator().graph_call),
-                # ('SimpleAgg', SimpleAggGenerator().graph_call),
-                # ('OrderBy', OrderByGenerator().graph_call),
-                # ('Groupby', GrouByGenerator().graph_call),
-                # ('Having', HavingGenerator().graph_call),
-                ('Join', JoinGenerator().graph_call)
-            ]
+        if generator_names is None:
+            generator_names = name2generator.keys()
+
+        list_node_fun = [
+            (name, name2generator[name]().graph_call)
+            for name in generator_names
+        ]
+
         for node_name, node_fun in list_node_fun:
             graph.add_node(node_name, node_fun)
             graph.add_edge(START, node_name)
