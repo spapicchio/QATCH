@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
-from typing import Literal
 
 import pandas as pd
 from pydantic import BaseModel
+from typing_extensions import Literal, TypedDict
 
 
 class ConnectorTableColumn(BaseModel):
@@ -17,6 +17,12 @@ class ConnectorTableColumn(BaseModel):
         return hash(self.__dict__['column_name'])
 
 
+class ForeignKey(TypedDict):
+    parent_column: str
+    child_column: str
+    child_table: ConnectorTable
+
+
 class ConnectorTable(BaseModel):
     db_path: str
     db_name: str
@@ -25,7 +31,7 @@ class ConnectorTable(BaseModel):
     cat_col2metadata: dict[str, ConnectorTableColumn]
     num_col2metadata: dict[str, ConnectorTableColumn]
     primary_key: list[ConnectorTableColumn] | None
-    foreign_keys: dict[str, ConnectorTable | str] | None
+    foreign_keys: list[ForeignKey]
 
 
 class Connector(ABC):

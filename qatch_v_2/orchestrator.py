@@ -13,7 +13,8 @@ from .checklist_generators import (
     SimpleAggGenerator,
     OrderByGenerator,
     GrouByGenerator,
-    HavingGenerator
+    HavingGenerator,
+    JoinGenerator
 
 )
 from .connectors import Connector
@@ -26,13 +27,14 @@ class Orchestrator:
         if list_node_fun is None:
             list_node_fun = [
 
-                ('Project', ProjectGenerator().graph_call),
-                ('Select', SelectGenerator().graph_call),
-                ('Distinct', DistinctGenerator().graph_call),
-                ('SimpleAgg', SimpleAggGenerator().graph_call),
-                ('OrderBy', OrderByGenerator().graph_call),
-                ('Groupby', GrouByGenerator().graph_call),
-                ('Having', HavingGenerator().graph_call)
+                # ('Project', ProjectGenerator().graph_call),
+                # ('Select', SelectGenerator().graph_call),
+                # ('Distinct', DistinctGenerator().graph_call),
+                # ('SimpleAgg', SimpleAggGenerator().graph_call),
+                # ('OrderBy', OrderByGenerator().graph_call),
+                # ('Groupby', GrouByGenerator().graph_call),
+                # ('Having', HavingGenerator().graph_call),
+                ('Join', JoinGenerator().graph_call)
             ]
         for node_name, node_fun in list_node_fun:
             graph.add_node(node_name, node_fun)

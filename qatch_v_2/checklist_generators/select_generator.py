@@ -40,7 +40,7 @@ class SelectGenerator(BaseGenerator):
             ('>', 'is greater than'),
             ('<', 'is less than'),
         ]
-        num_cols = [col for col in num_cols if 'id' not in col.lower()]
+        num_cols = {col: metadata for col, metadata in num_cols.items() if 'id' not in col.lower()}
 
         tests = []
         for num_col, metadata in num_cols.items():

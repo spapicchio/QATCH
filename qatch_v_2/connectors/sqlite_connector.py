@@ -92,8 +92,7 @@ class SqliteConnector(Connector):
             num_col2metadata={col_name: metadata for col_name, metadata in tbl_col2metadata.items()
                               if metadata.column_type == 'numerical'},
             primary_key=self._extract_primary_key(tbl),
-            foreign_keys={foreign_key.target_fullname.split('.')[0]: foreign_key.target_fullname.split('.')[1]
-                          for foreign_key in tbl.foreign_keys}
+            foreign_keys=[]
         )
 
     def _set_tables_in_db(self,
@@ -147,13 +146,16 @@ class SqliteConnector(Connector):
         return primary_keys if primary_keys else None
 
     def _update_foreign_key(self, tbl_name2table: dict[str, ConnectorTableColumn]) -> dict[str, ConnectorTableColumn]:
-
         for tbl_name, tbl in tbl_name2table.items():
+            tbl_sql_alchemy = self.metadata.tables[tbl_name]
+            new_keys = []
+            for foreign_key in tbl_sql_alchemy.foreign_keys:
+                new_key = {
+                    'parent_column': foreign_key.parent.name,
+                    'child_column': foreign_key.target_fullname.split('.')[1],
+                    'child_table': tbl_name2table[foreign_key.target_fullname.split('.')[0]]
+                }
+                new_keys.append(new_key)
 
-            new_foreign_key = dict()
-            for foreign_key_tbl, foreign_key_col in tbl.foreign_keys.items():
-                new_foreign_key[foreign_key_col] = tbl_name2table[foreign_key_tbl]
-
-            tbl.foreign_keys = new_foreign_key
-
+            tbl.foreign_keys = new_keys
         return tbl_name2table
