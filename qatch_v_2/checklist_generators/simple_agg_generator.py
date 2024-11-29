@@ -29,6 +29,9 @@ class SimpleAggGenerator(BaseGenerator):
         return tests
 
     def test_agg_num(self, num_cols, table_name):
+        # remove num_cols with ID. No sense to calculate sum/avg over ids
+        num_cols = [col for col in num_cols if 'id' not in col.lower()]
+
         operations = [
             ('MAX', 'maximum'),
             ('MIX', 'minimum'),

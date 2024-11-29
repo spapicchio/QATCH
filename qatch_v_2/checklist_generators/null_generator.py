@@ -16,6 +16,10 @@ class NullGenerator(BaseGenerator):
             ('IS NULL', 'missing'),
             ('IS NOT NULL', 'not missing'),
         ]
+
+        # remove columns with ID. No sense to calculate sum/avg over ids
+        columns = [col for col in columns if 'id' not in col.lower()]
+
         for col in columns:
             for op in operations:
                 test = SingleQA(

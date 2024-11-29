@@ -49,13 +49,13 @@ def utils_convert_df_in_sql_code(name: str, table: pd.DataFrame, table2primary_k
     create_table = [f'CREATE TABLE `{name}`(']
     # add simple col
     # "Round" real,
-    [create_table.append(f'"{col}" {column2type[col]},') for col in table.columns]
+    [create_table.append(f'`{col}` {column2type[col]},') for col in table.columns]
     # Add primary key and foreign key
     for col in table.columns:
         if col in primary_key2table:
             if name == primary_key2table[col]:
                 # PRIMARY KEY ("Round"),
-                create_table.append(f'PRIMARY KEY ("{col}"),')
+                create_table.append(f'PRIMARY KEY (`{col}`),')
             else:
                 # FOREIGN KEY (`Winning_Aircraft`) REFERENCES `aircraft`(`Aircraft_ID`),
                 create_table.append(f'FOREIGN KEY (`{col}`) REFERENCES `{primary_key2table[col]}`(`{col}`),')

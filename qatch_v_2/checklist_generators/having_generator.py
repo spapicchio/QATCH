@@ -45,6 +45,10 @@ class HavingGenerator(BaseGenerator):
             (">=", "at least"),
             ("<=", "at most"),
         ]
+
+        # remove num_cols with ID. No sense to calculate sum/avg over ids
+        num_cols = [col for col in num_cols if 'id' not in col.lower()]
+
         for cat_col in cat_cols:
             for num_col in num_cols:
                 mean_mean_sum, mean_mean_mean = self._get_average_of_sum_avg_cat_col(table_name, cat_col, num_col)
