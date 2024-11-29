@@ -1,6 +1,6 @@
 from .base_generator import BaseGenerator, SingleQA
 from .utils import utils_list_sample
-from ..connectors import ConnectorTable
+from qatch_v_2.connectors import ConnectorTable
 
 
 class OrderByGenerator(BaseGenerator):

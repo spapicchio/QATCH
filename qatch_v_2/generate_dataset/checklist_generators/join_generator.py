@@ -1,6 +1,6 @@
 from .base_generator import BaseGenerator, SingleQA
 from .utils import utils_list_sample
-from ..connectors import ConnectorTable
+from qatch_v_2.connectors import ConnectorTable
 
 
 class JoinGenerator(BaseGenerator):
@@ -47,7 +47,7 @@ class JoinGenerator(BaseGenerator):
             child_col = foreign_key['child_column']
             cat_cols_child = foreign_key['child_table'].cat_col2metadata.keys()
             cat_cols_child = utils_list_sample(cat_cols_child, k=3)
-            
+
             for cat_col_parent in cat_cols_parent:
                 if cat_col_parent == parent_col:
                     continue

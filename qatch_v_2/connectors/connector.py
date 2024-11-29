@@ -4,6 +4,7 @@ import os
 from abc import ABC, abstractmethod
 
 import pandas as pd
+from func_timeout import func_set_timeout
 from pydantic import BaseModel
 from typing_extensions import Literal, TypedDict
 
@@ -55,6 +56,7 @@ class Connector(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    @func_set_timeout(30)
     def run_query(self, query: str) -> list[list]:
         """Run the query on the database"""
         raise NotImplementedError

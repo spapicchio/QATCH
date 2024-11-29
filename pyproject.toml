@@ -30,6 +30,7 @@ pyarrow = "^15.0.0"
 sqlalchemy = "^2.0.36"
 langgraph = "^0.2.53"
 eval-type-backport = "^0.2.0"
+func-timeout = "^4.3.5"
 
 [tool.poetry.extras]
 model = ["accelerate", "torch", "openai", "transformers", "tiktoken"]

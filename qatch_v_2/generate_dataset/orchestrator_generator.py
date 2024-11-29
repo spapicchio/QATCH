@@ -15,8 +15,8 @@ from .checklist_generators import (
     JoinGenerator
 
 )
-from .connectors import Connector
-from .state_orchestrator import StateOrchestrator
+from .state_orchestrator_generator import StateOrchestratorGenerator
+from ..connectors import Connector
 
 name2generator = {
     'project': ProjectGenerator,
@@ -30,9 +30,9 @@ name2generator = {
 }
 
 
-class Orchestrator:
+class OrchestratorGenerator:
     def __init__(self, generator_names: list[str] | None = None):
-        graph = StateGraph(StateOrchestrator)
+        graph = StateGraph(StateOrchestratorGenerator)
 
         if generator_names is None:
             generator_names = name2generator.keys()

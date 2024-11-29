@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 from itertools import chain
 from typing import TypedDict, Literal
 
-from ..connectors import ConnectorTable
-from ..state_orchestrator import StateOrchestrator
+from qatch_v_2.connectors import ConnectorTable
+from ..state_orchestrator_generator import StateOrchestratorGenerator
 
 
 class SingleQA(TypedDict):
@@ -30,7 +30,7 @@ class BaseGenerator(ABC):
     def test_name(self):
         raise NotImplementedError
 
-    def graph_call(self, state: StateOrchestrator) -> dict[Literal['generated_templates']: list[BaseTest]]:
+    def graph_call(self, state: StateOrchestratorGenerator) -> dict[Literal['generated_templates']: list[BaseTest]]:
         database = state['database']
         connector = self.connector = state['connector']
         table_tests = []

@@ -1,5 +1,5 @@
 from .base_generator import BaseGenerator, SingleQA
-from ..connectors import ConnectorTable
+from qatch_v_2.connectors import ConnectorTable
 
 
 class NullGenerator(BaseGenerator):
