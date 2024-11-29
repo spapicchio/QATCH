@@ -23,6 +23,7 @@ class BaseTest(SingleQA):
 class BaseGenerator(ABC):
     def __init__(self, seed=2023):
         random.seed(seed)
+        self.connector = None
 
     @property
     @abstractmethod
@@ -31,6 +32,7 @@ class BaseGenerator(ABC):
 
     def graph_call(self, state: StateOrchestrator) -> dict[Literal['generated_templates']: list[BaseTest]]:
         connector = state['connector']
+        self.connector = connector
         table_tests = []
         for table in connector.load_tables_from_database():
             tests = self.template_generator(table)
