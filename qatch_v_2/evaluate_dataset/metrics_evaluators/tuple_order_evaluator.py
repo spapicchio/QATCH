@@ -11,6 +11,40 @@ class TupleOrder(BaseEvaluator):
         return 'tuple_order'
 
     def run_metric(self, target: list[list], prediction: list[list]) -> float | int:
+        """
+        Evaluates the similarity in tuple order between the target and prediction.
+        The score is based on the Spearman rank correlation coefficient normalized between 0 and 1.
+        This metric ONLY checks whether the order of the tuples is the same in the target and prediction.
+        Therefore, the elements that are in predictions but nor in target are ignored (and viceversa).
+
+        Args:
+            target (list[list]): Target table to be compared with the prediction table.
+            prediction (list[list]): Prediction table to be compared with the target table.
+
+        Returns:
+            float: Score between [-1, 1].
+            - 1 indicates that the order of rows in prediction is the same as in the target.
+            - 0.5 indicates that there is no correlation between the two lists.
+            - 0 indicates the order of rows in prediction is opposite to the target.
+
+        Examples:
+            >>> evaluator = TupleOrder()
+            >>>  target = [['a', 'b'], ['c', 'd']]
+            >>>  prediction = [['c', 'd'], ['a', 'b']]
+            >>> evaluator.run_metric(target, prediction)
+            0.0
+
+            >>>  target = [['apple', 'orange'], ['pear']]
+            >>>  prediction = [['pear'], ['apple', 'orange']]
+            >>> evaluator.run_metric(target, prediction)
+            0.0
+
+            >>>  target = [['apple', 'orange'], ['pear']]
+            >>>  prediction = [['pear']]
+            >>> evaluator.run_metric(target, prediction)
+            1.0
+        """
+
         # take only prediction that are in target without duplicates
         # MAINTAINING the order
         new_pred = []

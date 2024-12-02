@@ -11,6 +11,38 @@ class CellPrecision(BaseEvaluator):
         return 'cell_precision'
 
     def run_metric(self, target: list[list], prediction: list[list]) -> float | int:
+        """
+        Calculates the ratio of predicted cells that are in the target.
+        Does not consider cardinality (measured by other tags).
+        High precision indicates that the model is good at identifying relevant instances
+        and has a low false positive rate.
+
+        Args:
+            target (list[list]): Target table to be compared with the prediction table.
+            prediction (list[list]): Prediction table to be compared with the target table.
+
+        Returns:
+            float: Precision score between [0, 1].
+                - 0 indicates no cell in the prediction is in the target.
+                - 1 indicates all cells in the prediction are in the target.
+
+        Examples:
+            >>> evaluator = CellPrecision()
+            >>> target = [['a', 'b'], ['c', 'd']]
+            >>> prediction = [['a', 'b'], ['c', 'd']
+            >>> evaluator.run_metric(target, prediction)
+            1.0
+
+            >>> target = [['a', 'b'], ['c', 'd']]
+            >>> prediction = [['a', 'b'], ['c', 'e']
+            >>> evaluator.run_metric(target, prediction)
+            0.75
+
+            >>> target = [['a', 'b'], ['c', 'd']]
+            >>> prediction = [['a'], ['b'], ['c'], ['d']]
+            >>> evaluator.run_metric(target, prediction)
+            1.0  # it is one even if the schema does not match (we introduce tuple constraints for this)
+        """
         target = set(chain.from_iterable(target))
         prediction = set(chain.from_iterable(prediction))
         intersected_cells = target.intersection(prediction)

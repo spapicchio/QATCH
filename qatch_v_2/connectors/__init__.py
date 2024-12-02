@@ -1,2 +1,2 @@
-from .connector import Connector, ConnectorTable, ConnectorTableColumn
+from .base_connector import BaseConnector, ConnectorTable, ConnectorTableColumn
 from .sqlite_connector import SqliteConnector
