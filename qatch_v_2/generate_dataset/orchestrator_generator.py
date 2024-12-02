@@ -19,7 +19,7 @@ from .checklist_generators import (
 
 )
 from .state_orchestrator_generator import StateOrchestratorGenerator
-from ..connectors import Connector
+from ..connectors import BaseConnector
 
 name2generator = {
     'project': ProjectGenerator,
@@ -53,7 +53,7 @@ class OrchestratorGenerator:
 
         self.graph = graph.compile()
 
-    def generate_dataset(self, connector: Connector) -> pd.DataFrame:
+    def generate_dataset(self, connector: BaseConnector) -> pd.DataFrame:
         database = connector.load_tables_from_database()
         state = self.graph.invoke({'database': database, 'connector': connector})
         dataset = state['generated_templates']
