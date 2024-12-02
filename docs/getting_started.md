@@ -13,15 +13,14 @@ pip install QATCH
 
 Since QATCH is intended to be used without the inference step, the base installation does not come
 with the models' requirements.
-However, in case you want to use our implementation you can add the extras requirements.
 
-```console
-# Using poetry (recommended)
-poetry add QATCH -E model
+## QATCH package
 
-# Using pip
-pip install QATCH[model] 
-```
+The toolbox is composed of three main packages:
+
+- connectors: Connects the database to the base code
+- generate_dataset: Contains the code to create the dataset
+- evaluate_dataset: Contains the code to evaluate the dataset
 
 ## Create connection with input data
 
@@ -32,7 +31,7 @@ If this is not the case, you can skip this passage.
 ```python
 import pandas as pd
 
-from qatch.database_reader import SingleDatabase
+from qatch.connectors.sqlite_connector import SqliteConnector
 
 # Create dummy table
 data = {
@@ -47,152 +46,120 @@ db_tables = {'olympic_games': table}
 
 # Assume the PKs have all different names. Two tables cannot have same PK name.
 table2primary_key = {'olympic_games': 'id'}
+
 # define where to store the sqlite database
-db_save_path = 'test_db'
+db_save_path = 'test_db.sqlite'
 
 # define the name of the database
 db_id = 'olympic'
 
 # create database connection
-db = SingleDatabase(db_path=db_save_path, db_name=db_id, tables=db_tables, table2primary_key=table2primary_key)
+connector = SqliteConnector(
+    relative_db_path=db_save_path,
+    db_name=db_id,
+    tables=db_tables,
+    table2primary_key=table2primary_key
+)
 ```
 
-This class will create the sqlite database in "db_save_path/db_id/db_id.sqlite".
+This class will create the sqlite database in db_save_path.
 
-Once you have the database stored in this format "db_save_path/db_id/db_id.sqlite",
-you can create a connection in the following way:
+If you want to directly connect to the sqlite database:
 
 ```python
-from qatch.database_reader import MultipleDatabases
+from qatch.connectors.sqlite_connector import SqliteConnector
 
-# The path to multiple databases
-db_save_path = 'test_db'
-databases = MultipleDatabases(db_save_path)
+db_save_path = 'test_db.sqlite'
+db_name = 'olympics'
+connector = SqliteConnector(
+    relative_db_path=db_save_path,
+    db_name=db_name,
+)
 ```
-
-This class automatically detects the available databases and handle the communication
-between the code and the sqlite files.
 
 ## Step 1: QATCH generate
 
+To generate the datasets, we need an orchestrator:
+
 ```python
-from qatch import TestGenerator
+from qatch.connectors.sqlite_connector import SqliteConnector
+from qatch.generate_dataset.orchestrator_generator import OrchestratorGenerator
 
-# init generator
-test_generator = TestGenerator(databases=databases)
+# connection to the database
+connector = SqliteConnector(
+    relative_db_path='<your_sqlite_path>',
+    db_name='<your_db_name>',
+)
 
-# generate tests for each database and for each generator
-tests_df = test_generator.generate()
+# init the orchestrator
+orchestrator_generator = OrchestratorGenerator()
+
+# test generation
+orchestrator_generator.generate_dataset(connector)
 ```
 
 Test generator automatically creates a checklist based on the proprietary data.
 The tests_df dataframe contains:
 
+- *db_path*: The database path associated with the test
 - *db_id*: The database name associated with the test.
 - *tbl_name*: The table name associated with the test.
-- *sql_tags*: the SQL generator used to create the test.
+- *test_category*: The test category.
+- *sql_tag*: A more granular label for the test category.
 - *query*: The generated query. Used to evaluate the model.
 - *question*: The generated question associated with the query. Used as input for the model.
 
 ## Step 2: TRL model predictions
 
-QATCH is intended to be used without the inference step.
-However, it supports several models for reproducibility reason.
-
-```python
-from tqdm import tqdm
-
-from qatch.models import Tapas
-
-# init the model 
-model = Tapas(model_name="google/tapas-large-finetuned-wtq")
-
-# iterate for each row and run prediction
-tqdm.pandas(desc=f'Predicting for {model.name}')
-tests_df[f'predictions_{model.name}'] = tests_df.progress_apply(
-    lambda row: model.predict(table=databases.get_table(db_id=row['db_id'], tbl_name=row['tbl_name']),
-                              query=row['question'], tbl_name=row['tbl_name']),
-    axis=1
-)
-```
-
-Since Tapas, Tapex, Omnitab and LLama2 are based on huggingFace, the model_name parameter can be
-any possible name associate with the model in the hub.
-
-To use ChatGPT_QA or ChatGPT_SP you need to provide the API credentials:
-
-```python
-from qatch.models import ChatGPT_QA
-
-model = ChatGPT_QA(model_name="gpt-3.5-turbo-0613",
-                   api_key="your_api_key_chatgpt",
-                   api_org="your_api_org_chatgpt")
-```
-
-To use LLama2_QA or LLama2_SP you need to specify the HuggingFace token
-
-```python
-from qatch.models import LLama2_QA
-
-model = LLama2_QA(model_name="meta-llama/Llama-2-7b-chat-hf",
-                  hugging_face_token="your_hugging_face_token")
-```
-
-The tests_df dataframe after the prediction phase contains:
-
-- *db_id*: The database name associated with the test.
-- *tbl_name*: The table name associated with the test.
-- *sql_tags*: the SQL generator used to create the test.
-- *query*: The generated query. Used to evaluate the model.
-- *question*: The generated question associated with the query. Used as input for the model.
-- *predictions_<model_used>*: The predicted query/cells based on the task (SP or QA respectively)
+QATCH is intended to be used without the inference step. the new release of QATCH deprecate this section. 
+For reproducibility purposes, refer to previous main version of QATCH starting with 0.* 
 
 ## Step 3: QATCH evaluate
 
-QATCH MetricEvaluator is composed of 5 metrics (3 intra-tuple and 2 inter-tuple).
+Supported metrics are:
+- Cell Precision: [0-1] how many predicted elements are in target
+- Cell Recall: [0-1] how many target elements are in prediction
+- Tuple Cardinality: [0-1] whether cardinality of target and prediction matches
+- Tuple Constraint: [0-1] whether the tuple constraint is respected or not 
+- Tuple Order: [0-1] whether prediction and target contains same order, calculated only for target query with ORDER-BY clause
+- Execution Accuracy: [0-1] whether the execution of the query is the same or not.
+
+There are two options to evaluate your predictions: With a DataFrame or with a single test.
 
 ```python
-from qatch import MetricEvaluator
+from qatch.connectors.sqlite_connector import SqliteConnector
+from qatch.evaluate_dataset.orchestrator_evaluator import OrchestratorEvaluator
 
-evaluator = MetricEvaluator(databases=databases)
-tests_df = evaluator.evaluate_with_df(tests_df,
-                                      prediction_col_name="<prediction_col_name>",
-                                      task="QA")
+# init orchestrator evaluator 
+evaluator = OrchestratorEvaluator()
+
+connector = SqliteConnector(
+    relative_db_path='<your_sqlite_path>',
+    db_name='<your_db_name>',
+)
+
+# solution with df:
+# Returns: The input dataframe enriched with the metrics computed for each test case.
+evaluator.evaluate_df(
+    df='<the pandas df>',
+    target_col_name='<target_column_name>',
+    prediction_col_name='<prediction_column_name>',
+    db_path_name='<sqlite_db_path>'
+)
+
+# Returns: A dictionary comprising the evaluation metrics values for the test.
+evaluator.evaluate_single_test(
+    target_query='SELECT * FROM T',
+    predicted_query='SELECT * FROM T',
+    connector=connector
+)
+
+# note that target and prediction can be interchangeable the execution of the query or the SQL query
+#  The result is the same
+evaluator.evaluate_single_test(
+    target_query=[[1, 2], [3, 4]],
+    predicted_query=[[1, 2], [3, 4]],
+    connector=connector
+)
+
 ```
-
-You do not have to specify the "databases" in case the "target" and "predictions" are already executed for QA:
-
-```python
-eval_task = MetricEvaluator(databases=None, metrics=['cell_precision', 'cell_recall'])
-
-test = {"sql_tags": "SELECT",
-        "prediction": [["wales", "scotland"], ["england"]],
-        "target": [["scotland", "wales"], ["england"]]}
-
-df = pd.DataFrame(test)
-prediction_col_name = "prediction"
-target_col_name = "target"
-
-result = eval_task.evaluate_with_df(df, prediction_col_name, 'QA', target_col_name)
-print(result)
-# {'cell_precision_prediction': 1.0, 'cell_recall_prediction': 1.0}
-```
-
-**Attention**
-
-For SP, if you have both the target and the predictions already executed, you have to specify the task as 'QA'
-
-This because when using task 'SP' there are automatic controls on the query syntactic which are not available if they have
-already been executed.
-
-
-
-The final dataframe contains:
-
-- *db_id*: The database name associated with the test.
-- *tbl_name*: The table name associated with the test.
-- *sql_tags*: the SQL generator associated with the test.
-- *query*: The generated query from step 1.
-- *question*: The generated question from step 1. Used as input for the model.
-- *predictions_<model_used>*: The predicted query/cells from step 2.
-- *5 metrics*: The metrics used to evaluate the models.
