@@ -58,7 +58,7 @@ class BaseGenerator(ABC):
         )
 
     def remove_test_with_empty_results(self, tests: list[SingleQA], connector) -> list[SingleQA]:
-        return [test for test in tests if connector.run_query(test['query']) != []]
+        return [test for test in tests if len(connector.run_query(test['query'])) > 0]
 
     @abstractmethod
     def template_generator(self, table: ConnectorTable) -> list[SingleQA]:

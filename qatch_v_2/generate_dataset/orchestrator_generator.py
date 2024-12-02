@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 import pandas as pd
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
@@ -12,7 +14,8 @@ from .checklist_generators import (
     OrderByGenerator,
     GrouByGenerator,
     HavingGenerator,
-    JoinGenerator
+    JoinGenerator,
+    ManyToManyGenerator
 
 )
 from .state_orchestrator_generator import StateOrchestratorGenerator
@@ -26,7 +29,8 @@ name2generator = {
     'orderby': OrderByGenerator,
     'groupby': GrouByGenerator,
     'having': HavingGenerator,
-    'join': JoinGenerator
+    'join': JoinGenerator,
+    'many-to-many': ManyToManyGenerator,
 }
 
 
@@ -54,5 +58,8 @@ class OrchestratorGenerator:
         state = self.graph.invoke({'database': database, 'connector': connector})
         dataset = state['generated_templates']
         dataset = pd.DataFrame(dataset)
-        dataset = dataset.loc[:, ['db_path', 'db_id', 'tbl_name', 'test_category', 'sql_tag', 'query', 'question']]
+        if len(dataset) > 0:
+            dataset = dataset.loc[:, ['db_path', 'db_id', 'tbl_name', 'test_category', 'sql_tag', 'query', 'question']]
+        else:
+            logging.warning(f'QATCH not able to generate tests from {connector.db_path}')
         return dataset
