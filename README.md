@@ -2,19 +2,24 @@
 
 <p align="center">
  <kbd>
-  <img src="docs_old/img/qatch_logo_verticale.jpg" alt="QATCH's logo" height="300" style="border-radius:50%">
+  <img src="docs/img/qatch_logo_verticale.jpg" alt="QATCH's logo" height="300" style="border-radius:50%">
  </kbd>
  </p>
 
-This repository is the official implementation of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data](https://openreview.net/forum?id=XOpaPrb0U5)
+This repository is the official implementation
+of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data](https://openreview.net/forum?id=XOpaPrb0U5)
 NeurIPS Dataset and Benchmark track 2023.
 
 # 🔥 Updates
-- [**2024-Jan-22**]: Add [DAMBER: (Data-AMBiguity testER)](https://github.com/spapicchio/QATCH/tree/master/damber#readme) 
-- [**2024-Jan-10**]: Add JOIN tests for proprietary data 
-- [**2023-Dec-15**]: new License: Apache-2.0 
-- [**2023-Nov-06**]: Camera ready version is now available! [check it out](https://openreview.net/forum?id=XOpaPrb0U5)! 
-- [**2023-Nov-05**]: QATCH can now be donwloaded from pip! Do not forget to check the [documentation](https://spapicchio.github.io/QATCH/)! 
+
+- [**2024-Dec-02**]: new version of QATCH based on LangGraph! Test Generation and Evaluation is not executed in parallel
+- [**2024-Jan-22**]:
+  Add [DAMBER: (Data-AMBiguity testER)](https://github.com/spapicchio/QATCH/tree/master/damber#readme)
+- [**2024-Jan-10**]: Add JOIN tests for proprietary data
+- [**2023-Dec-15**]: new License: Apache-2.0
+- [**2023-Nov-06**]: Camera ready version is now available! [check it out](https://openreview.net/forum?id=XOpaPrb0U5)!
+- [**2023-Nov-05**]: QATCH can now be donwloaded from pip! Do not forget to check
+  the [documentation](https://spapicchio.github.io/QATCH/)!
 
 # 🏴󠁶󠁵󠁭󠁡󠁰󠁿 Overview
 
@@ -31,9 +36,8 @@ NeurIPS Dataset and Benchmark track 2023.
   downloaded [here](https://drive.google.com/uc?export=download&id=1_z8N52QNAHnxpHv54VhbvYu7DbKV6QRv). This is to
   prevent the costly generation of test results with the openAI API and to build trust in our results.
 
-
  <figure style="text-align:center">
-  <img src="docs_old/img/qatch-full-pipeline.png">
+  <img src="docs/img/qatch-full-pipeline.png">
 </figure>
 
 <br>
@@ -46,27 +50,20 @@ below:
    The SQL declaration expresses the logical complexity of the query and reflects the presence/absence of specific
    features peculiar to relational data model such as presence of missing values and duplicate values.
 
-2. *TRL Model Predictions*. It processes the tests for various TRL models and tasks. The current toolbox version
-   supports three Table Representation Learning (TRL) models for
-   QA: [TAPAS](https://github.com/google-research/tapas), [TAPEX](https://github.com/microsoft/Table-Pretraining)
-   and [Omnitab](https://github.com/jzbjyb/OmniTab).
-   In addition, two LLMs are implemented for QA and SP [ChatGPT 3.5](https://openai.com/blog/chatgpt) (need the API key)
-   and [LLama2](https://huggingface.co/blog/llama2) (need the HuggingFace token).
-
-3. *QATCH-Evaluate*. It evaluates the models outputs according to a set of cross-task performance metrics.
+2*QATCH-Evaluate*. It evaluates the models outputs according to a novel set of cross-task performance metrics, .
 
 <p align="center">
-<img src="docs_old/img/measures.png" width="70%">
+<img src="docs/img/measures.png" width="70%">
 </p>
 
-QATCH’s metrics are computed between the model output (prediction) and expected 
+QATCH’s metrics are computed between the model output (prediction) and expected
 ground-truth results (target). The target is the answer of the NL question "Show me all the data" over
 a table with three tuples and two attributes.
 <br>
 
 Given the ground truth result (target) with three tuples over two attributes, we report the metric values for five
 predictions, coming either from a QA or from the execution of a query in SP. More details can be found in
-the [metrics](qatch/metrics) folder
+the [metrics](qatch/metrics_evaluators) folder
 
 ## Who should use QATCH?
 
@@ -88,57 +85,76 @@ where QATCH can be used with LLMs:
 - Prompt engineering: Analyse the best prompt definition based on the proprietary data.
 
 <p align="center">
-<img src="docs_old/img/use_case_walter.png" width="70%">
+<img src="docs/img/use_case_walter.png" width="70%">
 </p>
 
-Use case example of engineer Walter. 
+Use case example of engineer Walter.
 With QATCH it is able to create a model ranking on his proprietary data for QA and SP.
-
 
 ## Project
 
 ```shell
-|-- metric_evaluator.py # user interface to calculate metrics for QA or SP
-|-- test_generator.py # user interface to run different SQL generators
-|--database_reader
-    |-- single_database.py # initialise single database 
-    |-- multiple_databases.py # handle multiple single database instances
-|-- metrics
-    |-- metric_evaluator.py # wrapper to initialise the user selected metrics
-    |-- abstract_metric.py # abstract class to handle common metric methods
-    |-- cell_precision_tag.py # implement cell precision tag
-    |-- cell_recall_tag.py # implement cell recall tag
-    |-- tuple_cardinality_tag.py # implement tuple cardinality tag
-    |-- tuple_constraint_tag.py # implement tuple constraint tag
-    |-- tuple_order_tag.py # implement tuple order tag
-|-- models
-    |-- chatgpt
-        |-- abstract_chatgpt.py # abstract class to handle common methods for ChatGPT
-        |-- chatgpt_QA.py # implement chatgpt for QA task
-        |-- chatgpt_SP.py # implement chatgpt for SP task
-    |-- chatgpt
-        |-- abstract_llama2.py # abstract class to handle common methods for LLama2
-        |-- llama2_QA.py # implement llama2 for QA task
-        |-- llama2_SP.py # implement llama2 for SP task
-    |-- abstract_model.py # abstract class to handle common model methods
-    |-- tapas.py # implement input processing and the prediction for TAPAS
-    |-- tapex.py # implement input processing and the prediction for TAPEX
-    |-- omnitab.py # implement the input processing and the prediction for Omnitab
-|-- sql_generator
-    |-- abstract_sql_generator.py # handle common methods for SQL generators
-    |-- select_generator.py # implement SELECT tests
-    |-- distinct_generator.py # implement DISTINCT tests
-    |-- orderby_generator.py # implement ORDERBY tests
-    |-- where_generator.py # implement WHERE tests
-    |-- groupby_generator.py # implement GROUPBY tests
-    |-- having_generator.py # implement HAVING tests
-    |-- simple_agg_generator.py # implement SIMPLE AGG tests
-    |-- null_generator.py # implement NULL generator tests
+|--qatch
+    |-- connectors  # handles the connections with the database
+        |-- base_connectors.py  # interfacte for connectors
+        |-- sqlite_connectors.py  # concrete SQLite connectors
+    |-- evaluate_dataset # handles the execution in parallel of the metrics
+        |-- orchestrator_evaluator.py  # orchestrator used to execute in parallel the metrics
+        |-- state_orchestrator_evaluator.py  # state passed among the nodes of the Graph
+        |-- metrics_evaluators  # handles execution of the metrics
+            |-- base_evaluator.py  # interface for base evaluator
+            |-- exec_evaluator.py  # implements execution accuracy
+            |-- cell_precision_evaluator.py # implement cell precision
+            |-- cell_recall_evaluator.py # implement cell recall
+            |-- tuple_cardinality_evaluator.py # implement tuple cardinality 
+            |-- tuple_constraint_evaluator.py # implement tuple constraint 
+            |-- tuple_order_evaluator.py # implement tuple order 
+    |-- generate_dataset  # handles the generation of the dataset
+        |-- orchestrator_generator.py  # orchestrator used to execute in parallel the checklist generation
+        |-- state_orchestrator_generator.py  # state passed among the nodes of the Graph
+        |-- checklist_generaotors
+            |-- base_generator.py # interface for base generator
+            |-- select_generator.py # implement SELECT tests
+            |-- distinct_generator.py # implement DISTINCT tests
+            |-- orderby_generator.py # implement ORDERBY tests
+            |-- where_generator.py # implement WHERE tests
+            |-- groupby_generator.py # implement GROUPBY tests
+            |-- having_generator.py # implement HAVING tests
+            |-- simple_agg_generator.py # implement SIMPLE AGG tests
+            |-- null_generator.py # implement NULL generator tests
+            |-- null_generator.py # implement NULL generator tests
+            |-- join_generator.py # implement JOIN generator tests
+            |-- many_to_many_generator.py # implement a more complex pattern
 
 ```
 
+## Citation
+
+If you are using this work please cite the following papers:
+
+```bibtex
+@inproceedings{papicchioqatch,
+  title={QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data},
+  author={Papicchio, Simone and Papotti, Paolo and Cagliero, Luca},
+  booktitle={Thirty-seventh Conference on Neural Information Processing Systems Datasets and Benchmarks Track}
+}
+```
+
+```bibtex
+@inproceedings{papicchio2024evaluating,
+  title={Evaluating Ambiguous Questions in Semantic Parsing},
+  author={Papicchio, Simone and Papotti, Paolo and Cagliero, Luca},
+  booktitle={2024 IEEE 40th International Conference on Data Engineering Workshops (ICDEW)},
+  pages={338--342},
+  year={2024},
+  organization={IEEE Computer Society}
+}
+```
+
 # ⚡️ Quickstart
+
 ## Installation
+
 You can install QATCH by running the following commands:
 
 ```console
@@ -170,75 +186,92 @@ If your data is not stored in a sqlite database you can use our code to generate
 
 ```python
 import pandas as pd
-from qatch.database_reader import SingleDatabase
 
+from qatch.connectors.sqlite_connector import SqliteConnector
+
+# Create dummy table
 data = {
+    "id": [0, 1, 2, 3, 4, 5],
     "year": [1896, 1900, 1904, 2004, 2008, 2012],
     "city": ["athens", "paris", "st. louis", "athens", "beijing", "london"]
 }
 table = pd.DataFrame.from_dict(data)
+
+# define the tables in the database (<table_name> : <table>)
 db_tables = {'olympic_games': table}
 
+# Assume the PKs have all different names. Two tables cannot have same PK name.
+table2primary_key = {'olympic_games': 'id'}
+
+# define where to store the sqlite database
+db_save_path = 'test_db.sqlite'
+
+# define the name of the database
+db_id = 'olympic'
+
 # create database connection
-# create the sqlite database in "db_save_path/db_id/db_id.sqlite".
-db = SingleDatabase(db_path="db_save_path", db_name="db_id", tables=db_tables)
-```
-Now we can create a connection with multiple databases:
-
-```python
-from qatch.database_reader import MultipleDatabases
-
-# The path to multiple databases
-db_save_path = 'test_db'
-databases = MultipleDatabases(db_save_path)
-```
-
-2. QATCH-Generate: Generates the tests
-
-```python
-from qatch import TestGenerator
-
-# init generator
-test_generator = TestGenerator(databases=databases)
-
-# generate tests for each database and for each generator
-tests_df = test_generator.generate()
-```
-
-3. TRL Model Predictions: if you want to use any version of Tapas/Tapex for QA in Huggingface or chatGPT you can use the
-   already implemented modules but it is NOT mandatory.
-
-```python
-from tqdm import tqdm
-
-from qatch.models import Tapas
-
-# init the model 
-model = Tapas(model_name="google/tapas-large-finetuned-wtq")
-
-# iterate for each row and run prediction
-tqdm.pandas(desc=f'Predicting for {model.name}')
-tests_df[f'predictions_{model.name}'] = tests_df.progress_apply(
-    lambda row: model.predict(
-        table=databases.get_table(db_id=row['db_id'], tbl_name=row['tbl_name']),
-        query=row['question'],
-        tbl_name=row['tbl_name']
-    ),
-    axis=1
+connector = SqliteConnector(
+    relative_db_path=db_save_path,
+    db_name=db_id,
+    tables=db_tables,
+    table2primary_key=table2primary_key
 )
 ```
 
+This class will create the sqlite database in db_save_path.
 
-4. QATCH-Evaluate: Evaluate the results.
+If you want to directly connect to the sqlite database:
 
 ```python
-from qatch import MetricEvaluator
+from qatch.connectors.sqlite_connector import SqliteConnector
 
-evaluator = MetricEvaluator(databases=databases)
-tests_df = evaluator.evaluate_with_df(tests_df,
-                                      prediction_col_name="<prediction_col_name>",
-                                      task="QA or SP")
+db_save_path = 'test_db.sqlite'
+db_name = 'olympics'
+connector = SqliteConnector(
+    relative_db_path=db_save_path,
+    db_name=db_name,
+)
 ```
+
+2. QATCH-Generate: Generates the tests
+   To generate the datasets, we need an orchestrator:
+
+```python
+from qatch.connectors.sqlite_connector import SqliteConnector
+from qatch.generate_dataset.orchestrator_generator import OrchestratorGenerator
+
+# connection to the database
+connector = SqliteConnector(
+    relative_db_path='<your_sqlite_path>',
+    db_name='<your_db_name>',
+)
+
+# init the orchestrator
+orchestrator_generator = OrchestratorGenerator()
+
+# test generation
+orchestrator_generator.generate_dataset(connector)
+```
+
+3. QATCH is intended to be used without the inference step. the new release of QATCH deprecate this section.
+   For reproducibility purposes, refer to previous main version of QATCH starting with 0.*
+
+4. QATCH-Evaluate: Evaluate the results with all the available metrics.
+
+```python
+from qatch.evaluate_dataset.orchestrator_evaluator import OrchestratorEvaluator
+
+# init orchestrator evaluator 
+evaluator = OrchestratorEvaluator()
+# Returns: The input dataframe enriched with the metrics computed for each test case.
+evaluator.evaluate_df(
+    df='<the pandas df>',
+    target_col_name='<target_column_name>',
+    prediction_col_name='<prediction_column_name>',
+    db_path_name='<sqlite_db_path>'
+)
+```
+
 The final dataframe contains:
 
 - *db_id*: The database name associated with the test.
@@ -249,13 +282,11 @@ The final dataframe contains:
 - *predictions_<model_used>*: The predicted query/cells from step 2.
 - *5 metrics*: The metrics used to evaluate the models.
 
-
 # 🏰 Reproduce Experiments
 
-## Install and prepare data
+## Step 0: Install and prepare data
 
 We suggest to create a *data* folder in the project to store all the data but it is not mandatory.
-<br> In case the input data are not in this folder, remember to change in *read_data* the *base_path* argument
 
 ```bash
 mkdir data/
@@ -267,7 +298,7 @@ paper.
 
  Data               | Link                                                                                                | # rows | # categorical cols | # numerical cols | example cols                 
 --------------------|-----------------------------------------------------------------------------------------------------|--------|--------------------|------------------|------------------------------
- Spider             | [link](https://yale-lily.github.io/spider)                                                      | -      | -                  | -                | -                            
+ Spider             | [link](https://yale-lily.github.io/spider)                                                          | -      | -                  | -                | -                            
  Sales-transactions | [link](https://www.kaggle.com/datasets/gabrielramos87/an-online-shop-business)                      | 500k   | 5                  | 3                | ProductNo, Date              
  Fitness-trackers   | [link](https://www.kaggle.com/datasets/devsubhash/fitness-trackers-products-ecommerce)              | 565    | 8                  | 3                | Brand Name, Display          
  Account-fraud      | [link](https://www.kaggle.com/datasets/sgpjesus/bank-account-fraud-dataset-neurips-2022)            | 1M     | 4                  | 26               | DaysSinceRequest, Velocity6h 
@@ -277,36 +308,105 @@ paper.
  Adult-census       | [link](https://www.kaggle.com/datasets/uciml/adult-census-income)                                   | 32.6k  | 9                  | 6                | education, fnlwgt            
  Mushrooms          | [link](https://www.kaggle.com/datasets/uciml/mushroom-classification)                               | 8.1k   | 23                 | 0                | cap-shape, ring-type         
 
-
-
 The experiments using JOIN involved specific, joinable tables from the following datasets:
-Domain              | Full Name               | Link                                                                        | Selected tables           
+Domain | Full Name | Link | Selected tables           
 --------------------|-----------------------|-----------------------------------------------------------------------------|-----------------------
-Medicine            | MIMIC-III              | [link](https://www.kaggle.com/datasets/asjad99/mimiciii)                    |admissions, callout, caregivers, caregivers             
-Finance             | Home Credit Default Risk  | [link](https://www.kaggle.com/datasets/megancrenshaw/home-credit-default-risk) |application, bureau, bureau_balance, credit_card_balance, installments_payments, previous_application       
-Ecommerce           | Instacart Market Basket | [link](https://www.kaggle.com/c/instacart-market-basket-analysis/data) |aisles, department, products, order_products, orders           
+Medicine | MIMIC-III | [link](https://www.kaggle.com/datasets/asjad99/mimiciii)                    |admissions, callout,
+caregivers, caregivers             
+Finance | Home Credit Default Risk | [link](https://www.kaggle.com/datasets/megancrenshaw/home-credit-default-risk)
+|application, bureau, bureau_balance, credit_card_balance, installments_payments, previous_application       
+Ecommerce | Instacart Market Basket | [link](https://www.kaggle.com/c/instacart-market-basket-analysis/data) |aisles,
+department, products, order_products, orders
 
+## Step 1: Generate tests
 
+Once we have downloaded the datasets, the generation of the checklist can be executed with the following commands:
 
-# Run Experiments
+```python
+import pandas as pd
 
-Current version of QATCH supports SP and QA tasks, however since we rely on third-party models
-not all the experiments can be run using QATCH.
-Supported models: 
+from qatch.connectors.sqlite_connector import SqliteConnector
+from qatch.generate_dataset.orchestrator_generator import OrchestratorGenerator
 
-- QA models: Tapas, Tapex, ChatGPT_QA, LLama2_QA and Omnitab
-- SP models: ChatGPT_SP and LLama2_SP
+db_save_path = '<path_to_proprietary_dataset>.sqlite'
+db_name = '<name_of_proprietary_dataset>'
+connector = SqliteConnector(
+    relative_db_path=db_save_path,
+    db_name=db_name,
+)
 
-For the proprietary data:
-```bash
-python main_reproducibility.py -gtf proprietary --task QA --model_name Tapas -dsp test_db --inject_null_percentage 0.0
+# init the orchestrator
+orchestrator_generator = OrchestratorGenerator()
+
+# test generation
+df: pd.DataFrame = orchestrator_generator.generate_dataset(connector)
 ```
-For Spider:
-```bash
-python main_reproducibility.py -gtf spider --task QA --model_name Tapas -dsp test_db --inject_null_percentage 0.0
+
+Test generator automatically creates a checklist based on the proprietary data.
+The tests_df dataframe contains:
+
+- *db_path*: The database path associated with the test
+- *db_id*: The database name associated with the test.
+- *tbl_name*: The table name associated with the test.
+- *test_category*: The test category.
+- *sql_tag*: A more granular label for the test category.
+- *query*: The generated query. Used to evaluate the model.
+- *question*: The generated question associated with the query. Used as input for the model.
+-
+
+## Step 2: TRL model predictions
+
+QATCH is intended to be used without the inference step. the new release of QATCH deprecate this section.
+For reproducibility purposes, refer to previous main version of QATCH starting with 0.*
+
+## Step 3: QATCH evaluate
+
+Supported metrics are:
+
+- Cell Precision: [0-1] how many predicted elements are in target
+- Cell Recall: [0-1] how many target elements are in prediction
+- Tuple Cardinality: [0-1] whether cardinality of target and prediction matches
+- Tuple Constraint: [0-1] whether the tuple constraint is respected or not
+- Tuple Order: [0-1] whether prediction and target contains same order, calculated only for target query with ORDER-BY
+  clause
+- Execution Accuracy: [0-1] whether the execution of the query is the same or not.
+
+There are two options to evaluate your predictions: With a DataFrame or with a single test.
+
+```python
+from qatch.connectors.sqlite_connector import SqliteConnector
+from qatch.evaluate_dataset.orchestrator_evaluator import OrchestratorEvaluator
+
+# init orchestrator evaluator 
+evaluator = OrchestratorEvaluator()
+
+connector = SqliteConnector(
+    relative_db_path='<your_sqlite_path>',
+    db_name='<your_db_name>',
+)
+
+# solution with df:
+# Returns: The input dataframe enriched with the metrics computed for each test case.
+evaluator.evaluate_df(
+    df='<the pandas df>',
+    target_col_name='<target_column_name>',
+    prediction_col_name='<prediction_column_name>',
+    db_path_name='<sqlite_db_path>'
+)
+
+# Returns: A dictionary comprising the evaluation metrics values for the test.
+evaluator.evaluate_single_test(
+    target_query='SELECT * FROM T',
+    predicted_query='SELECT * FROM T',
+    connector=connector
+)
+
+# note that target and prediction can be interchangeable the execution of the query or the SQL query
+#  The result is the same
+evaluator.evaluate_single_test(
+    target_query=[[1, 2], [3, 4]],
+    predicted_query=[[1, 2], [3, 4]],
+    connector=connector
+)
 ```
-Instead, for the not supported models (because an API does not exist),
-the only difference is that the prediction phase has to be done by the user.
-
-
 

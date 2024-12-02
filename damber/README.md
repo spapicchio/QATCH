@@ -1,3 +1,8 @@
+# Deprecated
+Damber is based on an older version of QATCH.
+Soon will be released a more comprehensive version of damber in a different github.
+If you still want to reproduce the results, clone the github before the pull with the newer version 1.0
+
 # DAMBER (**D**ata-**AMB**iguity test**ER**)
  <figure style="text-align:center">
 
