@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 from func_timeout import func_set_timeout
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing_extensions import Literal, TypedDict, Any
 
 
@@ -28,7 +28,12 @@ class ForeignKey(TypedDict):
     child_table: ConnectorTable  # The child table object in the foreign key relationship
 
 
+class Config:
+    arbitrary_types_allowed = True
+
+
 class ConnectorTable(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     db_path: str  # The path to the database
     db_name: str  # The name of the database
     tbl_name: str  # The name of the table

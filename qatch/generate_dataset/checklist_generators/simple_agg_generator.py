@@ -94,7 +94,7 @@ class SimpleAggGenerator(BaseGenerator):
 
         operations = [
             ('MAX', 'maximum'),
-            ('MIX', 'minimum'),
+            ('MIN', 'minimum'),
             ('AVG', 'average'),
         ]
         tests = []

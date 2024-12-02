@@ -59,10 +59,11 @@ class SelectGenerator(BaseGenerator):
             ('!=', 'not equal to'),
         ]
 
-        cat_cols = utils_list_sample(cat_cols, k=3)
+        cat_cols_name = utils_list_sample(cat_cols.keys(), k=3)
 
         tests = []
-        for cat_col, metadata in cat_cols.items():
+        for cat_col in cat_cols_name:
+            metadata = cat_cols[cat_col]
             for operation in operations:
                 sample_element = random.choice(metadata.sample_data)
                 single_test = SingleQA(
