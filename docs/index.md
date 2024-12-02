@@ -35,14 +35,7 @@ below:
    The SQL declaration expresses the logical complexity of the query and reflects the presence/absence of specific
    features peculiar to relational data model such as presence of missing values and duplicate values.
 
-2. *TRL Model Predictions*. It processes the tests for various TRL models and tasks. The current toolbox version
-   supports three Table Representation Learning (TRL) models for
-   QA: [TAPAS](https://github.com/google-research/tapas), [TAPEX](https://github.com/microsoft/Table-Pretraining)
-   and [Omnitab](https://github.com/jzbjyb/OmniTab).
-   In addition, two LLMs are implemented for QA and SP [ChatGPT 3.5](https://openai.com/blog/chatgpt) (need the API key)
-   and [LLama2](https://huggingface.co/blog/llama2) (need the HuggingFace token).
-
-3. *QATCH-Evaluate*. It evaluates the models outputs according to a set of cross-task performance metrics.
+2. *QATCH-Evaluate*. It evaluates the models outputs according to a set of cross-task performance metrics.
 
 <figure markdown>
 ![measures.png](img%2Fmeasures.png)
@@ -80,3 +73,26 @@ With QATCH it is able to create a model ranking on his proprietary data for QA a
 ## License
 This project is licensed under the terms of the **Apache 2.0** license. For more details, 
 see the `LICENSE` file in this repository.
+
+
+## Citation
+If you are using this work please cite the following papers:
+
+```bibtex
+@inproceedings{papicchioqatch,
+  title={QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Models on Your Data},
+  author={Papicchio, Simone and Papotti, Paolo and Cagliero, Luca},
+  booktitle={Thirty-seventh Conference on Neural Information Processing Systems Datasets and Benchmarks Track}
+}
+```
+
+```bibtex
+@inproceedings{papicchio2024evaluating,
+  title={Evaluating Ambiguous Questions in Semantic Parsing},
+  author={Papicchio, Simone and Papotti, Paolo and Cagliero, Luca},
+  booktitle={2024 IEEE 40th International Conference on Data Engineering Workshops (ICDEW)},
+  pages={338--342},
+  year={2024},
+  organization={IEEE Computer Society}
+}
+```

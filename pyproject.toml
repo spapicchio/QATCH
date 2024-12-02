@@ -12,7 +12,6 @@ packages = [
 # These packages are mandatory and form the core of this package’s distribution.
 [tool.poetry.dependencies]
 python = "^3.9"
-numpy = "^1.24"
 pandas = "^2"
 chardet = ">=3.0.2"
 tqdm = "^4.66.1"
@@ -30,6 +29,7 @@ eval-type-backport = "^0.2.0"
 func-timeout = "^4.3.5"
 langchain = "^0.3.9"
 langchain-openai = "^0.2.10"
+mkdocstrings-python = "^1.12.2"
 
 [tool.poetry.extras]
 model = ["accelerate", "torch", "openai", "transformers", "tiktoken"]
@@ -43,7 +43,6 @@ pytest = "*"
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.5.3"
 mkdocs-material = "^9.4.7"
-mkdocstrings = { extras = ["python"], version = "^0.23.0" }
 
 
 [tool.poetry.group.dev.dependencies]

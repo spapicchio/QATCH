@@ -5,7 +5,7 @@
 
 <p align="center">
  <kbd>
-     <img src="../docs/img/first_draft_ambiguous_qatch.drawio.png" alt="Damber's pipeline"  style="border-radius:90%">
+     <img src="../docs_old/img/first_draft_ambiguous_qatch.drawio.png" alt="Damber's pipeline"  style="border-radius:90%">
  </kbd>
  </p>
 

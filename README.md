@@ -2,7 +2,7 @@
 
 <p align="center">
  <kbd>
-  <img src="docs/img/qatch_logo_verticale.jpg" alt="QATCH's logo" height="300" style="border-radius:50%">
+  <img src="docs_old/img/qatch_logo_verticale.jpg" alt="QATCH's logo" height="300" style="border-radius:50%">
  </kbd>
  </p>
 
@@ -33,7 +33,7 @@ NeurIPS Dataset and Benchmark track 2023.
 
 
  <figure style="text-align:center">
-  <img src="docs/img/qatch-full-pipeline.png">
+  <img src="docs_old/img/qatch-full-pipeline.png">
 </figure>
 
 <br>
@@ -56,7 +56,7 @@ below:
 3. *QATCH-Evaluate*. It evaluates the models outputs according to a set of cross-task performance metrics.
 
 <p align="center">
-<img src="docs/img/measures.png" width="70%">
+<img src="docs_old/img/measures.png" width="70%">
 </p>
 
 QATCH’s metrics are computed between the model output (prediction) and expected 
@@ -88,7 +88,7 @@ where QATCH can be used with LLMs:
 - Prompt engineering: Analyse the best prompt definition based on the proprietary data.
 
 <p align="center">
-<img src="docs/img/use_case_walter.png" width="70%">
+<img src="docs_old/img/use_case_walter.png" width="70%">
 </p>
 
 Use case example of engineer Walter. 
