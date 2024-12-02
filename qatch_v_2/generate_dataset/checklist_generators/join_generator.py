@@ -1,6 +1,6 @@
+from qatch_v_2.connectors import ConnectorTable
 from .base_generator import BaseGenerator, SingleQA
 from .utils import utils_list_sample
-from qatch_v_2.connectors import ConnectorTable
 
 
 class JoinGenerator(BaseGenerator):
@@ -9,6 +9,24 @@ class JoinGenerator(BaseGenerator):
         return 'INNER-JOIN'
 
     def template_generator(self, table: ConnectorTable) -> list[SingleQA]:
+        """
+        Generates templates for the given ConnectorTable. The templates are created by generating
+        Join Project All tests and Join Project Single tests. If the ConnectorTable has no foreign
+        keys, an empty list is returned.
+
+        Args:
+            table (ConnectorTable): The ConnectorTable object for which templates will be generated.
+
+        Returns:
+            list[SingleQA]: A list of SingleQA tests that have been generated. Each SingleQA is a dictionary
+                            containing a SQL query, a corresponding natural language question, and a SQL tag.
+
+        Note:
+            The returned list of tests can have varying lengths depending on the foreign keys in the input
+            ConnectorTable and the category column metadata of the parent and child tables involved in the
+            foreign key relationships.
+        """
+
         if len(table.foreign_keys) == 0:
             return []
         tests = self.generate_join_project_all(table)
@@ -16,6 +34,26 @@ class JoinGenerator(BaseGenerator):
         return tests
 
     def generate_join_project_all(self, table: ConnectorTable) -> list[SingleQA]:
+        """
+        Generates a list of SQL queries and questions representing all possible joins
+        between a given table and all its child tables based on foreign key relationships.
+        The join operation will use all the records from the given table and the child tables.
+
+        Args:
+            table (ConnectorTable): The table to generate join queries for.
+
+        Returns:
+            list[SingleQA]: List of dictionaries holding generated SQL queries and questions.
+                            Each dictionary has the keys:
+                                - 'query': The SQL query for the join operation.
+                                - 'question': A description of the join operation.
+                                - 'sql_tag': A tag representing the type of the SQL operation. In this case 'JOIN-PROJECT-ALL'.
+
+        Note:
+            The number of tests generated is equal to the number of foreign keys in the 'table' object.
+            If there are no foreign keys, it returns an empty list.
+        """
+
         # num of tests = len(foreign_key)
         table_name = table.tbl_name
         tests = []
@@ -33,6 +71,26 @@ class JoinGenerator(BaseGenerator):
         return tests
 
     def generate_join_project_single(self, table: ConnectorTable) -> list[SingleQA]:
+        """
+        Generates a list of `SingleQA` objects based on JOIN queries derived from the input `table`.
+        The JOIN queries focus on categorical columns from the parent and child tables that are connected through a foreign key.
+        Each unique pair of (parent column, child column) (except for the foreign key pair) participates in a JOIN query,
+        hence, the number of returned tests equals to len(foreign_key) x (len(cat_cols_parent) - 1) x (len(cat_cols_child) - 1).
+
+        Args:
+            table (ConnectorTable): The table on which to generate the JOIN queries and questions.
+
+        Returns:
+            list[SingleQA]: A list of `SingleQA` objects, each containing an SQL JOIN query, its semantic
+                            representation in English, and the corresponding SQL tag.
+
+        Note:
+            - If the number of categorical columns exceeds 3 in the parent or child table, only a sample of 3
+               columns are chosen for generating the JOIN queries to limit the number of generated tests.
+            - If the parent or child column from the foreign key pair is the same as the currently chosen
+               categorical column from parent or child table, this pair is skipped.
+        """
+
         # num of tests = len(foreign_key) x len(cat_cols_parent) - 1  x len(cat_cols_child) - 1
 
         table_name = table.tbl_name

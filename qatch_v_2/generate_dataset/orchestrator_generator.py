@@ -35,6 +35,26 @@ name2generator = {
 
 
 class OrchestratorGenerator:
+    """
+    Initializes an OrchestratorGenerator object with a list of generator names or
+    defaults to all available generator names.
+
+    Args:
+        generator_names (list[str] | None): A list of generator names or None to use all available generator names
+        if not provided.
+
+    Attributes:
+        graph: Compiled StateGraph object containing node functions added from the generator names.
+
+    Methods:
+        - generate_dataset(connector: BaseConnector) -> pd.DataFrame:
+            Generates a dataset from the database connected by the given connector.
+            Loads tables from the database, invokes the graph with the loaded database and connector,
+            converts the state's `generated_templates` into a pandas DataFrame.
+            Returns a DataFrame with columns 'db_path', 'db_id', 'tbl_name', 'test_category',
+             'sql_tag', 'query', 'question'.
+            Logs a warning if no dataset can be generated from the connector's database.
+    """
     def __init__(self, generator_names: list[str] | None = None):
         graph = StateGraph(StateOrchestratorGenerator)
 
@@ -54,6 +74,31 @@ class OrchestratorGenerator:
         self.graph = graph.compile()
 
     def generate_dataset(self, connector: BaseConnector) -> pd.DataFrame:
+        """
+        Generates a dataset from the database connected by the given connector.
+
+        This method will load the tables from the database connected by the connector.
+        Then, it invokes the graph with the loaded database and connector. Takes the `generated_templates`
+        from the state and convert it into a pandas DataFrame. The final DataFrame consists of
+        columns 'db_path', 'db_id', 'tbl_name', 'test_category', 'sql_tag', 'query', 'question'
+        If no dataset can be generated from the connector's database, a warning is logged.
+
+        Args:
+            connector (BaseConnector): An instance of BaseConnector subclass which
+            contains database access configurations.
+
+        Returns:
+            pd.DataFrame: The DataFrame created from the `generated_templates` in the state
+            containing only specific columns 'db_path', 'db_id', 'tbl_name', 'test_category',
+            'sql_tag', 'query', 'question' if any data exists.
+            Otherwise, it will be an empty DataFrame.
+
+        Note:
+            This could lead to an empty DataFrame if no tests could be generated from the
+            database of the provided connector.
+            In that case, a warning message will be logged specifying the 'db_path'.
+        """
+
         database = connector.load_tables_from_database()
         state = self.graph.invoke({'database': database, 'connector': connector})
         dataset = state['generated_templates']

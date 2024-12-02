@@ -1,6 +1,6 @@
+from qatch_v_2.connectors import ConnectorTable
 from .base_generator import BaseGenerator, SingleQA
 from .utils import utils_list_sample
-from qatch_v_2.connectors import ConnectorTable
 
 
 class HavingGenerator(BaseGenerator):
@@ -9,15 +9,57 @@ class HavingGenerator(BaseGenerator):
         return 'HAVING'
 
     def template_generator(self, table: ConnectorTable) -> list[SingleQA]:
+        """
+        Generates test templates by leveraging having statements with count and aggregate operations
+        on categorical and numerical columns of the input table, respectively.
+
+        Args:
+            table (ConnectorTable): An instance of 'ConnectorTable' class which includes properties related to a
+            defined table.
+
+        Returns:
+            list[SingleQA]: A list of Q&A pairs generated based on the input table where each instance
+            of 'SingleQA' represents a query, a question and a corresponding SQL tag.
+
+        Note:
+            - The function is depending on `generate_having_count_cat` and `generate_having_agg_num` methods
+            to generate Q&A pairs for categorical and numerical columns.
+            - Additional steps are performed to
+            avoid running statistical operations over id like fields in the table.
+            - Max number of tests: 16 + 6 = 22
+        """
+
         table_name = table.tbl_name
         tests = []
         cat_cols = table.cat_col2metadata.keys()
         num_cols = table.num_col2metadata.keys()
-        tests += self.test_having_count_cat(cat_cols, table_name)
-        tests += self.test_having_agg_num(cat_cols, num_cols, table_name)
+        tests += self.generate_having_count_cat(cat_cols, table_name)
+        tests += self.generate_having_agg_num(cat_cols, num_cols, table_name)
         return tests
 
-    def test_having_count_cat(self, cat_cols, table_name) -> list[SingleQA]:
+    def generate_having_count_cat(self, cat_cols: list[str], table_name: str) -> list[SingleQA]:
+        """
+        Generates tests for SQL queries that group results by category, and return groups that have a certain count.
+
+        The method samples the category columns and for each of them, it constructs a SQL query
+        that groups records by that column and filters groups by their count with an HAVING clause.
+        'SingleQA' objects are created for each test and added to the tests list which is then returned.
+
+        Args:
+            cat_cols (list[str]): A list of string, where each string is the name of a categorical column.
+            table_name (str): Name of the table to perform the operations on.
+
+        Returns:
+            list[SingleQA]: A list of 'SingleQA' objects representing tests for SQL queries.
+
+        Note:
+            - This function relies on a private helper method
+              `_get_average_of_count_cat_col` to calculate the average count
+              of records for each category column.
+            - Three categorical columns are sampled to avoid explosion
+            - The maximum number of tests: len(cat_cols) x len(operations) = 3 x 2 = 6
+        """
+
         # num tests = len(cat_cols) x len(operations)
         cat_cols = utils_list_sample(cat_cols, k=3)
 
@@ -39,7 +81,31 @@ class HavingGenerator(BaseGenerator):
                 tests.append(single_test)
         return tests
 
-    def test_having_agg_num(self, cat_cols, num_cols, table_name):
+    def generate_having_agg_num(self, cat_cols: list[str], num_cols: list[str], table_name: str):
+        """
+        Constructs a list of SingleQA objects for SQL aggregate tests (avg, sum) with 'having' clause.
+
+        This function generates SQL queries with a 'having' clause that tests aggregate functions
+        (i.e., 'avg' and 'sum') on numerical columns. The clauses are constructed such that
+        the aggregate value is compared against the average of those aggregate values for each category.
+
+        Note:
+        - Only two items are randomly sampled from both 'cat_cols' and 'num_cols' to avoid explosion.
+        - Columns considered for aggregation are filtered to remove ID related columns.
+        - Max number of tests generated = len(cat_cols_sampled) * len(num_cols_sampled) * len(operations) * len(symbols)
+          = 2 x 2 x 2 x 2 = 16
+
+
+        Args:
+            cat_cols (List[str]): List of categorical column names to be used in group by clause.
+            num_cols (List[str]): List of numerical column names to be used in aggregate functions.
+            table_name (str): Name of the table on which queries will be generated.
+
+        Returns:
+            List[SingleQA]: Returns a list of SingleQA objects, each representing a test case for SQL 'having'
+            clause with aggregate functions.
+        """
+
         # num tests = len(cat_cols) x len(num_cols) x len(operations) x len(symbols)
         cat_cols = utils_list_sample(cat_cols, k=2)
         num_cols = utils_list_sample(num_cols, k=2)
@@ -73,7 +139,7 @@ class HavingGenerator(BaseGenerator):
                         tests.append(single_test)
         return tests
 
-    def _get_average_of_count_cat_col(self, table_name, cat_col):
+    def _get_average_of_count_cat_col(self, table_name: str, cat_col: list[str]) -> int:
         """
         Helper method to calculate the average count of rows for each category in a categorical column.
 
@@ -90,17 +156,23 @@ class HavingGenerator(BaseGenerator):
         average = self.connector.run_query(f'SELECT AVG(row_count) FROM ({inner_query})')[0][0]
         return int(average)
 
-    def _get_average_of_sum_avg_cat_col(self, table_name, cat_col, num_col):
+    def _get_average_of_sum_avg_cat_col(self, table_name: str, cat_col: list[str], num_col: list[str]) -> float:
         """
-        Helper method to calculate the average sum and average of a numerical column for each category in a categorical column.
+        This method calculates the average sum and average of a specified numerical column for each category in a
+        specified categorical column. It presents these results as a tuple.
+
+        Note: The calculations are based on SQL queries and are run on the provided table in which the specific
+        categorical and numerical columns are located.
 
         Args:
-            table_name (str): The name of the table in the database.
-            cat_col (str): The name of the categorical column.
-            num_col (str): The name of the numerical column.
+            table_name (str): Name of the table in the database where calculations are to be performed.
+            cat_col (str): Name of the categorical column in the specified table.
+            num_col (str): Name of the numerical column in the specified table.
 
         Returns:
-            tuple: A tuple containing the average sum and average of the numerical column for each category.
+            tuple: A tuple of two float values. The first value represents the average sum of the numerical column
+            for each category in the categorical column. The second value represents the average of the numerical
+            column for each category in the categorical column. Both values are rounded to 2 decimal places.
         """
         # SQL queries to get the average sum and average of numerical column for each category
         inner_query_sum = f'SELECT SUM(`{num_col}`) AS sum_col FROM `{table_name}` GROUP BY `{cat_col}`'
