@@ -8,8 +8,6 @@ edit_uri: https://github.com/spapicchio/QATCH/
 theme:
   name: material
   logo: assets/qatch_logo.png
-  icon:
-    repo: fontawesome/brands/github
   palette:
     scheme: slate
     primary: deep purple
@@ -41,7 +39,6 @@ plugins:
               ignore:
                 - my_module.my_function
   - search
-
 markdown_extensions:
   - attr_list
   - md_in_html
@@ -53,12 +50,17 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.superfences
 
+
 nav:
   - Introduction: index.md
   - Getting Started: getting_started.md
   - Package:
-      - "Database Reader & Creation": database_reader.md
-      - "QATCH Generate": sql_generator.md
-      - "Supported Models": supported_models.md
-      - "QATCH Evaluate": metrics.md
-
+       - "Connectors":
+            - base_connectors.md
+            - sqlite_connector.md
+       - "Generate Dataset":
+           - generator_orchestrator.md
+           - template_generator.md
+       - "Evaluate Dataset":
+           - evaluator_orchestrator.md
+           - supported_metrics.md
