@@ -117,12 +117,14 @@ For reproducibility purposes, refer to previous main version of QATCH starting w
 ## Step 3: QATCH evaluate
 
 Supported metrics are:
-- Cell Precision: [0-1] how many predicted elements are in target
-- Cell Recall: [0-1] how many target elements are in prediction
-- Tuple Cardinality: [0-1] whether cardinality of target and prediction matches
-- Tuple Constraint: [0-1] whether the tuple constraint is respected or not 
-- Tuple Order: [0-1] whether prediction and target contains same order, calculated only for target query with ORDER-BY clause
-- Execution Accuracy: [0-1] whether the execution of the query is the same or not.
+- Execution Accuracy: {0, 1} whether the execution of the query is the same or not.
+- Valid Efficiency Score: [0, +infinite) whether the execution of the query is the same or not.
+- Cell Precision: [0, 1] how many predicted elements are in target
+- Cell Recall: [0, 1] how many target elements are in prediction
+- Tuple Cardinality: [0, 1] whether cardinality of target and prediction matches
+- Tuple Constraint: [0, 1] whether the tuple constraint is respected or not 
+- Tuple Order: [0, 1] whether prediction and target contains same order, calculated only for target query with ORDER-BY clause
+
 
 There are two options to evaluate your predictions: With a DataFrame or with a single test.
 
