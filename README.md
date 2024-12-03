@@ -165,18 +165,6 @@ poetry add QATCH
 pip install QATCH 
 ```
 
-Since QATCH is intended to be used without the inference step, the base installation does not come
-with the models' requirements.
-However, in case you want to use our implementation you can add the extras requirements.
-
-```console
-# Using poetry (recommended)
-poetry add QATCH -E model
-
-# Using pip
-pip install QATCH[model] 
-```
-
 ## How to use QATCH with my data?
 
 1. Load your input data
@@ -268,7 +256,7 @@ evaluator.evaluate_df(
     df='<the pandas df>',
     target_col_name='<target_column_name>',
     prediction_col_name='<prediction_column_name>',
-    db_path_name='<sqlite_db_path>'
+    db_path_name='<db_path_column_name>'
 )
 ```
 
@@ -309,14 +297,12 @@ paper.
  Mushrooms          | [link](https://www.kaggle.com/datasets/uciml/mushroom-classification)                               | 8.1k   | 23                 | 0                | cap-shape, ring-type         
 
 The experiments using JOIN involved specific, joinable tables from the following datasets:
-Domain | Full Name | Link | Selected tables           
---------------------|-----------------------|-----------------------------------------------------------------------------|-----------------------
-Medicine | MIMIC-III | [link](https://www.kaggle.com/datasets/asjad99/mimiciii)                    |admissions, callout,
-caregivers, caregivers             
-Finance | Home Credit Default Risk | [link](https://www.kaggle.com/datasets/megancrenshaw/home-credit-default-risk)
-|application, bureau, bureau_balance, credit_card_balance, installments_payments, previous_application       
-Ecommerce | Instacart Market Basket | [link](https://www.kaggle.com/c/instacart-market-basket-analysis/data) |aisles,
-department, products, order_products, orders
+
+Domain | Full Name | Link                                                                            | Selected tables           
+--------------------|-----------------------|---------------------------------------------------------------------------------|-----------------------
+Medicine | MIMIC-III | [link](https://www.kaggle.com/datasets/asjad99/mimiciii)                        |admissions, callout, caregivers, caregivers             
+Finance | Home Credit Default Risk | [link](https://www.kaggle.com/datasets/megancrenshaw/home-credit-default-risk)  |application, bureau, bureau_balance, credit_card_balance, installments_payments, previous_application       
+Ecommerce | Instacart Market Basket | [link](https://www.kaggle.com/c/instacart-market-basket-analysis/data)          |aisles, department, products, order_products, orders
 
 ## Step 1: Generate tests
 
@@ -352,7 +338,6 @@ The tests_df dataframe contains:
 - *sql_tag*: A more granular label for the test category.
 - *query*: The generated query. Used to evaluate the model.
 - *question*: The generated question associated with the query. Used as input for the model.
--
 
 ## Step 2: TRL model predictions
 
@@ -370,8 +355,6 @@ Supported metrics are:
 - Tuple Order: [0-1] whether prediction and target contains same order, calculated only for target query with ORDER-BY
   clause
 - Execution Accuracy: [0-1] whether the execution of the query is the same or not.
-
-There are two options to evaluate your predictions: With a DataFrame or with a single test.
 
 ```python
 from qatch.connectors.sqlite_connector import SqliteConnector
@@ -391,22 +374,7 @@ evaluator.evaluate_df(
     df='<the pandas df>',
     target_col_name='<target_column_name>',
     prediction_col_name='<prediction_column_name>',
-    db_path_name='<sqlite_db_path>'
-)
-
-# Returns: A dictionary comprising the evaluation metrics values for the test.
-evaluator.evaluate_single_test(
-    target_query='SELECT * FROM T',
-    predicted_query='SELECT * FROM T',
-    connector=connector
-)
-
-# note that target and prediction can be interchangeable the execution of the query or the SQL query
-#  The result is the same
-evaluator.evaluate_single_test(
-    target_query=[[1, 2], [3, 4]],
-    predicted_query=[[1, 2], [3, 4]],
-    connector=connector
+    db_path_name='<db_path_column_name>'
 )
 ```
 

@@ -144,7 +144,7 @@ evaluator.evaluate_df(
     df='<the pandas df>',
     target_col_name='<target_column_name>',
     prediction_col_name='<prediction_column_name>',
-    db_path_name='<sqlite_db_path>'
+    db_path_name='<db_path_column_name>'
 )
 
 # Returns: A dictionary comprising the evaluation metrics values for the test.
