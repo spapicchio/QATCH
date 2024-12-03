@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 import pandas as pd
 from func_timeout import func_set_timeout
 from pydantic import BaseModel, ConfigDict
-from typing_extensions import Literal, TypedDict, Any
+from typing_extensions import Literal, TypedDict
 
 
 class ConnectorTableColumn(BaseModel):
@@ -42,8 +42,6 @@ class ConnectorTable(BaseModel):
     num_col2metadata: dict[str, ConnectorTableColumn]  # Mapping of numeric column names to their metadata.
     primary_key: list[ConnectorTableColumn] | None  # The primary keys of the table as list of ConnectorTableColumn.
     foreign_keys: list[ForeignKey]  # List of foreign keys in the table.
-    # Additional metadata related to the ConnectorTable. For SqliteConnector it represents the SQL alchemy table
-    metadata: Any
 
 
 class BaseConnector(ABC):

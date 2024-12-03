@@ -207,7 +207,6 @@ class SqliteConnector(BaseConnector):
                               if metadata.column_type == 'numerical'},
             primary_key=self._extract_primary_key(tbl),
             foreign_keys=[],
-            metadata=tbl
         )
 
     def _set_tables_in_db(self,
