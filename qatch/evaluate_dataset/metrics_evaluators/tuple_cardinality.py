@@ -8,7 +8,7 @@ class TupleCardinality(BaseEvaluator):
     def metric_name(self):
         return 'tuple_cardinality'
 
-    def run_metric(self, target: list[list], prediction: list[list]) -> float | int:
+    def run_metric(self, target: list[list], prediction: list[list], *args, **kwargs) -> float | int:
         """
         Evaluates the ratio of the length of the smaller list to the length of the larger list.
 
