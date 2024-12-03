@@ -11,12 +11,14 @@ class TupleConstraint(BaseEvaluator):
     def metric_name(self):
         return 'tuple_constraint'
 
-    def run_metric(self, target: list[list], prediction: list[list]) -> float | int:
+    def run_metric(self, target: list[list], prediction: list[list], *args, **kwargs) -> float | int:
         """
         Evaluates the ratio between the cardinality of the target tuples and the prediction.
         Returns a score between 0 and 1. It is 1 if the schema, the cardinality and the cell values are equal.
 
         Args:
+            *args:
+            **kwargs:
             target (list[list]): Target table to be compared with the prediction table.
             prediction (list[list]): Prediction table to be compared with the target table.
 
@@ -30,17 +32,17 @@ class TupleConstraint(BaseEvaluator):
             >>> evaluator = TupleConstraint()
             >>> target = [['a', 'b'], ['c', 'd']]
             >>> prediction = [['a', 'b'], ['c', 'd']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             1.0
 
             >>> target = [['a', 'b'], ['c', 'd']]
             >>> prediction = [['a', 'b'], ['a', 'b'], ['c', 'd']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             0.5  # only ['c', 'd'] is the same in both tables
 
             >>> target = [['a', 'b'], ['c', 'd']]
             >>> prediction = [['a', 'b'], ['a', 'b'], ['c', 'd'], ['c', 'd']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             0.0
         """
         target_len = len(target)

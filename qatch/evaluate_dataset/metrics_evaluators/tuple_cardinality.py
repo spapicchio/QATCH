@@ -28,17 +28,17 @@ class TupleCardinality(BaseEvaluator):
             >>> evaluator = TupleCardinality()
             >>> target = [['a', 'b'], ['c', 'd'], ['c', 'd'], ['f', 'g']]
             >>> prediction = [['a', 'b'], [3, 2]]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             0.5  # 2/4
 
             >>> target = [['a', 'b'], [3, 2]]
             >>> prediction = [['a', 'b'], ['c', 'd'], ['c', 'd'], ['f', 'g']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             0.5
 
             >>> target = [['a', 'b'], [3, 2]]
             >>> prediction = [['a', 'b'], ['c', 'd']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             1.0
         """
         if len(target) == len(prediction) == 0:

@@ -9,15 +9,19 @@ class ExecutionAccuracy(BaseEvaluator):
     def metric_name(self):
         return 'execution_accuracy'
 
-    def run_metric(self, target: list[list], prediction: list[list]) -> float | int:
+    def run_metric(self, target: list[list], prediction: list[list], *args, **kwargs) -> float | int:
         """
         Calculates the execution accuracy between the target and prediction.
+        The logic comes from: "Spider: A Large-Scale Human-Labeled Dataset for Complex and Cross-Domain
+        Semantic Parsing and Text-to-SQL Task"
 
         This function compares a set of target rows with the prediction by creating a unique representation of data sequence.
         If the matching rows are not found, it returns 0.0 else it continues to check other rows.
         If all rows match perfectly returns 1.0, else it returns 0.0.
 
         Args:
+            *args:
+            **kwargs:
             target (list[list]): The target list of lists, each representing a unique sequence of data.
             prediction (list[list]): The prediction list of lists, each representing a matched sequence of data.
 

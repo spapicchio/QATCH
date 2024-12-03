@@ -10,13 +10,15 @@ class CellRecall(BaseEvaluator):
     def metric_name(self):
         return 'cell_recall'
 
-    def run_metric(self, target: list[list], prediction: list[list]) -> float | int:
+    def run_metric(self, target: list[list], prediction: list[list], *args, **kwargs) -> float | int:
         """
         Calculates the ratio of target cells that are in the prediction.
         High recall indicates that the model is good at identifying all relevant instances
         and has a low false negative rate.
 
         Args:
+            *args:
+            **kwargs:
             target (list[list]): Target table to be compared with the prediction table.
             prediction (list[list]): Prediction table to be compared with the target table.
 
@@ -29,17 +31,17 @@ class CellRecall(BaseEvaluator):
             >>> evaluator = CellRecall()
             >>> target = [['a', 'b'], ['c', 'd']]
             >>> prediction = [['a', 'b'], ['c', 'd']
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             1.0
 
             >>> target = [['a', 'b'], ['c', 'd']]
             >>> prediction = [['a', 'x'], ['y', 'd']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             0.5
 
             >>> target = [['a', 'b'], ['c', 'd']]
             >>> prediction = [['a', 'a'], ['b', 'b'], ['c', 'd']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             1.0
         """
         target_len = len(target)

@@ -88,7 +88,7 @@ class SqliteConnector(BaseConnector):
         tbl_name2table = self._update_foreign_key(tbl_name2table)
         return tbl_name2table
 
-    @func_set_timeout(30)
+    @func_set_timeout(60)
     def run_query(self, query: str) -> list[list]:
         """
         Executes a query on SQLite database and returns the result as a list of lists.

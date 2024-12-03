@@ -10,7 +10,7 @@ class CellPrecision(BaseEvaluator):
     def metric_name(self):
         return 'cell_precision'
 
-    def run_metric(self, target: list[list], prediction: list[list]) -> float | int:
+    def run_metric(self, target: list[list], prediction: list[list], *args, **kwargs) -> float | int:
         """
         Calculates the ratio of predicted cells that are in the target.
         Does not consider cardinality (measured by other tags).
@@ -18,6 +18,8 @@ class CellPrecision(BaseEvaluator):
         and has a low false positive rate.
 
         Args:
+            *args:
+            **kwargs:
             target (list[list]): Target table to be compared with the prediction table.
             prediction (list[list]): Prediction table to be compared with the target table.
 
@@ -30,17 +32,17 @@ class CellPrecision(BaseEvaluator):
             >>> evaluator = CellPrecision()
             >>> target = [['a', 'b'], ['c', 'd']]
             >>> prediction = [['a', 'b'], ['c', 'd']
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             1.0
 
             >>> target = [['a', 'b'], ['c', 'd']]
             >>> prediction = [['a', 'b'], ['c', 'e']
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             0.75
 
             >>> target = [['a', 'b'], ['c', 'd']]
             >>> prediction = [['a'], ['b'], ['c'], ['d']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             1.0  # it is one even if the schema does not match (we introduce tuple constraints for this)
         """
         target_len = len(target)

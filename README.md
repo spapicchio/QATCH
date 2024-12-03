@@ -103,12 +103,12 @@ With QATCH it is able to create a model ranking on his proprietary data for QA a
         |-- state_orchestrator_evaluator.py  # state passed among the nodes of the Graph
         |-- metrics_evaluators  # handles execution of the metrics
             |-- base_evaluator.py  # interface for base evaluator
-            |-- exec_evaluator.py  # implements execution accuracy
-            |-- cell_precision_evaluator.py # implement cell precision
-            |-- cell_recall_evaluator.py # implement cell recall
-            |-- tuple_cardinality_evaluator.py # implement tuple cardinality 
-            |-- tuple_constraint_evaluator.py # implement tuple constraint 
-            |-- tuple_order_evaluator.py # implement tuple order 
+            |-- execution_accuracy.py  # implements execution accuracy
+            |-- cell_precision.py # implement cell precision
+            |-- cell_recall.py # implement cell recall
+            |-- tuple_cardinality.py # implement tuple cardinality 
+            |-- tuple_constraint.py # implement tuple constraint 
+            |-- tuple_order.py # implement tuple order 
     |-- generate_dataset  # handles the generation of the dataset
         |-- orchestrator_generator.py  # orchestrator used to execute in parallel the checklist generation
         |-- state_orchestrator_generator.py  # state passed among the nodes of the Graph
@@ -245,6 +245,14 @@ orchestrator_generator.generate_dataset(connector)
    For reproducibility purposes, refer to previous main version of QATCH starting with 0.*
 
 4. QATCH-Evaluate: Evaluate the results with all the available metrics.
+Supported metrics are:
+- Execution Accuracy: {0, 1} whether the execution of the query is the same or not.
+- Valid Efficiency Score: [0, +infinite) whether the execution of the query is the same or not.
+- Cell Precision: [0, 1] how many predicted elements are in target
+- Cell Recall: [0, 1] how many target elements are in prediction
+- Tuple Cardinality: [0, 1] whether cardinality of target and prediction matches
+- Tuple Constraint: [0, 1] whether the tuple constraint is respected or not 
+- Tuple Order: [0, 1] whether prediction and target contains same order, calculated only for target query with ORDER-BY clause
 
 ```python
 from qatch.evaluate_dataset.orchestrator_evaluator import OrchestratorEvaluator

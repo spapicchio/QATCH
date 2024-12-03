@@ -64,13 +64,18 @@ class BaseEvaluator(ABC):
             `predicted_test` information in the state is accurate and compatible with the evaluation metric used in
              `_wrapper_run_metric`.
         """
-
         predicted_test = state['predicted_test']
-        evaluated_test = self.run_metric(target=predicted_test.target, prediction=predicted_test.prediction)
+        evaluated_test = self.run_metric(
+            target=predicted_test.target_values,
+            prediction=predicted_test.predicted_values,
+            target_query=predicted_test.target_query,
+            predicted_query=predicted_test.predicted_query,
+            connector=state['connector']
+        )
         return {'evaluated_tests': [EvaluatedTest(metric_name=self.metric_name, metric_value=evaluated_test)]}
 
     @abstractmethod
-    def run_metric(self, target: list[list], prediction: list[list]) -> float | int:
+    def run_metric(self, target: list[list], prediction: list[list], *args, **kwargs) -> float | int:
         """
         Abstract method to compute a specific evaluation metric based on targets and predictions.
 
@@ -80,6 +85,9 @@ class BaseEvaluator(ABC):
 
             prediction (list[list]): The predicted values to be evaluated against the target.
                                      Each sublist represents a different set of associated predicted values.
+
+            *args (Any): Additional arguments to be passed to the evaluation method.:
+            **kwargs (Any): Additional keyword arguments to be passed to the evaluation method.:
 
         Returns:
             float | int: The computed evaluation metric value. The actual type and semantics of the result

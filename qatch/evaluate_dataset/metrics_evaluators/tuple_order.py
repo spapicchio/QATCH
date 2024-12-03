@@ -10,7 +10,7 @@ class TupleOrder(BaseEvaluator):
     def metric_name(self):
         return 'tuple_order'
 
-    def run_metric(self, target: list[list], prediction: list[list]) -> float | int:
+    def run_metric(self, target: list[list], prediction: list[list], *args, **kwargs) -> float | int:
         """
         Evaluates the similarity in tuple order between the target and prediction.
         The score is based on the Spearman rank correlation coefficient normalized between 0 and 1.
@@ -18,6 +18,8 @@ class TupleOrder(BaseEvaluator):
         Therefore, the elements that are in predictions but nor in target are ignored (and viceversa).
 
         Args:
+            *args:
+            **kwargs:
             target (list[list]): Target table to be compared with the prediction table.
             prediction (list[list]): Prediction table to be compared with the target table.
 
@@ -31,17 +33,17 @@ class TupleOrder(BaseEvaluator):
             >>> evaluator = TupleOrder()
             >>>  target = [['a', 'b'], ['c', 'd']]
             >>>  prediction = [['c', 'd'], ['a', 'b']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             0.0
 
             >>>  target = [['apple', 'orange'], ['pear']]
             >>>  prediction = [['pear'], ['apple', 'orange']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             0.0
 
             >>>  target = [['apple', 'orange'], ['pear']]
             >>>  prediction = [['pear']]
-            >>> evaluator.run_metric(target, prediction)
+            >>> evaluator.run_metric(target,prediction)
             1.0
         """
         target_len = len(target)
