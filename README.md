@@ -11,8 +11,8 @@ of [QATCH: Benchmarking SQL-centric tasks with Table Representation Learning Mod
 NeurIPS Dataset and Benchmark track 2023.
 
 # 🔥 Updates
-
-- [**2024-Dec-02**]: new version of QATCH based on LangGraph! Test Generation and Evaluation is not executed in parallel
+- [**2024-Dec-03**]: Introduce new metrics from literature: Execution Accuracy and Valid Efficiency Score (VES)
+- [**2024-Dec-02**]: new version of QATCH based on LangGraph! Test Generation and Evaluation is now executed in parallel
 - [**2024-Jan-22**]:
   Add [DAMBER: (Data-AMBiguity testER)](https://github.com/spapicchio/QATCH/tree/master/damber#readme)
 - [**2024-Jan-10**]: Add JOIN tests for proprietary data
