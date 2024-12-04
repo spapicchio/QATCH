@@ -55,6 +55,7 @@ class OrchestratorGenerator:
              'sql_tag', 'query', 'question'.
             Logs a warning if no dataset can be generated from the connector's database.
     """
+
     def __init__(self, generator_names: list[str] | None = None):
         graph = StateGraph(StateOrchestratorGenerator)
 
@@ -73,7 +74,7 @@ class OrchestratorGenerator:
 
         self.graph = graph.compile()
 
-    def generate_dataset(self, connector: BaseConnector) -> pd.DataFrame:
+    def generate_dataset(self, connector: BaseConnector, column_to_include: str | None = None) -> pd.DataFrame:
         """
         Generates a dataset from the database connected by the given connector.
 
@@ -86,6 +87,7 @@ class OrchestratorGenerator:
         Args:
             connector (BaseConnector): An instance of BaseConnector subclass which
             contains database access configurations.
+            column_to_include (str): If the column is present in the table, it will be selected in the generation
 
         Returns:
             pd.DataFrame: The DataFrame created from the `generated_templates` in the state
@@ -100,7 +102,10 @@ class OrchestratorGenerator:
         """
 
         database = connector.load_tables_from_database()
-        state = self.graph.invoke({'database': database, 'connector': connector})
+        state = self.graph.invoke(
+            {'database': database,
+             'connector': connector,
+             'column_to_include': column_to_include})
         dataset = state['generated_templates']
         dataset = pd.DataFrame(dataset)
         if len(dataset) > 0:

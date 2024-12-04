@@ -48,4 +48,4 @@ class ExecutionAccuracy(BaseEvaluator):
             gold_row_set.add(tuple(sort_with_different_types(gold_row)))
             pred_row_set.add(tuple(sort_with_different_types(predicted_row)))
 
-        return gold_row_set == pred_row_set
+        return int(gold_row_set == pred_row_set)

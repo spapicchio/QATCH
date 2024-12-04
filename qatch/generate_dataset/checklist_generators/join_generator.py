@@ -96,7 +96,7 @@ class JoinGenerator(BaseGenerator):
         table_name = table.tbl_name
         tests = []
         cat_cols_parent = table.cat_col2metadata.keys()
-        cat_cols_parent = utils_list_sample(cat_cols_parent, k=3)
+        cat_cols_parent = utils_list_sample(cat_cols_parent, k=3, val=self.column_to_include)
 
         for foreign_key in table.foreign_keys:
 
@@ -104,7 +104,7 @@ class JoinGenerator(BaseGenerator):
             parent_col = foreign_key['parent_column']
             child_col = foreign_key['child_column']
             cat_cols_child = foreign_key['child_table'].cat_col2metadata.keys()
-            cat_cols_child = utils_list_sample(cat_cols_child, k=3)
+            cat_cols_child = utils_list_sample(cat_cols_child, k=3, val=self.column_to_include)
 
             for cat_col_parent in cat_cols_parent:
                 if cat_col_parent == parent_col:

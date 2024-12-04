@@ -52,7 +52,7 @@ class SimpleAggGenerator(BaseGenerator):
         """
 
         # num tests = len(cat_columns)
-        cat_columns = utils_list_sample(cat_columns, k=5)
+        cat_columns = utils_list_sample(cat_columns, k=5, val=self.column_to_include)
 
         tests = []
         for cat_col in cat_columns:
@@ -90,7 +90,7 @@ class SimpleAggGenerator(BaseGenerator):
 
         # remove num_cols with ID. No meaning to calculate max/min/avg over ids
         num_cols = [col for col in num_cols if 'id' not in col.lower()]
-        num_cols = utils_list_sample(num_cols, k=2)
+        num_cols = utils_list_sample(num_cols, k=2, val=self.column_to_include)
 
         operations = [
             ('MAX', 'maximum'),

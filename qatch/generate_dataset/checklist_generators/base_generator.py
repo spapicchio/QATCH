@@ -25,9 +25,11 @@ class BaseGenerator(ABC):
     A Base class for all types of generators. This class provides the basic skeleton for a template
     generator.
     """
+
     def __init__(self, seed=2023):
         random.seed(seed)
         self.connector = None
+        self.column_to_include = None  # column to include in the generation if present
 
     @property
     @abstractmethod
@@ -82,6 +84,7 @@ class BaseGenerator(ABC):
             - This is the function used by the LangGraph object during its execution
         """
         database = state['database']
+        self.column_to_include = state['column_to_include'] if 'column_to_include' in state else None
         connector = self.connector = state['connector']
         table_tests = []
         for tbl_name, table in database.items():
@@ -109,5 +112,3 @@ class BaseGenerator(ABC):
 
     def _remove_test_with_empty_results(self, tests: list[SingleQA], connector) -> list[SingleQA]:
         return [test for test in tests if len(connector.run_query(test['query'])) > 0]
-
-

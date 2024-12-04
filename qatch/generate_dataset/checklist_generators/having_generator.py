@@ -61,7 +61,7 @@ class HavingGenerator(BaseGenerator):
         """
 
         # num tests = len(cat_cols) x len(operations)
-        cat_cols = utils_list_sample(cat_cols, k=3)
+        cat_cols = utils_list_sample(cat_cols, k=3, val=self.column_to_include)
 
         operations = [
             ('>=', 'at least'),
@@ -107,8 +107,8 @@ class HavingGenerator(BaseGenerator):
         """
 
         # num tests = len(cat_cols) x len(num_cols) x len(operations) x len(symbols)
-        cat_cols = utils_list_sample(cat_cols, k=2)
-        num_cols = utils_list_sample(num_cols, k=2)
+        cat_cols = utils_list_sample(cat_cols, k=2, val=self.column_to_include)
+        num_cols = utils_list_sample(num_cols, k=2, val=self.column_to_include)
 
         tests = []
         operations = [

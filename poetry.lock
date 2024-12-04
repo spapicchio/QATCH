@@ -663,17 +663,6 @@ socks = ["socksio (==1.*)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
-name = "httpx-sse"
-version = "0.4.0"
-description = "Consume Server-Sent Event (SSE) messages with HTTPX."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "httpx-sse-0.4.0.tar.gz", hash = "sha256:1e81a3a3070ce322add1d3529ed42eb5f70817f45ed6ec915ab753f961139721"},
-    {file = "httpx_sse-0.4.0-py3-none-any.whl", hash = "sha256:f329af6eae57eaa2bdfd962b42524764af68075ea87370a2de920af5341e318f"},
-]
-
-[[package]]
 name = "idna"
 version = "3.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -829,19 +818,19 @@ langchain-core = ">=0.3.15,<0.4.0"
 
 [[package]]
 name = "langgraph"
-version = "0.2.53"
+version = "0.2.54"
 description = "Building stateful, multi-actor applications with LLMs"
 optional = false
 python-versions = "<4.0,>=3.9.0"
 files = [
-    {file = "langgraph-0.2.53-py3-none-any.whl", hash = "sha256:b34b67d0a12ae0ba6f03af97ad0f744bc609bd0328e8b734618cc039985cfdea"},
-    {file = "langgraph-0.2.53.tar.gz", hash = "sha256:b83232a04f2b536cbeac542f9ad7e0265f41ac6b7c6706ba8e031e0e80cb13a6"},
+    {file = "langgraph-0.2.54-py3-none-any.whl", hash = "sha256:73c514cfd798cbb40da369510d2086c77cf3572e85e60f9aa459321ee9ec4f21"},
+    {file = "langgraph-0.2.54.tar.gz", hash = "sha256:be9d7572959de6f30c27e09168c8f78f6f86648a60ebb67ae815d159255a6b52"},
 ]
 
 [package.dependencies]
 langchain-core = ">=0.2.43,<0.3.0 || >0.3.0,<0.3.1 || >0.3.1,<0.3.2 || >0.3.2,<0.3.3 || >0.3.3,<0.3.4 || >0.3.4,<0.3.5 || >0.3.5,<0.3.6 || >0.3.6,<0.3.7 || >0.3.7,<0.3.8 || >0.3.8,<0.3.9 || >0.3.9,<0.3.10 || >0.3.10,<0.3.11 || >0.3.11,<0.3.12 || >0.3.12,<0.3.13 || >0.3.13,<0.3.14 || >0.3.14,<0.4.0"
 langgraph-checkpoint = ">=2.0.4,<3.0.0"
-langgraph-sdk = ">=0.1.32,<0.2.0"
+langgraph-sdk = ">=0.1.42,<0.2.0"
 
 [[package]]
 name = "langgraph-checkpoint"
@@ -860,18 +849,17 @@ msgpack = ">=1.1.0,<2.0.0"
 
 [[package]]
 name = "langgraph-sdk"
-version = "0.1.40"
+version = "0.1.42"
 description = "SDK for interacting with LangGraph API"
 optional = false
 python-versions = "<4.0.0,>=3.9.0"
 files = [
-    {file = "langgraph_sdk-0.1.40-py3-none-any.whl", hash = "sha256:8810cca5e4144cf3a5441fc76b4ee6e658ec95f932d3a0bf9ad63de117e925b9"},
-    {file = "langgraph_sdk-0.1.40.tar.gz", hash = "sha256:ab2719ac7274612a791a7a0ad9395d250357106cba8ba81bca9968fc91009af2"},
+    {file = "langgraph_sdk-0.1.42-py3-none-any.whl", hash = "sha256:9e53133a417d525dd4a39ecc0c4704fa6845efce5d2a23995ad01988c8bb11a5"},
+    {file = "langgraph_sdk-0.1.42.tar.gz", hash = "sha256:b927d2271dc526a80983a89bbde303729d82ad810c64b2105ea9113203de1166"},
 ]
 
 [package.dependencies]
 httpx = ">=0.25.2"
-httpx-sse = ">=0.4.0"
 orjson = ">=3.10.1"
 
 [[package]]
@@ -1762,13 +1750,13 @@ files = [
 
 [[package]]
 name = "pydantic"
-version = "2.10.2"
+version = "2.10.3"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic-2.10.2-py3-none-any.whl", hash = "sha256:cfb96e45951117c3024e6b67b25cdc33a3cb7b2fa62e239f7af1378358a1d99e"},
-    {file = "pydantic-2.10.2.tar.gz", hash = "sha256:2bc2d7f17232e0841cbba4641e65ba1eb6fafb3a08de3a091ff3ce14a197c4fa"},
+    {file = "pydantic-2.10.3-py3-none-any.whl", hash = "sha256:be04d85bbc7b65651c5f8e6b9976ed9c6f41782a55524cef079a34a0bb82144d"},
+    {file = "pydantic-2.10.3.tar.gz", hash = "sha256:cb5ac360ce894ceacd69c403187900a02c4b20b693a9dd1d643e1effab9eadf9"},
 ]
 
 [package.dependencies]
