@@ -31,8 +31,8 @@ class HavingGenerator(BaseGenerator):
 
         table_name = table.tbl_name
         tests = []
-        cat_cols = table.cat_col2metadata.keys()
-        num_cols = table.num_col2metadata.keys()
+        cat_cols = list(table.cat_col2metadata.keys())
+        num_cols = list(table.num_col2metadata.keys())
         tests += self.generate_having_count_cat(cat_cols, table_name)
         tests += self.generate_having_agg_num(cat_cols, num_cols, table_name)
         return tests
