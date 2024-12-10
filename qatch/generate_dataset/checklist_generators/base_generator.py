@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from itertools import chain
 from typing import TypedDict, Literal
 
+from sqlalchemy.exc import OperationalError
+
 from qatch.connectors import ConnectorTable
 from ..state_orchestrator_generator import StateOrchestratorGenerator
 
@@ -25,9 +27,11 @@ class BaseGenerator(ABC):
     A Base class for all types of generators. This class provides the basic skeleton for a template
     generator.
     """
+
     def __init__(self, seed=2023):
         random.seed(seed)
         self.connector = None
+        self.column_to_include = None  # column to include in the generation if present
 
     @property
     @abstractmethod
@@ -82,6 +86,7 @@ class BaseGenerator(ABC):
             - This is the function used by the LangGraph object during its execution
         """
         database = state['database']
+        self.column_to_include = state['column_to_include'] if 'column_to_include' in state else None
         connector = self.connector = state['connector']
         table_tests = []
         for tbl_name, table in database.items():
@@ -94,7 +99,7 @@ class BaseGenerator(ABC):
         table_tests = list(chain.from_iterable(table_tests))
 
         # remove empty tests
-        table_tests = self._remove_test_with_empty_results(table_tests, connector)
+        table_tests = self._remove_test_with_empty_results_or_errors(table_tests, connector)
 
         return {'generated_templates': table_tests}
 
@@ -107,7 +112,14 @@ class BaseGenerator(ABC):
             test_category=self.test_name
         )
 
-    def _remove_test_with_empty_results(self, tests: list[SingleQA], connector) -> list[SingleQA]:
-        return [test for test in tests if len(connector.run_query(test['query'])) > 0]
+    def _remove_test_with_empty_results_or_errors(self, tests: list[SingleQA], connector) -> list[SingleQA]:
+        new_tests = []
+        for test in tests:
+            try:
+                result = connector.run_query(test['query'])
+                if len(result) > 0:
+                    new_tests.append(test)
+            except OperationalError:
+                continue
 
-
+        return new_tests

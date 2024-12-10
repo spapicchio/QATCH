@@ -59,7 +59,7 @@ class SelectGenerator(BaseGenerator):
             ('!=', 'not equal to'),
         ]
 
-        cat_cols_name = utils_list_sample(cat_cols.keys(), k=3)
+        cat_cols_name = utils_list_sample(list(cat_cols.keys()), k=3, val=self.column_to_include)
 
         tests = []
         for cat_col in cat_cols_name:
@@ -102,7 +102,7 @@ class SelectGenerator(BaseGenerator):
             ('>', 'is greater than'),
             ('<', 'is less than'),
         ]
-        num_cols_name = utils_list_sample(num_cols.keys(), k=3)
+        num_cols_name = utils_list_sample(list(num_cols.keys()), k=3, val=self.column_to_include)
 
         num_cols = {col: num_cols[col] for col in num_cols_name if 'id' not in col.lower()}
 

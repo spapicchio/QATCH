@@ -82,7 +82,7 @@ class ProjectGenerator(BaseGenerator):
         """
 
         output = []
-        columns = utils_list_sample(columns, k=5)
+        columns = utils_list_sample(columns, k=5, val=self.column_to_include)
         for col_name in columns:
             test = SingleQA(
                 query=f'SELECT `{col_name}` FROM `{tbl_name}`',

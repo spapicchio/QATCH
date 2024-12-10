@@ -29,8 +29,8 @@ class DistinctGenerator(BaseGenerator):
             - Max num of tests it can generate: len(cat_columns) < 5
         """
         # num of tests len(cat_columns)
-        cat_columns = table.cat_col2metadata.keys()
-        cat_columns = utils_list_sample(cat_columns, k=5)
+        cat_columns = list(table.cat_col2metadata.keys())
+        cat_columns = utils_list_sample(cat_columns, k=5, val=self.column_to_include)
 
         table_name = table.tbl_name
         tests = []

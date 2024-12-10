@@ -42,7 +42,7 @@ class OrderByGenerator(BaseGenerator):
         """
 
         # number of tests: len(columns) * 2
-        columns = utils_list_sample(columns, k=2)
+        columns = utils_list_sample(columns, k=2, val=self.column_to_include)
 
         tests = []
         operations = [
@@ -84,7 +84,7 @@ class OrderByGenerator(BaseGenerator):
         """
 
         # number of tests: len(columns) * 2
-        columns = utils_list_sample(columns, k=2)
+        columns = utils_list_sample(columns, k=2, val=self.column_to_include)
 
         tests = []
         operations = [

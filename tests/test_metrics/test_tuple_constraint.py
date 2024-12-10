@@ -96,6 +96,6 @@ class TestTupleConstraintTag:
         target = np.random.rand(20, 1000).tolist()
         prediction = np.random.rand(20, 1000).tolist()
         start = time.time()
-        _ = instance.evaluate_single_no_special_case(target, prediction)
+        _ = instance.run_metric(target, prediction)
         end = time.time()
         assert start - end < 0.001
