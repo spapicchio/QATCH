@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from itertools import chain
 from typing import TypedDict, Literal
 
+from sqlalchemy.exc import OperationalError
+
 from qatch.connectors import ConnectorTable
 from ..state_orchestrator_generator import StateOrchestratorGenerator
 
@@ -97,7 +99,7 @@ class BaseGenerator(ABC):
         table_tests = list(chain.from_iterable(table_tests))
 
         # remove empty tests
-        table_tests = self._remove_test_with_empty_results(table_tests, connector)
+        table_tests = self._remove_test_with_empty_results_or_errors(table_tests, connector)
 
         return {'generated_templates': table_tests}
 
@@ -110,5 +112,14 @@ class BaseGenerator(ABC):
             test_category=self.test_name
         )
 
-    def _remove_test_with_empty_results(self, tests: list[SingleQA], connector) -> list[SingleQA]:
-        return [test for test in tests if len(connector.run_query(test['query'])) > 0]
+    def _remove_test_with_empty_results_or_errors(self, tests: list[SingleQA], connector) -> list[SingleQA]:
+        new_tests = []
+        for test in tests:
+            try:
+                result = connector.run_query(test['query'])
+                if len(result) > 0:
+                    new_tests.append(test)
+            except OperationalError:
+                continue
+
+        return new_tests
