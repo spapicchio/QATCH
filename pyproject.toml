@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qatch"
-version = "1.0.29"
+version = "1.0.34"
 description = ""
 license = "apache-2.0"
 authors = ["spapicchio <simone.papicchio@polito.it>"]
@@ -21,6 +21,7 @@ func-timeout = "^4.3.5"
 eval-type-backport = "^0.2.0"
 
 # TEST group
+notebook = "^7.3.3"
 [tool.poetry.group.test]
 optional = true
 [tool.poetry.group.test.dependencies]

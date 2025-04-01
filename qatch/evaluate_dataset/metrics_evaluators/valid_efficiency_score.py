@@ -4,6 +4,7 @@ import time
 
 import numpy as np
 from func_timeout import FunctionTimedOut
+import sqlalchemy
 
 from .base_evaluator import BaseEvaluator
 from .execution_accuracy import ExecutionAccuracy
@@ -20,12 +21,11 @@ def _remove_outliers(array: list[float]) -> list[float]:
 class ValidEfficiencyScore(BaseEvaluator):
     @property
     def metric_name(self):
-        return 'valid_efficiency_score'
+        return "valid_efficiency_score"
 
-    def run_metric(self,
-                   target: list[list],
-                   prediction: list[list],
-                   *args, **kwargs) -> float | int:
+    def run_metric(
+        self, target: list[list], prediction: list[list], *args, **kwargs
+    ) -> float | int:
         """
         Execute the ValidEfficiencyScore metric.
         Credit to the logic:
@@ -40,6 +40,7 @@ class ValidEfficiencyScore(BaseEvaluator):
         Notes:
             - The VES is between [0, +infinite). Larger is the metric, faster is the prediction
             - If the prediction have an execution accuracy=0 also the VES is 0
+            - VES can only be calculated for Text2SQL, in case of TQA the VES is set to 0
 
         Args:
             target (list[list]): The expected output to which the prediction will be compared.
@@ -55,16 +56,31 @@ class ValidEfficiencyScore(BaseEvaluator):
              It's a product of execution accuracy and efficiency score. it is between 0 and + infinite. larger is better
         """
 
-        connector = kwargs.get('connector')
-        predicted_query = kwargs.get('predicted_query')
-        target_query = kwargs.get('target_query')
+        connector = kwargs.get("connector")
+        predicted_query = kwargs.get("predicted_query")
+        target_query = kwargs.get("target_query")
+
         execution_accuracy = ExecutionAccuracy().run_metric(target, prediction)
-        relative_efficiency_score = self.relative_execution_efficiency(predicted_query, target_query, connector)
+        try:
+            relative_efficiency_score = self.relative_execution_efficiency(
+                predicted_query, target_query, connector
+            )
+        except sqlalchemy.exc.ResourceClosedError:
+            # error in case the target/prediction does not return any row
+            # this is the case when we are working with TQA
+            # in this case we set the VES to 0
+            return 0.0
         return execution_accuracy * relative_efficiency_score
 
-    def relative_execution_efficiency(self, target_query: str, predicted_query: str, connector: BaseConnector) -> float:
-        expected_time_target = self.calculate_expected_execution_time(target_query, connector)
-        expected_time_prediction = self.calculate_expected_execution_time(predicted_query, connector)
+    def relative_execution_efficiency(
+        self, target_query: str, predicted_query: str, connector: BaseConnector
+    ) -> float:
+        expected_time_target = self.calculate_expected_execution_time(
+            target_query, connector
+        )
+        expected_time_prediction = self.calculate_expected_execution_time(
+            predicted_query, connector
+        )
         ratio = expected_time_target / expected_time_prediction
         return np.sqrt(ratio)
 

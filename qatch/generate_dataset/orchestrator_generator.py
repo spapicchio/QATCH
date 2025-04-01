@@ -74,7 +74,9 @@ class OrchestratorGenerator:
 
         self.graph = graph.compile()
 
-    def generate_dataset(self, connector: BaseConnector, column_to_include: str | None = None) -> pd.DataFrame:
+    def generate_dataset(self, connector: BaseConnector,
+                         column_to_include: str | None = None,
+                         tables_to_include: str | list | None = None) -> pd.DataFrame:
         """
         Generates a dataset from the database connected by the given connector.
 
@@ -88,6 +90,7 @@ class OrchestratorGenerator:
             connector (BaseConnector): An instance of BaseConnector subclass which
             contains database access configurations.
             column_to_include (str): If the column is present in the table, it will be selected in the generation
+            tables_to_include (str | list | None): If the table is present in the database, it will be selected in the generation
 
         Returns:
             pd.DataFrame: The DataFrame created from the `generated_templates` in the state
@@ -102,6 +105,9 @@ class OrchestratorGenerator:
         """
 
         database = connector.load_tables_from_database()
+        tables_to_include = tables_to_include or list(database.keys())
+        database = {table: database[table] for table in tables_to_include}
+
         state = self.graph.invoke(
             {'database': database,
              'connector': connector,
