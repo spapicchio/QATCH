@@ -87,13 +87,9 @@ class OrchestratorEvaluator:
 
     def __init__(self, evaluator_names: list[str] | None = None):
         graph = StateGraph(StateOrchestratorEvaluator)
-        if evaluator_names is None:
-            evaluator_names = name2evaluator.keys()
-
-        self.evaluator_names = evaluator_names
-
+        self.evaluator_names = evaluator_names or list(name2evaluator.keys())
         list_node_fun = [
-            (name, name2evaluator[name]().graph_call) for name in evaluator_names
+            (name, name2evaluator[name]().graph_call) for name in self.evaluator_names
         ]
 
         for node_name, node_fun in list_node_fun:
@@ -172,6 +168,7 @@ class OrchestratorEvaluator:
 
         Note:
             - Tuple Order is computed only if target SQL contains an 'oder by' clause.
+            - Some metrics can be computed only for Text2SQL as VES.
 
         Args:
             target_query (str | list[list]): The target SQL query or the expected results in a nested list.
