@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qatch"
-version = "1.0.34"
+version = "1.0.36"
 description = ""
 license = "apache-2.0"
 authors = ["spapicchio <simone.papicchio@polito.it>"]
@@ -15,13 +15,13 @@ python = "^3.9"
 pandas = "^2"
 tqdm = "^4.66.1"
 sqlalchemy = "^2.0.36"
-langgraph = "^0.2.53"
 langchain = "^0.3.9"
 func-timeout = "^4.3.5"
 eval-type-backport = "^0.2.0"
 
 # TEST group
 notebook = "^7.3.3"
+langgraph = "^0.4"
 [tool.poetry.group.test]
 optional = true
 [tool.poetry.group.test.dependencies]
