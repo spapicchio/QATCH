@@ -3,7 +3,7 @@ import time
 import numpy as np
 import pytest
 
-from qatch.evaluate_dataset.metrics_evaluators import CellRecall
+from src.qatch.evaluate_dataset.metrics_evaluators import CellRecall
 
 
 class TestCellRecall:

@@ -20,7 +20,7 @@ def utils_convert_df_in_sql_code(name: str, table: pd.DataFrame, table2primary_k
 
     Example:
         >>> import pandas as pd
-        >>> from qatch.database_reader import SingleDatabase
+        >>> from src.qatch import SingleDatabase
 
         >>> name = 'sample_table'
         >>> table = pd.DataFrame({

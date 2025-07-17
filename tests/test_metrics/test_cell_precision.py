@@ -4,7 +4,7 @@ import time
 import numpy as np
 import pytest
 
-from qatch.evaluate_dataset.metrics_evaluators import CellPrecision
+from src.qatch.evaluate_dataset.metrics_evaluators import CellPrecision
 
 
 class TestCellPrecision:

@@ -63,7 +63,7 @@ a table with three tuples and two attributes.
 
 Given the ground truth result (target) with three tuples over two attributes, we report the metric values for five
 predictions, coming either from a QA or from the execution of a query in SP. More details can be found in
-the [metrics](qatch/metrics_evaluators) folder
+the [metrics](src/qatch/metrics_evaluators) folder
 
 ## Who should use QATCH?
 
@@ -175,7 +175,7 @@ If your data is not stored in a sqlite database you can use our code to generate
 ```python
 import pandas as pd
 
-from qatch.connectors.sqlite_connector import SqliteConnector
+from src.qatch.connectors.sqlite_connector import SqliteConnector
 
 # Create dummy table
 data = {
@@ -211,7 +211,7 @@ This class will create the sqlite database in db_save_path.
 If you want to directly connect to the sqlite database:
 
 ```python
-from qatch.connectors.sqlite_connector import SqliteConnector
+from src.qatch.connectors.sqlite_connector import SqliteConnector
 
 db_save_path = 'test_db.sqlite'
 db_name = 'olympics'
@@ -225,8 +225,8 @@ connector = SqliteConnector(
    To generate the datasets, we need an orchestrator:
 
 ```python
-from qatch.connectors.sqlite_connector import SqliteConnector
-from qatch.generate_dataset.orchestrator_generator import OrchestratorGenerator
+from src.qatch.connectors.sqlite_connector import SqliteConnector
+from src.qatch.generate_dataset.orchestrator_generator import OrchestratorGenerator
 
 # connection to the database
 connector = SqliteConnector(
@@ -255,7 +255,7 @@ Supported metrics are:
 - Tuple Order: [0, 1] whether prediction and target contains same order, calculated only for target query with ORDER-BY clause
 
 ```python
-from qatch.evaluate_dataset.orchestrator_evaluator import OrchestratorEvaluator
+from src.qatch.evaluate_dataset.orchestrator_evaluator import OrchestratorEvaluator
 
 # init orchestrator evaluator 
 evaluator = OrchestratorEvaluator()
@@ -319,8 +319,8 @@ Once we have downloaded the datasets, the generation of the checklist can be exe
 ```python
 import pandas as pd
 
-from qatch.connectors.sqlite_connector import SqliteConnector
-from qatch.generate_dataset.orchestrator_generator import OrchestratorGenerator
+from src.qatch.connectors.sqlite_connector import SqliteConnector
+from src.qatch.generate_dataset.orchestrator_generator import OrchestratorGenerator
 
 db_save_path = '<path_to_proprietary_dataset>.sqlite'
 db_name = '<name_of_proprietary_dataset>'
@@ -365,8 +365,8 @@ Supported metrics are:
 - Execution Accuracy: [0-1] whether the execution of the query is the same or not.
 
 ```python
-from qatch.connectors.sqlite_connector import SqliteConnector
-from qatch.evaluate_dataset.orchestrator_evaluator import OrchestratorEvaluator
+from src.qatch.connectors.sqlite_connector import SqliteConnector
+from src.qatch.evaluate_dataset.orchestrator_evaluator import OrchestratorEvaluator
 
 # init orchestrator evaluator 
 evaluator = OrchestratorEvaluator()

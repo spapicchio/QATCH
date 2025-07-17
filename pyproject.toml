@@ -1,41 +1,40 @@
-[tool.poetry]
+[project]
 name = "qatch"
 version = "1.0.36"
 description = ""
-license = "apache-2.0"
-authors = ["spapicchio <simone.papicchio@polito.it>"]
+authors = [{ name = "spapicchio", email = "simone.papicchio@polito.it" }]
+requires-python = "~=3.9"
 readme = "README.md"
-packages = [
-    { include = "qatch" },
+license = "apache-2.0"
+dependencies = [
+    "pandas>=2,<3",
+    "sqlalchemy>=2.0.36,<3",
+    "func-timeout>=4.3.5,<5",
+    "langgraph>=0.4,<0.5",
 ]
 
-# These packages are mandatory and form the core of this package’s distribution.
-[tool.poetry.dependencies]
-python = "^3.9"
-pandas = "^2"
-tqdm = "^4.66.1"
-sqlalchemy = "^2.0.36"
-langchain = "^0.3.9"
-func-timeout = "^4.3.5"
-eval-type-backport = "^0.2.0"
+[dependency-groups]
+test = ["pytest"]
+docs = [
+    "mkdocs>=1.5.3,<2",
+    "mkdocs-material>=9.4.7,<10",
+    "mkdocstrings-python>=1.12.2,<2",
+]
+dev = ["setuptools>=69.0.3,<70"]
 
-# TEST group
-notebook = "^7.3.3"
-langgraph = "^0.4"
-[tool.poetry.group.test]
-optional = true
-[tool.poetry.group.test.dependencies]
-pytest = "*"
+[tool.uv]
+default-groups = [
+    "test",
+    "docs",
+    "dev",
+]
 
+[tool.hatch.build.targets.sdist]
+include = ["qatch"]
 
-[tool.poetry.group.docs.dependencies]
-mkdocs = "^1.5.3"
-mkdocs-material = "^9.4.7"
-mkdocstrings-python = "^1.12.2"
-
-[tool.poetry.group.dev.dependencies]
-setuptools = "^69.0.3"
+[tool.hatch.build.targets.wheel]
+include = ["qatch"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

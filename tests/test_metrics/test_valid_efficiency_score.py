@@ -3,8 +3,8 @@ import os.path
 import pandas as pd
 import pytest
 
-from qatch.connectors import SqliteConnector
-from qatch.evaluate_dataset.metrics_evaluators.valid_efficiency_score import ValidEfficiencyScore
+from src.qatch.connectors import SqliteConnector
+from src.qatch.evaluate_dataset.metrics_evaluators.valid_efficiency_score import ValidEfficiencyScore
 
 
 class TestValidEfficiencyScore:

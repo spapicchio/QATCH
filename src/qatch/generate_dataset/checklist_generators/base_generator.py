@@ -5,7 +5,7 @@ from typing import TypedDict, Literal
 
 from sqlalchemy.exc import OperationalError
 
-from qatch.connectors import ConnectorTable
+from src.qatch.connectors import ConnectorTable
 from ..state_orchestrator_generator import StateOrchestratorGenerator
 
 

@@ -4,7 +4,7 @@ import time
 import numpy as np
 import pytest
 
-from qatch.evaluate_dataset.metrics_evaluators import TupleConstraint
+from src.qatch.evaluate_dataset.metrics_evaluators import TupleConstraint
 
 
 class TestTupleConstraintTag:

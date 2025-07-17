@@ -1,6 +1,6 @@
 import random
 
-from qatch.connectors import ConnectorTable
+from src.qatch.connectors import ConnectorTable
 from .base_generator import BaseGenerator, SingleQA
 from .utils import utils_list_sample
 

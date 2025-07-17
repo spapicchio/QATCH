@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from qatch.evaluate_dataset.metrics_evaluators import ExecutionAccuracy
+from src.qatch.evaluate_dataset.metrics_evaluators import ExecutionAccuracy
 
 
 class TestCellRecall:
